@@ -1,0 +1,132 @@
+/*
+ * AEGISAXIOM theme for react-day-picker.
+ *
+ * Scoped to `.aegisaxiom-date-popover` so it does not affect any other
+ * DayPicker instances (the existing shadcn-style `Calendar` component
+ * keeps its own styling).
+ */
+
+.aegisaxiom-date-popover .rdp {
+  --rdp-cell-size: 32px;
+  --rdp-accent-color: rgb(139 92 246); /* violet-500 */
+  --rdp-background-color: rgb(139 92 246 / 0.15);
+  --rdp-accent-color-dark: rgb(124 58 237); /* violet-600 */
+  --rdp-background-color-dark: rgb(124 58 237 / 0.25);
+  --rdp-outline: 2px solid rgb(139 92 246 / 0.6);
+  --rdp-outline-selected: 2px solid rgb(139 92 246);
+  margin: 0;
+  padding: 12px;
+  color: var(--aegisaxiom-text, #e5e7eb);
+  font-size: 12px;
+}
+
+.aegisaxiom-date-popover .rdp-months {
+  display: flex;
+}
+
+.aegisaxiom-date-popover .rdp-month {
+  margin: 0;
+}
+
+.aegisaxiom-date-popover .rdp-caption {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0 8px 0;
+  position: relative;
+}
+
+.aegisaxiom-date-popover .rdp-caption_label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--aegisaxiom-text, #e5e7eb);
+  padding: 0 4px;
+}
+
+.aegisaxiom-date-popover .rdp-nav {
+  display: flex;
+  align-items: center;
+}
+
+.aegisaxiom-date-popover .rdp-nav_button {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--aegisaxiom-text-muted, #9ca3af);
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.aegisaxiom-date-popover .rdp-nav_button:hover {
+  background: var(--aegisaxiom-elevated, rgb(255 255 255 / 0.05));
+  color: var(--aegisaxiom-text, #e5e7eb);
+}
+
+.aegisaxiom-date-popover .rdp-nav_button_previous {
+  position: absolute;
+  left: 0;
+}
+
+.aegisaxiom-date-popover .rdp-nav_button_next {
+  position: absolute;
+  right: 0;
+}
+
+.aegisaxiom-date-popover .rdp-head_cell {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--aegisaxiom-text-muted, #9ca3af);
+  padding-bottom: 6px;
+}
+
+.aegisaxiom-date-popover .rdp-weeknumber {
+  font-size: 10px;
+  color: var(--aegisaxiom-text-muted, #9ca3af);
+  font-weight: 500;
+}
+
+.aegisaxiom-date-popover .rdp-day {
+  border-radius: 6px;
+  color: var(--aegisaxiom-text, #e5e7eb);
+  font-weight: 500;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.aegisaxiom-date-popover .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled) {
+  background: var(--aegisaxiom-elevated, rgb(255 255 255 / 0.05));
+  color: var(--aegisaxiom-text, #ffffff);
+}
+
+.aegisaxiom-date-popover .rdp-day_today {
+  color: rgb(167 139 250); /* violet-400 */
+  font-weight: 700;
+}
+
+.aegisaxiom-date-popover .rdp-day_selected,
+.aegisaxiom-date-popover .rdp-day_selected:hover {
+  background: rgb(139 92 246); /* violet-500 */
+  color: white;
+  font-weight: 600;
+}
+
+.aegisaxiom-date-popover .rdp-day_outside {
+  color: var(--aegisaxiom-text-muted, rgb(156 163 175 / 0.4));
+}
+
+.aegisaxiom-date-popover .rdp-day_disabled {
+  color: var(--aegisaxiom-text-muted, rgb(156 163 175 / 0.3));
+  cursor: not-allowed;
+}
+
+.aegisaxiom-date-popover .rdp-button:focus-visible:not([disabled]) {
+  background: var(--aegisaxiom-elevated, rgb(255 255 255 / 0.05));
+  border: 2px solid rgb(139 92 246);
+  outline: none;
+}

@@ -1,0 +1,777 @@
+{
+  "allow_orphan_deals": true,
+  "blocked_excluded": 0,
+  "considered": 94,
+  "db_connected": true,
+  "dry_run": false,
+  "errors": [],
+  "finished_at": "2026-05-21T22:25:14.870997+00:00",
+  "inserted": 94,
+  "orphan_deal_count": 1,
+  "per_row": [
+    {
+      "action": "inserted",
+      "contract_number": "CN-100008",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000023461001"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100009",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000023561001"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100025",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000024861001"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100026",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000025292019"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100027",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000025292049"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100032",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000026108009"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100033",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining",
+        "total_hours_disagreement"
+      ],
+      "zoho_contract_id": "zcrm_4761157000026190010"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100038",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000026308001"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100041",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000026506093"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100044",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "missing_invoice_type",
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000026692030"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100045",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000027216038"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100046",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000027443001"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100047",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000028068035"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100048",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000028164057"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100049",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000028454049"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100061",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000031722101"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100062",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000031928205"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100064",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000032813020"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100066",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000033800253"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100067",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000034391280"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100069",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000035356101"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100072",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000036804328"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100076",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000038844137"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100077",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000038940192"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100078",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining",
+        "total_hours_disagreement"
+      ],
+      "zoho_contract_id": "zcrm_4761157000044947034"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100079",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000045393079"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100080",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000046538204"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100081",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000046760088"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100082",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000047415155"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100083",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000047777090"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100084",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "total_hours_disagreement"
+      ],
+      "zoho_contract_id": "zcrm_4761157000048238198"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100085",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000049782212"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100086",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000049782493"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100087",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000049824294"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100088",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000050238264"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100090",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000052959177"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100091",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining",
+        "total_hours_disagreement"
+      ],
+      "zoho_contract_id": "zcrm_4761157000052994243"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100092",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000053258135"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100093",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000054413001"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100094",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "total_hours_disagreement"
+      ],
+      "zoho_contract_id": "zcrm_4761157000055018130"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100095",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000055118108"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100096",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000055118282"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100097",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000055118419"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100098",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000056535221"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100099",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000057640065"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100100",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000058338202"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100101",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "total_hours_disagreement"
+      ],
+      "zoho_contract_id": "zcrm_4761157000058511188"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100102",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000059390025"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100103",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000059390094"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100104",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000059657178"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100106",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000059899069"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100108",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000060092038"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100109",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000060265022"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100110",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining",
+        "total_hours_disagreement"
+      ],
+      "zoho_contract_id": "zcrm_4761157000060359045"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100111",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "total_hours_disagreement"
+      ],
+      "zoho_contract_id": "zcrm_4761157000060900001"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100112",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000060900102"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100114",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000061021163"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100115",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000061452222"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100116",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000061452369"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100117",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000061863071"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100118",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000062598044"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100119",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000062598150"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100120",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000062636084"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100122",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000063581052"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100123",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000064443081"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100124",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000064588081"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100125",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000064959091"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100126",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000066201055"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100127",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000067058058"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100128",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000067204283"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100129",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000067204402"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100130",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000067986113"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100132",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000072316061"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100133",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000072393067"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100134",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000072967047"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100135",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000073220046"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100136",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000073382044"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100137",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000073614048"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100138",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000074886059"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100139",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000075540001"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100140",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000075614043"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100141",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000075737039"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100142",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000075843063"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100143",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000077194017"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100144",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000077298035"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100146",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000078157029"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100147",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000079475045"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100149",
+      "orphan_deal": false,
+      "warning_kinds": [
+        "negative_remaining"
+      ],
+      "zoho_contract_id": "zcrm_4761157000080748117"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100150",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000081192056"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100151",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000081290107"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100152",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000081996055"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100153",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000083436065"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100154",
+      "orphan_deal": false,
+      "warning_kinds": [],
+      "zoho_contract_id": "zcrm_4761157000084889020"
+    },
+    {
+      "action": "inserted",
+      "contract_number": "CN-100121",
+      "orphan_deal": true,
+      "warning_kinds": [
+        "negative_remaining",
+        "orphan_zoho_deal_id"
+      ],
+      "zoho_contract_id": "zcrm_4761157000063081038"
+    }
+  ],
+  "plan_path": "imports/zoho/reports/contracts_import_plan.json",
+  "skipped": 0,
+  "total_plan_rows": 94,
+  "updated": 0,
+  "warning_count": 53,
+  "warnings": []
+}

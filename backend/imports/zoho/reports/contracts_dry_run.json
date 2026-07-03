@@ -1,0 +1,798 @@
+{
+  "duplicates": {
+    "contract_numbers": [],
+    "record_ids": []
+  },
+  "enumerations": {
+    "contract_types": {
+      "BOH": 75,
+      "BOH and Bill on Actuals": 12,
+      "Bill on Actuals": 2,
+      "Fixed Fee": 3,
+      "TBD 1": 2
+    },
+    "invoice_types": {
+      "Incremental Billing": 3,
+      "Invoice at signing, due net30": 79,
+      "Invoice at signing, due net45": 1,
+      "Invoice half at signing, with review before next billing, due net30": 7,
+      "Managed Services/Recurring": 1,
+      "TBD 1": 2
+    },
+    "statuses": {
+      "Approved": 91,
+      "New": 3
+    }
+  },
+  "errors": [],
+  "field_coverage": {
+    "Account": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Account"
+      ]
+    },
+    "Account.id": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Account.id"
+      ]
+    },
+    "Consumed Hour's %": {
+      "coverage_pct": 91.49,
+      "empty": 8,
+      "non_empty": 86,
+      "present": true,
+      "variants_accepted": [
+        "Consumed Hour's %",
+        "Consumed Hours %"
+      ]
+    },
+    "Contract Name": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Contract Name"
+      ]
+    },
+    "Contract Number": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Contract Number"
+      ]
+    },
+    "Contract Owner": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Contract Owner"
+      ]
+    },
+    "Contract Status": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Contract Status"
+      ]
+    },
+    "Contract Type": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Contract Type"
+      ]
+    },
+    "Created Time": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Created Time"
+      ]
+    },
+    "Deals": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Deals"
+      ]
+    },
+    "Deals.id": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Deals.id"
+      ]
+    },
+    "Invoice Type": {
+      "coverage_pct": 98.94,
+      "empty": 1,
+      "non_empty": 93,
+      "present": true,
+      "variants_accepted": [
+        "Invoice Type"
+      ]
+    },
+    "Modified Time": {
+      "coverage_pct": 0.0,
+      "empty": 0,
+      "non_empty": 0,
+      "present": false,
+      "variants_accepted": [
+        "Modified Time"
+      ]
+    },
+    "Record Id": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Record Id"
+      ]
+    },
+    "Remaining Hour's": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Remaining Hour's",
+        "Remaining Hours"
+      ]
+    },
+    "Total Consumed Hour's": {
+      "coverage_pct": 87.23,
+      "empty": 12,
+      "non_empty": 82,
+      "present": true,
+      "variants_accepted": [
+        "Total Consumed Hour's",
+        "Total Consumed Hours"
+      ]
+    },
+    "Total Contract Hour's": {
+      "coverage_pct": 100.0,
+      "empty": 0,
+      "non_empty": 94,
+      "present": true,
+      "variants_accepted": [
+        "Total Contract Hour's"
+      ]
+    },
+    "Total Contract Hours": {
+      "coverage_pct": 59.57,
+      "empty": 38,
+      "non_empty": 56,
+      "present": true,
+      "variants_accepted": [
+        "Total Contract Hours"
+      ]
+    }
+  },
+  "headers_present": [
+    "Record Id",
+    "Contract Name",
+    "Contract Owner.id",
+    "Contract Owner",
+    "Created By.id",
+    "Created By",
+    "Created Time",
+    "Last Activity Time",
+    "Tag",
+    "Unsubscribed Mode",
+    "Unsubscribed Time",
+    "Locked",
+    "Account.id",
+    "Account",
+    "Total Contract Hours",
+    "Deals.id",
+    "Deals",
+    "Contract Type",
+    "Invoice Type",
+    "Remaining Hour's",
+    "Contract Number",
+    "Consumed Hour's %",
+    "Contract Status",
+    "Total Consumed Hour's",
+    "Number of Invoices",
+    "Bill On Actual Hours",
+    "Hours To Be Paid",
+    "Paid Hours",
+    "AP issues",
+    "Total Contract Hour's",
+    "Status",
+    "Connected To.module",
+    "Connected To.id"
+  ],
+  "hour_anomalies": [
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000024861001",
+      "remaining": -1.0,
+      "row": 3
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000025292019",
+      "remaining": -16.67,
+      "row": 4
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000026190010",
+      "remaining": -27.08,
+      "row": 7
+    },
+    {
+      "delta": -20.0,
+      "kind": "total_hours_disagreement",
+      "record_id": "zcrm_4761157000026190010",
+      "row": 7,
+      "total_apostrophe": 25.0,
+      "total_plain": 45.0
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000026308001",
+      "remaining": -20.18,
+      "row": 8
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000026692030",
+      "remaining": -223.86,
+      "row": 10
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000027216038",
+      "remaining": -80.0,
+      "row": 11
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000027443001",
+      "remaining": -77.17,
+      "row": 12
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000028068035",
+      "remaining": -7.53,
+      "row": 13
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000028454049",
+      "remaining": -1.0,
+      "row": 15
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000031928205",
+      "remaining": -10.0,
+      "row": 17
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000032813020",
+      "remaining": -4.0,
+      "row": 18
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000034391280",
+      "remaining": -20.17,
+      "row": 20
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000035356101",
+      "remaining": -6.65,
+      "row": 21
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000038940192",
+      "remaining": -15.83,
+      "row": 24
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000044947034",
+      "remaining": -243.51,
+      "row": 25
+    },
+    {
+      "delta": 16.33,
+      "kind": "total_hours_disagreement",
+      "record_id": "zcrm_4761157000044947034",
+      "row": 25,
+      "total_apostrophe": 16.33,
+      "total_plain": 0.0
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000045393079",
+      "remaining": -0.5,
+      "row": 26
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000046538204",
+      "remaining": -1.67,
+      "row": 27
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000047415155",
+      "remaining": -13.0,
+      "row": 29
+    },
+    {
+      "delta": 80.0,
+      "kind": "total_hours_disagreement",
+      "record_id": "zcrm_4761157000048238198",
+      "row": 31,
+      "total_apostrophe": 120.0,
+      "total_plain": 40.0
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000052959177",
+      "remaining": -0.01,
+      "row": 36
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000052994243",
+      "remaining": -8.67,
+      "row": 37
+    },
+    {
+      "delta": 5.0,
+      "kind": "total_hours_disagreement",
+      "record_id": "zcrm_4761157000052994243",
+      "row": 37,
+      "total_apostrophe": 35.0,
+      "total_plain": 30.0
+    },
+    {
+      "delta": 20.0,
+      "kind": "total_hours_disagreement",
+      "record_id": "zcrm_4761157000055018130",
+      "row": 40,
+      "total_apostrophe": 190.0,
+      "total_plain": 170.0
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000055118282",
+      "remaining": -9.59,
+      "row": 42
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000056535221",
+      "remaining": -8.16,
+      "row": 44
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000057640065",
+      "remaining": -4.5,
+      "row": 45
+    },
+    {
+      "delta": 50.0,
+      "kind": "total_hours_disagreement",
+      "record_id": "zcrm_4761157000058511188",
+      "row": 47,
+      "total_apostrophe": 100.0,
+      "total_plain": 50.0
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000059657178",
+      "remaining": -24.1,
+      "row": 50
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000059899069",
+      "remaining": -10.33,
+      "row": 51
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000060092038",
+      "remaining": -0.33,
+      "row": 52
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000060359045",
+      "remaining": -50.0,
+      "row": 54
+    },
+    {
+      "delta": 95.0,
+      "kind": "total_hours_disagreement",
+      "record_id": "zcrm_4761157000060359045",
+      "row": 54,
+      "total_apostrophe": 100.0,
+      "total_plain": 5.0
+    },
+    {
+      "delta": 12.0,
+      "kind": "total_hours_disagreement",
+      "record_id": "zcrm_4761157000060900001",
+      "row": 55,
+      "total_apostrophe": 12.0,
+      "total_plain": 0.0
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000061452222",
+      "remaining": -5.67,
+      "row": 58
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000062598150",
+      "remaining": -6.85,
+      "row": 62
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000062636084",
+      "remaining": -16.17,
+      "row": 63
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000063081038",
+      "remaining": -0.5,
+      "row": 64
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000064443081",
+      "remaining": -15.82,
+      "row": 66
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000064588081",
+      "remaining": -1.5,
+      "row": 67
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000064959091",
+      "remaining": -63.55,
+      "row": 68
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000067058058",
+      "remaining": -12.17,
+      "row": 70
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000072316061",
+      "remaining": -1.83,
+      "row": 74
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000073614048",
+      "remaining": -15.51,
+      "row": 79
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000074886059",
+      "remaining": -1.34,
+      "row": 80
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000075614043",
+      "remaining": -58.65,
+      "row": 82
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000075737039",
+      "remaining": -1.67,
+      "row": 83
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000077194017",
+      "remaining": -1.0,
+      "row": 85
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000077298035",
+      "remaining": -36.16,
+      "row": 86
+    },
+    {
+      "kind": "negative_remaining",
+      "record_id": "zcrm_4761157000080748117",
+      "remaining": -11.18,
+      "row": 89
+    }
+  ],
+  "missing_required": {
+    "account_id": [],
+    "contract_number": [],
+    "contract_status": [],
+    "contract_type": [],
+    "deal_id": [],
+    "invoice_type": [
+      {
+        "record_id": "zcrm_4761157000026692030",
+        "row": 10
+      }
+    ],
+    "record_id": []
+  },
+  "ready_for_import": true,
+  "source_file": "imports/zoho/raw/Contract.csv",
+  "summary": {
+    "duplicate_contract_number_count": 0,
+    "duplicate_record_id_count": 0,
+    "error_count": 0,
+    "hour_anomaly_count": 51,
+    "unmappable_row_count": 0,
+    "warning_count": 2
+  },
+  "total_rows": 94,
+  "unmappable_rows": [],
+  "warnings": [
+    {
+      "count": 94,
+      "kind": "missing_modified_time",
+      "samples": [
+        {
+          "record_id": "zcrm_4761157000023461001",
+          "row": 1
+        },
+        {
+          "record_id": "zcrm_4761157000023561001",
+          "row": 2
+        },
+        {
+          "record_id": "zcrm_4761157000024861001",
+          "row": 3
+        },
+        {
+          "record_id": "zcrm_4761157000025292019",
+          "row": 4
+        },
+        {
+          "record_id": "zcrm_4761157000025292049",
+          "row": 5
+        },
+        {
+          "record_id": "zcrm_4761157000026108009",
+          "row": 6
+        },
+        {
+          "record_id": "zcrm_4761157000026190010",
+          "row": 7
+        },
+        {
+          "record_id": "zcrm_4761157000026308001",
+          "row": 8
+        },
+        {
+          "record_id": "zcrm_4761157000026506093",
+          "row": 9
+        },
+        {
+          "record_id": "zcrm_4761157000026692030",
+          "row": 10
+        },
+        {
+          "record_id": "zcrm_4761157000027216038",
+          "row": 11
+        },
+        {
+          "record_id": "zcrm_4761157000027443001",
+          "row": 12
+        },
+        {
+          "record_id": "zcrm_4761157000028068035",
+          "row": 13
+        },
+        {
+          "record_id": "zcrm_4761157000028164057",
+          "row": 14
+        },
+        {
+          "record_id": "zcrm_4761157000028454049",
+          "row": 15
+        },
+        {
+          "record_id": "zcrm_4761157000031722101",
+          "row": 16
+        },
+        {
+          "record_id": "zcrm_4761157000031928205",
+          "row": 17
+        },
+        {
+          "record_id": "zcrm_4761157000032813020",
+          "row": 18
+        },
+        {
+          "record_id": "zcrm_4761157000033800253",
+          "row": 19
+        },
+        {
+          "record_id": "zcrm_4761157000034391280",
+          "row": 20
+        },
+        {
+          "record_id": "zcrm_4761157000035356101",
+          "row": 21
+        },
+        {
+          "record_id": "zcrm_4761157000036804328",
+          "row": 22
+        },
+        {
+          "record_id": "zcrm_4761157000038844137",
+          "row": 23
+        },
+        {
+          "record_id": "zcrm_4761157000038940192",
+          "row": 24
+        },
+        {
+          "record_id": "zcrm_4761157000044947034",
+          "row": 25
+        },
+        {
+          "record_id": "zcrm_4761157000045393079",
+          "row": 26
+        },
+        {
+          "record_id": "zcrm_4761157000046538204",
+          "row": 27
+        },
+        {
+          "record_id": "zcrm_4761157000046760088",
+          "row": 28
+        },
+        {
+          "record_id": "zcrm_4761157000047415155",
+          "row": 29
+        },
+        {
+          "record_id": "zcrm_4761157000047777090",
+          "row": 30
+        },
+        {
+          "record_id": "zcrm_4761157000048238198",
+          "row": 31
+        },
+        {
+          "record_id": "zcrm_4761157000049782212",
+          "row": 32
+        },
+        {
+          "record_id": "zcrm_4761157000049782493",
+          "row": 33
+        },
+        {
+          "record_id": "zcrm_4761157000049824294",
+          "row": 34
+        },
+        {
+          "record_id": "zcrm_4761157000050238264",
+          "row": 35
+        },
+        {
+          "record_id": "zcrm_4761157000052959177",
+          "row": 36
+        },
+        {
+          "record_id": "zcrm_4761157000052994243",
+          "row": 37
+        },
+        {
+          "record_id": "zcrm_4761157000053258135",
+          "row": 38
+        },
+        {
+          "record_id": "zcrm_4761157000054413001",
+          "row": 39
+        },
+        {
+          "record_id": "zcrm_4761157000055018130",
+          "row": 40
+        },
+        {
+          "record_id": "zcrm_4761157000055118108",
+          "row": 41
+        },
+        {
+          "record_id": "zcrm_4761157000055118282",
+          "row": 42
+        },
+        {
+          "record_id": "zcrm_4761157000055118419",
+          "row": 43
+        },
+        {
+          "record_id": "zcrm_4761157000056535221",
+          "row": 44
+        },
+        {
+          "record_id": "zcrm_4761157000057640065",
+          "row": 45
+        },
+        {
+          "record_id": "zcrm_4761157000058338202",
+          "row": 46
+        },
+        {
+          "record_id": "zcrm_4761157000058511188",
+          "row": 47
+        },
+        {
+          "record_id": "zcrm_4761157000059390025",
+          "row": 48
+        },
+        {
+          "record_id": "zcrm_4761157000059390094",
+          "row": 49
+        },
+        {
+          "record_id": "zcrm_4761157000059657178",
+          "row": 50
+        }
+      ]
+    },
+    {
+      "count": 1,
+      "kind": "missing_invoice_type",
+      "samples": [
+        {
+          "record_id": "zcrm_4761157000026692030",
+          "row": 10
+        }
+      ]
+    }
+  ]
+}

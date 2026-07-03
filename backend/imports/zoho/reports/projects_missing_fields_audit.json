@@ -1,0 +1,864 @@
+{
+  "aegisaxiom_imported_count": 101,
+  "aegisaxiom_only_zoho_project_ids": [
+    "zcrm_4761157000023468001",
+    "zcrm_4761157000024863001",
+    "zcrm_4761157000025314001",
+    "zcrm_4761157000025408001",
+    "zcrm_4761157000026117001",
+    "zcrm_4761157000026224001",
+    "zcrm_4761157000026317001",
+    "zcrm_4761157000026517007",
+    "zcrm_4761157000026831001",
+    "zcrm_4761157000027220001",
+    "zcrm_4761157000027789001",
+    "zcrm_4761157000028079001",
+    "zcrm_4761157000028187001",
+    "zcrm_4761157000028251010",
+    "zcrm_4761157000028464001",
+    "zcrm_4761157000028765009",
+    "zcrm_4761157000030478011",
+    "zcrm_4761157000030877001",
+    "zcrm_4761157000031961001",
+    "zcrm_4761157000032719019",
+    "zcrm_4761157000033566004",
+    "zcrm_4761157000033743004",
+    "zcrm_4761157000034391041",
+    "zcrm_4761157000034472001",
+    "zcrm_4761157000035342002",
+    "zcrm_4761157000036804390",
+    "zcrm_4761157000036957001",
+    "zcrm_4761157000038788012",
+    "zcrm_4761157000039085001",
+    "zcrm_4761157000040003010",
+    "zcrm_4761157000040114007",
+    "zcrm_4761157000045024001",
+    "zcrm_4761157000045414001",
+    "zcrm_4761157000046608001",
+    "zcrm_4761157000046743037",
+    "zcrm_4761157000047420017",
+    "zcrm_4761157000048033012",
+    "zcrm_4761157000048289001",
+    "zcrm_4761157000049758102",
+    "zcrm_4761157000049826001",
+    "zcrm_4761157000049920001",
+    "zcrm_4761157000050257001",
+    "zcrm_4761157000052945097",
+    "zcrm_4761157000053064077",
+    "zcrm_4761157000053455001",
+    "zcrm_4761157000054412016",
+    "zcrm_4761157000055002030",
+    "zcrm_4761157000055115057",
+    "zcrm_4761157000055115075",
+    "zcrm_4761157000055128017",
+    "zcrm_4761157000056567001",
+    "zcrm_4761157000057608009",
+    "zcrm_4761157000058454011",
+    "zcrm_4761157000058872037",
+    "zcrm_4761157000059373017",
+    "zcrm_4761157000059389011",
+    "zcrm_4761157000059943009",
+    "zcrm_4761157000060043042",
+    "zcrm_4761157000060255033",
+    "zcrm_4761157000060704041",
+    "zcrm_4761157000060917001",
+    "zcrm_4761157000061077001",
+    "zcrm_4761157000061382372",
+    "zcrm_4761157000061445145",
+    "zcrm_4761157000061751170",
+    "zcrm_4761157000061813182",
+    "zcrm_4761157000062544005",
+    "zcrm_4761157000062607001",
+    "zcrm_4761157000062673033",
+    "zcrm_4761157000063110003",
+    "zcrm_4761157000064463001",
+    "zcrm_4761157000064563324",
+    "zcrm_4761157000064902025",
+    "zcrm_4761157000066235001",
+    "zcrm_4761157000066559080",
+    "zcrm_4761157000066612058",
+    "zcrm_4761157000067089225",
+    "zcrm_4761157000067211011",
+    "zcrm_4761157000067218006",
+    "zcrm_4761157000068021051",
+    "zcrm_4761157000072346009",
+    "zcrm_4761157000072346052",
+    "zcrm_4761157000072926017",
+    "zcrm_4761157000073181011",
+    "zcrm_4761157000073396047",
+    "zcrm_4761157000074133016",
+    "zcrm_4761157000074914001",
+    "zcrm_4761157000075532066",
+    "zcrm_4761157000075637001",
+    "zcrm_4761157000075764043",
+    "zcrm_4761157000075854001",
+    "zcrm_4761157000077149002",
+    "zcrm_4761157000077288032",
+    "zcrm_4761157000078083002",
+    "zcrm_4761157000079679031",
+    "zcrm_4761157000080752136",
+    "zcrm_4761157000081169025",
+    "zcrm_4761157000081286035",
+    "zcrm_4761157000081932033",
+    "zcrm_4761157000083424042",
+    "zcrm_4761157000084921001"
+  ],
+  "field_population": {
+    "aegisaxiom": {
+      "account_id": {
+        "empty": 101,
+        "present": 0
+      },
+      "account_name": {
+        "empty": 0,
+        "present": 101
+      },
+      "actual_end_date": {
+        "empty": 101,
+        "present": 0
+      },
+      "assigned_user_ids": {
+        "empty": 101,
+        "present": 0
+      },
+      "contract_id": {
+        "empty": 0,
+        "present": 101
+      },
+      "external_ids.zoho_account_id": {
+        "empty": 0,
+        "present": 101
+      },
+      "external_ids.zoho_contract_id": {
+        "empty": 0,
+        "present": 101
+      },
+      "external_ids.zoho_deal_id": {
+        "empty": 0,
+        "present": 101
+      },
+      "external_ids.zoho_project_id": {
+        "empty": 0,
+        "present": 101
+      },
+      "external_project_id": {
+        "empty": 0,
+        "present": 101
+      },
+      "health": {
+        "empty": 0,
+        "present": 101
+      },
+      "import_source": {
+        "empty": 0,
+        "present": 101
+      },
+      "imported_consumed_hours": {
+        "empty": 11,
+        "present": 90
+      },
+      "name": {
+        "empty": 0,
+        "present": 101
+      },
+      "owner_raw": {
+        "empty": 0,
+        "present": 101
+      },
+      "pm_id": {
+        "empty": 101,
+        "present": 0
+      },
+      "project_id": {
+        "empty": 0,
+        "present": 101
+      },
+      "project_number": {
+        "empty": 0,
+        "present": 101
+      },
+      "project_type": {
+        "empty": 0,
+        "present": 101
+      },
+      "project_type_raw": {
+        "empty": 101,
+        "present": 0
+      },
+      "raw_source": {
+        "empty": 0,
+        "present": 101
+      },
+      "service_line": {
+        "empty": 0,
+        "present": 101
+      },
+      "source_created_at": {
+        "empty": 0,
+        "present": 101
+      },
+      "source_modified_at": {
+        "empty": 0,
+        "present": 101
+      },
+      "start_date": {
+        "empty": 101,
+        "present": 0
+      },
+      "status": {
+        "empty": 0,
+        "present": 101
+      },
+      "status_raw": {
+        "empty": 0,
+        "present": 101
+      },
+      "target_end_date": {
+        "empty": 101,
+        "present": 0
+      }
+    },
+    "zoho": {}
+  },
+  "generated_at": "2026-05-22T16:13:02.961019+00:00",
+  "hour_mismatches": [],
+  "mapping_gaps": {
+    "aegisaxiom_fields_empty_with_zoho_value": {
+      "account_name": 0,
+      "contract_number": 0,
+      "deal_name": 0,
+      "deleted_raw": 0,
+      "external_ids.zoho_contract_id": 0,
+      "external_ids.zoho_project_id": 0,
+      "imported_consumed_hours": 0,
+      "owner_raw": 0,
+      "project_number": 0,
+      "project_type_raw": 0,
+      "source_modified_at": 0,
+      "status_raw": 0,
+      "zoho_project_url": 0
+    },
+    "zoho_columns_not_mapped_to_aegisaxiom": []
+  },
+  "notes": [
+    "Read-only audit. No DB writes, no Zoho API calls, no --execute flag. Companion planner: zoho_projects_missing_fields_plan.py.",
+    "Tasks are NOT imported in this slice. The task counter is informational only and feeds the future task importer's sizing estimate."
+  ],
+  "owner_mapping_gaps": [],
+  "per_project": [
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_a6013e631862",
+      "name": "Reading Bakery-Reading Bakery - Identity and Secure Access Proj.",
+      "zoho_project_id": "zcrm_4761157000023468001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_88720bb21a9d",
+      "name": "Simpay-Simpay.net - Azure Support and Assessment BOH (5/17/24)",
+      "zoho_project_id": "zcrm_4761157000024863001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_fa65570254c6",
+      "name": "Miura-Miura - server assistance / troubleshooting",
+      "zoho_project_id": "zcrm_4761157000025314001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_63a2110b060c",
+      "name": "Pat McCormick-Paulson Mitchell Engineering - Network and Fortinet engineering BOH",
+      "zoho_project_id": "zcrm_4761157000025408001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_d05adc60adb0",
+      "name": "Pat McCormick-Randall Paulson Architects - Network and Fortinet engineering BOH",
+      "zoho_project_id": "zcrm_4761157000026117001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_58b98aa143a1",
+      "name": "Miura-AdCom -Miura - Veeam backup and Azure migration",
+      "zoho_project_id": "zcrm_4761157000026224001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_a6529d879f24",
+      "name": "DigiTel-DigiTel - TCO Analysis: Desktop Virtualization Solutions",
+      "zoho_project_id": "zcrm_4761157000026317001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_080355fc839d",
+      "name": "Carley Corp-Carley Corp - Jira Configuration",
+      "zoho_project_id": "zcrm_4761157000026517007"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_6fb80de6c473",
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "zoho_project_id": "zcrm_4761157000026831001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_c85dac84ff3d",
+      "name": "Shive Hattery - General Assistance Block",
+      "zoho_project_id": "zcrm_4761157000027220001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_4fc7e76528f6",
+      "name": "Graham Field-Graham Field - Full MSSP Proposal",
+      "zoho_project_id": "zcrm_4761157000027789001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_ccc85bd40046",
+      "name": "Kelley Kroneberg-Kelley Kronenburg - CUCM Assessment and Upgrade",
+      "zoho_project_id": "zcrm_4761157000028079001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_ea8dc658bf26",
+      "name": "ATS Group-ATS - General BOH",
+      "zoho_project_id": "zcrm_4761157000028187001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_ad5f36f2bb45",
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "zoho_project_id": "zcrm_4761157000028251010"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_46daf7110fdb",
+      "name": "GSC Capital-GSC Capital - Managed WIFI",
+      "zoho_project_id": "zcrm_4761157000028464001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_df405bccc25f",
+      "name": "Metadata - Internal - PreSales Requests",
+      "zoho_project_id": "zcrm_4761157000028765009"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_3e1ff3ff0682",
+      "name": "Metadata Internal - Dialpad Deployment",
+      "zoho_project_id": "zcrm_4761157000030478011"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_f3d3a10222ba",
+      "name": "Metadata - Website Revamp",
+      "zoho_project_id": "zcrm_4761157000030877001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_1d924eb5694c",
+      "name": "ttmsy-TTM - SimpliSecure MRR",
+      "zoho_project_id": "zcrm_4761157000031961001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_3e60fea103ff",
+      "name": "Paulson Mitchell - Azure/Veeam Storage Project",
+      "zoho_project_id": "zcrm_4761157000032719019"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_81fb481a4414",
+      "name": "Trupoint cs-Trupoint//SimpliMeta Security Assessment",
+      "zoho_project_id": "zcrm_4761157000033566004"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_888a39beb2be",
+      "name": "ttmsy-Factory Automation - Equipment and install",
+      "zoho_project_id": "zcrm_4761157000033743004"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_6033753f504b",
+      "name": "SimpliMeta - TechOps Build",
+      "zoho_project_id": "zcrm_4761157000034391041"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_c8df9ff926b5",
+      "name": "KPS Global-Azure AD and Intune Migration for KPS Global",
+      "zoho_project_id": "zcrm_4761157000034472001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_e1486c598169",
+      "name": "CyberLogic LLC-CyberLogic - SimpliSecure",
+      "zoho_project_id": "zcrm_4761157000035342002"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_5b7d2951aeda",
+      "name": "GovPilot - SASE Replacement Project",
+      "zoho_project_id": "zcrm_4761157000036804390"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_169f3e1bf273",
+      "name": "Redner's Markets Inc-Redner's - 1 site AP deployment taste test",
+      "zoho_project_id": "zcrm_4761157000036957001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_412bef22776d",
+      "name": "The Baldwin Group-The Baldwin Group",
+      "zoho_project_id": "zcrm_4761157000038788012"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_c65b6d98826b",
+      "name": "The Baldwin Group-Baldwin Group-- Active Directory",
+      "zoho_project_id": "zcrm_4761157000039085001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_2a6dc7050265",
+      "name": "Metadata - Zoho Desk Deployment for Support",
+      "zoho_project_id": "zcrm_4761157000040003010"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_0025afc99f6c",
+      "name": "Metadata - Bre Internal Tasks",
+      "zoho_project_id": "zcrm_4761157000040114007"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_357ea964b06d",
+      "name": "ISG-ISG - Bill on Actuals",
+      "zoho_project_id": "zcrm_4761157000045024001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_f6b0bf63f0b0",
+      "name": "Pat McCormick-Paulson Mitchell - Domain Change (2/11/25)",
+      "zoho_project_id": "zcrm_4761157000045414001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_740ca058dea8",
+      "name": "Leasepath-Leasepath--M365 and Azure Forensic Investigation and remediation",
+      "zoho_project_id": "zcrm_4761157000046608001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_c4641624ef9e",
+      "name": "Higher Information Group-Higher Info Group - Church Farm - Gap Assessment",
+      "zoho_project_id": "zcrm_4761157000046743037"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_6ff37ce1fd4a",
+      "name": "Farmers National Bank-Farmers National Bank --VXrail infrastructure Bluewave",
+      "zoho_project_id": "zcrm_4761157000047420017"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_38e6d4e702b9",
+      "name": "Simpay-Simpay-Azure discovery BOH and SOW",
+      "zoho_project_id": "zcrm_4761157000048033012"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_834ad5c5ace1",
+      "name": "Caire-Care InC BOH and BOA",
+      "zoho_project_id": "zcrm_4761157000048289001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_4f837c2eca15",
+      "name": "Southeastern Underwriters-Southeastern Underwriters--Network Troubleshooting Block",
+      "zoho_project_id": "zcrm_4761157000049758102"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_23ba375909ec",
+      "name": "The Greenbrier Companies-Greenbrier Companies - IQ Wired - M365/Dynamics License Management Assessment",
+      "zoho_project_id": "zcrm_4761157000049826001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_7e860cf38ccf",
+      "name": "KPS Global-KPS Global -- Entra, MAM, and MDM",
+      "zoho_project_id": "zcrm_4761157000049920001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_cace33524ffa",
+      "name": "AppDirect-Microsoft SQL Server SME",
+      "zoho_project_id": "zcrm_4761157000050257001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_2d26a7931d12",
+      "name": "Miura-Miura - Veeam backup and Azure migration Phase 2 with updated SOW",
+      "zoho_project_id": "zcrm_4761157000052945097"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_05b051224d24",
+      "name": "AppDirect-Garber Metrology -- Microsoft Power Automate Flows",
+      "zoho_project_id": "zcrm_4761157000053064077"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_43bc7a3522db",
+      "name": "Xtel-Xtel- Proserve",
+      "zoho_project_id": "zcrm_4761157000053455001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_75de7e529a94",
+      "name": "AppDirect-Westmont-- Azure Project",
+      "zoho_project_id": "zcrm_4761157000054412016"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_1cc20f5428bb",
+      "name": "LSI-LSI - Horizon on Azure (4/14/25)",
+      "zoho_project_id": "zcrm_4761157000055002030"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_c961587a5fd4",
+      "name": "Paulson Mitchell Engineering-Paulson Mitchell Engineering - General 20BOH and Remediation( 5/13/25)",
+      "zoho_project_id": "zcrm_4761157000055115057"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_85aa405a0ef5",
+      "name": "Randall Paulson Architects-Randall Paulson Architects - General 20HR Block&remediation (5/13/25)",
+      "zoho_project_id": "zcrm_4761157000055115075"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_4a7f16c61f05",
+      "name": "Young Life-AppDirect- YoungLife - Ubiquity Project",
+      "zoho_project_id": "zcrm_4761157000055128017"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_0aabc61f0840",
+      "name": "AppDirect-AppDirect -Zeneth Partners",
+      "zoho_project_id": "zcrm_4761157000056567001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_0b4182cdd728",
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "zoho_project_id": "zcrm_4761157000057608009"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_abcc5d42e2ce",
+      "name": "Randall Paulson Architects-Randall Paulson - Cyflareand S1 EDR",
+      "zoho_project_id": "zcrm_4761157000058454011"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_6b9bda91b946",
+      "name": "Simpay-Simpay -Customer Portal- install (4/23/25)",
+      "zoho_project_id": "zcrm_4761157000058872037"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_cb6f78e8ec07",
+      "name": "Paulson Mitchell Engineering-Paulson Mitchell - Cyflare - S1complete(6/6/25)",
+      "zoho_project_id": "zcrm_4761157000059373017"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_a3745b096f0f",
+      "name": "AppDirect-AppdirectPSWL: Young Life - AWS Financial HealthCheck Engagement (7/1/25)",
+      "zoho_project_id": "zcrm_4761157000059389011"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_13475bef2d7b",
+      "name": "Beghou Consulting-Beghou - Cyflare",
+      "zoho_project_id": "zcrm_4761157000059943009"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_126ed3b3a5c2",
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "zoho_project_id": "zcrm_4761157000060043042"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_126c65f487ab",
+      "name": "AppDirect-AppDirectPSWL - Docupace to Dropbox",
+      "zoho_project_id": "zcrm_4761157000060255033"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_abd98f7d8da7",
+      "name": "Caire Inc - BOA PenTest Project",
+      "zoho_project_id": "zcrm_4761157000060704041"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_363e25a6c3ea",
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "zoho_project_id": "zcrm_4761157000060917001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_9a546108abe9",
+      "name": "Paulson Mitchell Engineering-Paulson Mitchell - Azure Point-to-Site VPN configuration(7/17/25)",
+      "zoho_project_id": "zcrm_4761157000061077001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_e1c68ffe12eb",
+      "name": "AssetMark-AssetMark - Azure Project (3/31/25)",
+      "zoho_project_id": "zcrm_4761157000061382372"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_1656f389a919",
+      "name": "AppdirectPSWL - AMBA -Tenant to Tenant Transfer(BitTitan)(7/18/25)",
+      "zoho_project_id": "zcrm_4761157000061445145"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_413ad5e98559",
+      "name": "Caire BOA - Networking Audit Remediation Project",
+      "zoho_project_id": "zcrm_4761157000061751170"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_1e9c1613dbca",
+      "name": "Trevanna-Trevanna - Annual Pen Test",
+      "zoho_project_id": "zcrm_4761157000061813182"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_352b06ba905a",
+      "name": "AppDirect-AppDirectPSWL: University Tees - AWS Financial Health Check (8/12/25)",
+      "zoho_project_id": "zcrm_4761157000062544005"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_0e7dc8cb5c92",
+      "name": "AppDirect-AppDirectPSWL: Altaworx- AWS Health and Security HealthCheck",
+      "zoho_project_id": "zcrm_4761157000062607001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_c0e4c8b2d93b",
+      "name": "Graham Field-GrahamField - BOA",
+      "zoho_project_id": "zcrm_4761157000062673033"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_5e657cd1ed49",
+      "name": "Winter Media-Student First Tech - Winter Media",
+      "zoho_project_id": "zcrm_4761157000063110003"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_873d44a23a88",
+      "name": "MMM Medicare y Mucho M\u00e1s-MMM Medicare y Mucho M\u00e1s",
+      "zoho_project_id": "zcrm_4761157000064463001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_f0ecbca32896",
+      "name": "Paramount Global Inc.-Paramount Global - Azure AD",
+      "zoho_project_id": "zcrm_4761157000064563324"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_0877a9a00073",
+      "name": "AppDirect-Project Access RFP",
+      "zoho_project_id": "zcrm_4761157000064902025"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_eb58601a49ae",
+      "name": "Radius GS-VMWare Storage and Reporting",
+      "zoho_project_id": "zcrm_4761157000066235001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_33aeacae1cd5",
+      "name": "TEST ACCOUNT-Today Test - 09-07-25",
+      "zoho_project_id": "zcrm_4761157000066559080"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_7cf0d93dd2a5",
+      "name": "TEST ACCOUNT-Today Test - 09-07-25",
+      "zoho_project_id": "zcrm_4761157000066612058"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_ccf922a2913f",
+      "name": "OU Education Services-OUES - Jira Project",
+      "zoho_project_id": "zcrm_4761157000067089225"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_8d3d9a747688",
+      "name": "AppDirect-AppDirect- MAR JAC- Dynamics engagement",
+      "zoho_project_id": "zcrm_4761157000067211011"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_c0fe52aebd8c",
+      "name": "SouthFloridaAutism-South Florida Autism - Trupoint - Valcom Project (10/9/25)",
+      "zoho_project_id": "zcrm_4761157000067218006"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_30df840460b4",
+      "name": "AwayDay-AwayDay - Socium - Google to MS (10/13/25",
+      "zoho_project_id": "zcrm_4761157000068021051"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_fa1783f545ae",
+      "name": "Miura-Miura - Azure and domain work - (10/29/25)",
+      "zoho_project_id": "zcrm_4761157000072346009"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_f3d1e77abd80",
+      "name": "AwayDay-AwayDay - Socium - LBR Migration (12/3/25)",
+      "zoho_project_id": "zcrm_4761157000072346052"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_06a6c46f6316",
+      "name": "Xtel-XTel - Server Config - Maryland Masonic",
+      "zoho_project_id": "zcrm_4761157000072926017"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_9948a5f94812",
+      "name": "AppDirect-AppDirectWL: The Bank of Monroe - Full Turnkey Proserv(12/11/25)",
+      "zoho_project_id": "zcrm_4761157000073181011"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_8af292edf8d9",
+      "name": "Socium Consulting-Socium - Bill on actuals (11/25/25)",
+      "zoho_project_id": "zcrm_4761157000073396047"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_9bed322d3926",
+      "name": "AwayDay-AwayDay-Socium - Meredith Lodging Mirgration ( 12/3/25)",
+      "zoho_project_id": "zcrm_4761157000074133016"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_f2c96aa40506",
+      "name": "MarJac-MarJac - Trupoint - Checkpoint Implementation (12/9/25)",
+      "zoho_project_id": "zcrm_4761157000074914001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_8fa09ea91bf9",
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "zoho_project_id": "zcrm_4761157000075532066"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_34d15629635f",
+      "name": "CrownCastle-Crown Castle - Ward Trucking - Security(11/12/25)",
+      "zoho_project_id": "zcrm_4761157000075637001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_45d72275d3db",
+      "name": "CyberLogic LLC-CyberLogic - Microsoft License and Migration",
+      "zoho_project_id": "zcrm_4761157000075764043"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_a41186e92ed4",
+      "name": "AppDirect-Garber Metrology -- Microsoft Power Automate Flows - Addendum",
+      "zoho_project_id": "zcrm_4761157000075854001"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_ec6b1fd1da62",
+      "name": "AppDirect-AppDirectPSWL: Bank of Old Monroe - Part 2",
+      "zoho_project_id": "zcrm_4761157000077149002"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_a93597fe8a51",
+      "name": "N-OVATE Business Solutions-NFL- NOVATE",
+      "zoho_project_id": "zcrm_4761157000077288032"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_9aa6105db94a",
+      "name": "Higher Information Group-HigherInfo - Exchange project",
+      "zoho_project_id": "zcrm_4761157000078083002"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_087efa533ecb",
+      "name": "Able2-Alliance for Empowerment, Inc - Higher Info - General Block",
+      "zoho_project_id": "zcrm_4761157000079679031"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_598bbb47f1b2",
+      "name": "Randall Paulson Architects-Randall Paulson - BOA- Troubleshooting (2/26/25)",
+      "zoho_project_id": "zcrm_4761157000080752136"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_e917b3e38af1",
+      "name": "Lancaster Archery Supply-Lancaster Archery Supply - Outlook issue",
+      "zoho_project_id": "zcrm_4761157000081169025"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_0f7436d69ccd",
+      "name": "En Pointe IT Solutions-En Pointe ITS - AWS",
+      "zoho_project_id": "zcrm_4761157000081286035"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_c826e0d52bc5",
+      "name": "Cyber Savi Security-Cyber Savi Security - Deal",
+      "zoho_project_id": "zcrm_4761157000081932033"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_6526d4ba7a10",
+      "name": "HTS Data, LLC-Integrated Dermatology - RingCentral Implementation",
+      "zoho_project_id": "zcrm_4761157000083424042"
+    },
+    {
+      "aegisaxiom_only": true,
+      "aegisaxiom_project_id": "proj_980ca2b69f62",
+      "name": "Volunteer Lawyers Network-Volunteer Lawyers Network - Zoom BoH (4/30/26)",
+      "zoho_project_id": "zcrm_4761157000084921001"
+    }
+  ],
+  "related_counts": {
+    "consumed_per_project_from_txn": {},
+    "tasks_per_project": {}
+  },
+  "source": "aegisaxiom=mongo",
+  "status_mismatches": [],
+  "zoho_only_zoho_project_ids": [],
+  "zoho_project_count": 0
+}

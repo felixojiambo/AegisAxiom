@@ -1,0 +1,11 @@
+Record Id,Account Name,Account Owner,Created Time
+ZA0000000001,Synthetic Account Alpha,fixture.owner@example.invalid,2024-01-01 09:00:00
+ZA0000000002,Synthetic Account Beta,fixture.owner@example.invalid,2024-01-02 09:00:00
+ZA0000000004,Synthetic Account Delta,fixture.owner@example.invalid,2024-01-04 09:00:00
+ZA0000000005,Synthetic Account Epsilon,fixture.owner@example.invalid,2024-01-05 09:00:00
+ZA0000000006,Synthetic Account Zeta,fixture.owner@example.invalid,2024-01-06 09:00:00
+ZA0000000007,Synthetic Account Eta,fixture.owner@example.invalid,2024-01-07 09:00:00
+ZA0000000008,Synthetic Account Theta,fixture.owner@example.invalid,2024-01-08 09:00:00
+ZA0000000009,Synthetic Account Iota,fixture.owner@example.invalid,2024-01-09 09:00:00
+ZA0000000010,Synthetic Account Kappa,fixture.owner@example.invalid,2024-01-10 09:00:00
+

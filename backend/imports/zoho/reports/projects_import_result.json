@@ -1,0 +1,942 @@
+{
+  "allow_partial": true,
+  "blocked_excluded": 5,
+  "considered": 101,
+  "db_connected": true,
+  "errors": [],
+  "finished_at": "2026-05-22T11:04:08.185825+00:00",
+  "inserted": 0,
+  "mode": "dry_run",
+  "per_row": [
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_8f7292593f1a",
+      "project_name": "Reading Bakery-Reading Bakery - Identity and Secure Access Proj.",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000023468001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_93110f724403",
+      "project_name": "Simpay-Simpay.net - Azure Support and Assessment BOH (5/17/24)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000024863001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_cccb522481bd",
+      "project_name": "Miura-Miura - server assistance / troubleshooting",
+      "warning_kinds": [
+        "deal_id_mismatch_with_contract",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000025314001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_82523c73875d",
+      "project_name": "Pat McCormick-Paulson Mitchell Engineering - Network and Fortinet engineering BOH",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000025408001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_1623cc930d12",
+      "project_name": "Pat McCormick-Randall Paulson Architects - Network and Fortinet engineering BOH",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000026117001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_cccb522481bd",
+      "project_name": "Miura-AdCom -Miura - Veeam backup and Azure migration",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000026224001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_2148d267a01e",
+      "project_name": "DigiTel-DigiTel - TCO Analysis: Desktop Virtualization Solutions",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000026317001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_68a87e8ebae7",
+      "project_name": "Carley Corp-Carley Corp - Jira Configuration",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000026517007"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "project_name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000026831001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_0a39865012b2",
+      "project_name": "Shive Hattery - General Assistance Block",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000027220001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_f9dae5566388",
+      "project_name": "Graham Field-Graham Field - Full MSSP Proposal",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000027789001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_d9ffcf5bcf22",
+      "project_name": "Kelley Kroneberg-Kelley Kronenburg - CUCM Assessment and Upgrade",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000028079001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_17e0ac0107e1",
+      "project_name": "ATS Group-ATS - General BOH",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000028187001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "project_name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000028251010"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_3515a524abf0",
+      "project_name": "GSC Capital-GSC Capital - Managed WIFI",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000028464001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "project_name": "Metadata - Internal - PreSales Requests",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000028765009"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "project_name": "Metadata Internal - Dialpad Deployment",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000030478011"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "project_name": "Metadata - Website Revamp",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000030877001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4fb8df0c81aa",
+      "project_name": "ttmsy-TTM - SimpliSecure MRR",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000031961001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_82523c73875d",
+      "project_name": "Paulson Mitchell - Azure/Veeam Storage Project",
+      "warning_kinds": [
+        "deal_id_mismatch_with_contract",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000032719019"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_7ee8abbaa366",
+      "project_name": "Trupoint cs-Trupoint//SimpliMeta Security Assessment",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000033566004"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_90e568fe326c",
+      "project_name": "ttmsy-Factory Automation - Equipment and install",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000033743004"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "project_name": "SimpliMeta - TechOps Build",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000034391041"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_df10d41fcd7d",
+      "project_name": "KPS Global-Azure AD and Intune Migration for KPS Global",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000034472001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_0abdecea2e78",
+      "project_name": "CyberLogic LLC-CyberLogic - SimpliSecure",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000035342002"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_80f34217d599",
+      "project_name": "GovPilot - SASE Replacement Project",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000036804390"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_a88f02d8b96e",
+      "project_name": "Redner's Markets Inc-Redner's - 1 site AP deployment taste test",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000036957001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_d983da927681",
+      "project_name": "The Baldwin Group-The Baldwin Group",
+      "warning_kinds": [
+        "account_id_mismatch_with_contract",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000038788012"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_2da0c949ea8e",
+      "project_name": "The Baldwin Group-Baldwin Group-- Active Directory",
+      "warning_kinds": [
+        "account_id_mismatch_with_contract",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000039085001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "project_name": "Metadata - Zoho Desk Deployment for Support",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000040003010"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "project_name": "Metadata - Bre Internal Tasks",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000040114007"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_806c7089cee4",
+      "project_name": "ISG-ISG - Bill on Actuals",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000045024001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_07de11587021",
+      "project_name": "Pat McCormick-Paulson Mitchell - Domain Change (2/11/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000045414001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_ce7e624ef3cf",
+      "project_name": "Leasepath-Leasepath--M365 and Azure Forensic Investigation and remediation",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000046608001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_5b2091e749f0",
+      "project_name": "Higher Information Group-Higher Info Group - Church Farm - Gap Assessment",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000046743037"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_e68f0b44f9dd",
+      "project_name": "Farmers National Bank-Farmers National Bank --VXrail infrastructure Bluewave",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000047420017"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_0f3ad166df8b",
+      "project_name": "Simpay-Simpay-Azure discovery BOH and SOW",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000048033012"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_31a21df26be2",
+      "project_name": "Caire-Care InC BOH and BOA",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000048289001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_279aafd6c6a2",
+      "project_name": "Southeastern Underwriters-Southeastern Underwriters--Network Troubleshooting Block",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000049758102"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_0631bb9a1815",
+      "project_name": "The Greenbrier Companies-Greenbrier Companies - IQ Wired - M365/Dynamics License Management Assessment",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000049826001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_fe2a23abd320",
+      "project_name": "KPS Global-KPS Global -- Entra, MAM, and MDM",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000049920001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_f74f5533534d",
+      "project_name": "AppDirect-Microsoft SQL Server SME",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000050257001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_cd9b7d493cb6",
+      "project_name": "Miura-Miura - Veeam backup and Azure migration Phase 2 with updated SOW",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000052945097"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_c4e727d1722b",
+      "project_name": "AppDirect-Garber Metrology -- Microsoft Power Automate Flows",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000053064077"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_bf4f9b75f23a",
+      "project_name": "Xtel-Xtel- Proserve",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000053455001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_c3e309ae9149",
+      "project_name": "AppDirect-Westmont-- Azure Project",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000054412016"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_dd2244694c9a",
+      "project_name": "LSI-LSI - Horizon on Azure (4/14/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000055002030"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_34745bf7c29a",
+      "project_name": "Paulson Mitchell Engineering-Paulson Mitchell Engineering - General 20BOH and Remediation( 5/13/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000055115057"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_96adf45f3a43",
+      "project_name": "Randall Paulson Architects-Randall Paulson Architects - General 20HR Block&remediation (5/13/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000055115075"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_841deb2e3a56",
+      "project_name": "Young Life-AppDirect- YoungLife - Ubiquity Project",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000055128017"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_41dc8484d5cb",
+      "project_name": "AppDirect-AppDirect -Zeneth Partners",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000056567001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_2b72d487a81d",
+      "project_name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000057608009"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_c38775b86989",
+      "project_name": "Randall Paulson Architects-Randall Paulson - Cyflareand S1 EDR",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000058454011"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_2f2a83a605c0",
+      "project_name": "Simpay-Simpay -Customer Portal- install (4/23/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000058872037"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_e9050c0acd12",
+      "project_name": "Paulson Mitchell Engineering-Paulson Mitchell - Cyflare - S1complete(6/6/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000059373017"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_b3590a9d0011",
+      "project_name": "AppDirect-AppdirectPSWL: Young Life - AWS Financial HealthCheck Engagement (7/1/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000059389011"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_2e59af541564",
+      "project_name": "Beghou Consulting-Beghou - Cyflare",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000059943009"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_5d555efb9d74",
+      "project_name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000060043042"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_509b78b09378",
+      "project_name": "AppDirect-AppDirectPSWL - Docupace to Dropbox",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000060255033"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_31a21df26be2",
+      "project_name": "Caire Inc - BOA PenTest Project",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000060704041"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_f349b28b7ee2",
+      "project_name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000060917001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_b02cc0416345",
+      "project_name": "Paulson Mitchell Engineering-Paulson Mitchell - Azure Point-to-Site VPN configuration(7/17/25)",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000061077001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4ab5385ce359",
+      "project_name": "AssetMark-AssetMark - Azure Project (3/31/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000061382372"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_7e79981d0c8d",
+      "project_name": "AppdirectPSWL - AMBA -Tenant to Tenant Transfer(BitTitan)(7/18/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000061445145"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_31a21df26be2",
+      "project_name": "Caire BOA - Networking Audit Remediation Project",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000061751170"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_7f7d59dfa8c7",
+      "project_name": "Trevanna-Trevanna - Annual Pen Test",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000061813182"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_d550ebaba23a",
+      "project_name": "AppDirect-AppDirectPSWL: University Tees - AWS Financial Health Check (8/12/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000062544005"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_7a2ec2530d98",
+      "project_name": "AppDirect-AppDirectPSWL: Altaworx- AWS Health and Security HealthCheck",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000062607001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4b6c8fee52ca",
+      "project_name": "Graham Field-GrahamField - BOA",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000062673033"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_c91c92533e86",
+      "project_name": "Winter Media-Student First Tech - Winter Media",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000063110003"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_bf06aa608946",
+      "project_name": "MMM Medicare y Mucho M\u00e1s-MMM Medicare y Mucho M\u00e1s",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000064463001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_cbf152ae5c20",
+      "project_name": "Paramount Global Inc.-Paramount Global - Azure AD",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000064563324"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_02a4fe57846b",
+      "project_name": "AppDirect-Project Access RFP",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000064902025"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_3c79a51d732c",
+      "project_name": "Radius GS-VMWare Storage and Reporting",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000066235001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_67ad87b8cac1",
+      "project_name": "TEST ACCOUNT-Today Test - 09-07-25",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000066559080"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_67ad87b8cac1",
+      "project_name": "TEST ACCOUNT-Today Test - 09-07-25",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000066612058"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_4276611d1e15",
+      "project_name": "OU Education Services-OUES - Jira Project",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000067089225"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_f3d1fcf9cc8a",
+      "project_name": "AppDirect-AppDirect- MAR JAC- Dynamics engagement",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000067211011"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_26424bb9a5f9",
+      "project_name": "SouthFloridaAutism-South Florida Autism - Trupoint - Valcom Project (10/9/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000067218006"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_25190690b557",
+      "project_name": "AwayDay-AwayDay - Socium - Google to MS (10/13/25",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000068021051"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_f73e954e0415",
+      "project_name": "Miura-Miura - Azure and domain work - (10/29/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000072346009"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_c126eb3cb2ad",
+      "project_name": "AwayDay-AwayDay - Socium - LBR Migration (12/3/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000072346052"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_789799e593ed",
+      "project_name": "Xtel-XTel - Server Config - Maryland Masonic",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000072926017"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_374ae6320dac",
+      "project_name": "AppDirect-AppDirectWL: The Bank of Monroe - Full Turnkey Proserv(12/11/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000073181011"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_12c1cc86ce41",
+      "project_name": "Socium Consulting-Socium - Bill on actuals (11/25/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000073396047"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_b3e15242ab31",
+      "project_name": "AwayDay-AwayDay-Socium - Meredith Lodging Mirgration ( 12/3/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000074133016"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_ea674048ef3a",
+      "project_name": "MarJac-MarJac - Trupoint - Checkpoint Implementation (12/9/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000074914001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_f6e51dc989e6",
+      "project_name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000075532066"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_cb663ae29cf9",
+      "project_name": "CrownCastle-Crown Castle - Ward Trucking - Security(11/12/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000075637001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_03913ab1eae2",
+      "project_name": "CyberLogic LLC-CyberLogic - Microsoft License and Migration",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000075764043"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_09c3a963b520",
+      "project_name": "AppDirect-Garber Metrology -- Microsoft Power Automate Flows - Addendum",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000075854001"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_0a842ef03915",
+      "project_name": "AppDirect-AppDirectPSWL: Bank of Old Monroe - Part 2",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000077149002"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_bbf89be22833",
+      "project_name": "N-OVATE Business Solutions-NFL- NOVATE",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000077288032"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_291c5c63bfd3",
+      "project_name": "Higher Information Group-HigherInfo - Exchange project",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000078083002"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_fb7e78975768",
+      "project_name": "Able2-Alliance for Empowerment, Inc - Higher Info - General Block",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000079679031"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_e719e20a433c",
+      "project_name": "Randall Paulson Architects-Randall Paulson - BOA- Troubleshooting (2/26/25)",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000080752136"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_44ac20519d4e",
+      "project_name": "Lancaster Archery Supply-Lancaster Archery Supply - Outlook issue",
+      "warning_kinds": [
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000081169025"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_5195c7c74aa9",
+      "project_name": "En Pointe IT Solutions-En Pointe ITS - AWS",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000081286035"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_dd1e1c2c09ca",
+      "project_name": "Cyber Savi Security-Cyber Savi Security - Deal",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000081932033"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_b6d474150407",
+      "project_name": "HTS Data, LLC-Integrated Dermatology - RingCentral Implementation",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000083424042"
+    },
+    {
+      "action": "would_update",
+      "aegisaxiom_contract_id": "contract_c1e7fa75fde1",
+      "project_name": "Volunteer Lawyers Network-Volunteer Lawyers Network - Zoom BoH (4/30/26)",
+      "warning_kinds": [
+        "missing_consumed_hours",
+        "missing_project_type"
+      ],
+      "zoho_project_id": "zcrm_4761157000084921001"
+    }
+  ],
+  "plan_file": "imports/zoho/reports/projects_import_plan.json",
+  "skipped": 0,
+  "total_plan_rows": 106,
+  "updated": 101,
+  "warning_count": 116,
+  "warnings": []
+}

@@ -1,0 +1,5536 @@
+{
+  "contracts": [
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_8f7292593f1a",
+      "contract_number": "CN-100008",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000023461001",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 135.0,
+      "imported_total_hours": 136.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 135.0,
+        "total_hours": 136.0,
+        "total_hours_purchased": 136.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_956b50815c5f",
+      "contract_number": "CN-100009",
+      "contract_type": "other",
+      "external_contract_id": "zcrm_4761157000023561001",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 12.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources"
+      ],
+      "operator_candidate_patch": {},
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_93110f724403",
+      "contract_number": "CN-100025",
+      "contract_type": "other",
+      "external_contract_id": "zcrm_4761157000024861001",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 1.0,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources"
+      ],
+      "operator_candidate_patch": {},
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_82523c73875d",
+      "contract_number": "CN-100026",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000025292019",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 61.67,
+      "imported_total_hours": 45.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 61.67,
+        "total_hours": 45.0,
+        "total_hours_purchased": 45.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_d0c074fd4ec4",
+      "contract_number": "CN-100027",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000025292049",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 20.0,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 20.0,
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_1623cc930d12",
+      "contract_number": "CN-100032",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000026108009",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 16.2,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 16.2,
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_cccb522481bd",
+      "contract_number": "CN-100033",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000026190010",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 52.08,
+      "imported_total_hours": 25.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 52.08,
+        "total_hours": 25.0,
+        "total_hours_purchased": 25.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_2148d267a01e",
+      "contract_number": "CN-100038",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000026308001",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 60.18,
+      "imported_total_hours": 40.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 60.18,
+        "total_hours": 40.0,
+        "total_hours_purchased": 40.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_68a87e8ebae7",
+      "contract_number": "CN-100041",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000026506093",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 0.0,
+      "imported_total_hours": 30.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 30.0,
+        "total_hours_purchased": 30.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_4d1ecd48923f",
+      "contract_number": "CN-100044",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000026692030",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 223.86,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 223.86
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_0a39865012b2",
+      "contract_number": "CN-100045",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000027216038",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 120.0,
+      "imported_total_hours": 40.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 120.0,
+        "total_hours": 40.0,
+        "total_hours_purchased": 40.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_f9dae5566388",
+      "contract_number": "CN-100046",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000027443001",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 117.17,
+      "imported_total_hours": 40.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 117.17,
+        "total_hours": 40.0,
+        "total_hours_purchased": 40.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_d9ffcf5bcf22",
+      "contract_number": "CN-100047",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000028068035",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 97.53,
+      "imported_total_hours": 90.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 97.53,
+        "total_hours": 90.0,
+        "total_hours_purchased": 90.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_17e0ac0107e1",
+      "contract_number": "CN-100048",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000028164057",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 25.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 25.0,
+        "total_hours_purchased": 25.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_3515a524abf0",
+      "contract_number": "CN-100049",
+      "contract_type": "fixed_fee",
+      "external_contract_id": "zcrm_4761157000028454049",
+      "gaps": [
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 1.0,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "resources"
+      ],
+      "operator_candidate_patch": {},
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": true,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_a88f02d8b96e",
+      "contract_number": "CN-100061",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000031722101",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 4.5,
+      "imported_total_hours": 5.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 4.5,
+        "total_hours": 5.0,
+        "total_hours_purchased": 5.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_4fb8df0c81aa",
+      "contract_number": "CN-100062",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000031928205",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 20.0,
+      "imported_total_hours": 10.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 20.0,
+        "total_hours": 10.0,
+        "total_hours_purchased": 10.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_7ee8abbaa366",
+      "contract_number": "CN-100064",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000032813020",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 14.0,
+      "imported_total_hours": 10.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 14.0,
+        "total_hours": 10.0,
+        "total_hours_purchased": 10.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_90e568fe326c",
+      "contract_number": "CN-100066",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000033800253",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 3.5,
+      "imported_total_hours": 17.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 3.5,
+        "total_hours": 17.0,
+        "total_hours_purchased": 17.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_df10d41fcd7d",
+      "contract_number": "CN-100067",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000034391280",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 145.17,
+      "imported_total_hours": 125.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 145.17,
+        "total_hours": 125.0,
+        "total_hours_purchased": 125.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_0abdecea2e78",
+      "contract_number": "CN-100069",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000035356101",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 36.65,
+      "imported_total_hours": 30.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 36.65,
+        "total_hours": 30.0,
+        "total_hours_purchased": 30.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_80f34217d599",
+      "contract_number": "CN-100072",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000036804328",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 10.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 10.0,
+        "total_hours_purchased": 10.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_d983da927681",
+      "contract_number": "CN-100076",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000038844137",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 72.67,
+      "imported_total_hours": 130.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 72.67,
+        "total_hours": 130.0,
+        "total_hours_purchased": 130.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_2da0c949ea8e",
+      "contract_number": "CN-100077",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000038940192",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 75.83,
+      "imported_total_hours": 60.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 75.83,
+        "total_hours": 60.0,
+        "total_hours_purchased": 60.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_806c7089cee4",
+      "contract_number": "CN-100078",
+      "contract_type": "boa",
+      "external_contract_id": "zcrm_4761157000044947034",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 259.84,
+      "imported_total_hours": 16.33,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources"
+      ],
+      "operator_candidate_patch": {},
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_07de11587021",
+      "contract_number": "CN-100079",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000045393079",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 30.5,
+      "imported_total_hours": 30.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 30.5,
+        "total_hours": 30.0,
+        "total_hours_purchased": 30.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_ce7e624ef3cf",
+      "contract_number": "CN-100080",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000046538204",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 51.67,
+      "imported_total_hours": 50.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 51.67,
+        "total_hours": 50.0,
+        "total_hours_purchased": 50.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_5b2091e749f0",
+      "contract_number": "CN-100081",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000046760088",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 25.84,
+      "imported_total_hours": 48.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 25.84,
+        "total_hours": 48.0,
+        "total_hours_purchased": 48.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_e68f0b44f9dd",
+      "contract_number": "CN-100082",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000047415155",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 63.0,
+      "imported_total_hours": 50.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 63.0,
+        "total_hours": 50.0,
+        "total_hours_purchased": 50.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_0f3ad166df8b",
+      "contract_number": "CN-100083",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000047777090",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 34.83,
+      "imported_total_hours": 40.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 34.83,
+        "total_hours": 40.0,
+        "total_hours_purchased": 40.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_31a21df26be2",
+      "contract_number": "CN-100084",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000048238198",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 113.19,
+      "imported_total_hours": 120.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 113.19,
+        "total_hours": 120.0,
+        "total_hours_purchased": 120.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_279aafd6c6a2",
+      "contract_number": "CN-100085",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000049782212",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 23.32,
+      "imported_total_hours": 45.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 23.32,
+        "total_hours": 45.0,
+        "total_hours_purchased": 45.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_0631bb9a1815",
+      "contract_number": "CN-100086",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000049782493",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 28.5,
+      "imported_total_hours": 100.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 28.5,
+        "total_hours": 100.0,
+        "total_hours_purchased": 100.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_fe2a23abd320",
+      "contract_number": "CN-100087",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000049824294",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 66.0,
+      "imported_total_hours": 71.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 66.0,
+        "total_hours": 71.0,
+        "total_hours_purchased": 71.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_f74f5533534d",
+      "contract_number": "CN-100088",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000050238264",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 10.0,
+      "imported_total_hours": 10.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 10.0,
+        "total_hours": 10.0,
+        "total_hours_purchased": 10.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_cd9b7d493cb6",
+      "contract_number": "CN-100090",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000052959177",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 80.01,
+      "imported_total_hours": 80.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 80.01,
+        "total_hours": 80.0,
+        "total_hours_purchased": 80.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_c4e727d1722b",
+      "contract_number": "CN-100091",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000052994243",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 43.67,
+      "imported_total_hours": 35.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 43.67,
+        "total_hours": 35.0,
+        "total_hours_purchased": 35.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_bf4f9b75f23a",
+      "contract_number": "CN-100092",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000053258135",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 13.5,
+      "imported_total_hours": 15.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 13.5,
+        "total_hours": 15.0,
+        "total_hours_purchased": 15.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_c3e309ae9149",
+      "contract_number": "CN-100093",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000054413001",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 29.85,
+      "imported_total_hours": 30.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 29.85,
+        "total_hours": 30.0,
+        "total_hours_purchased": 30.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_dd2244694c9a",
+      "contract_number": "CN-100094",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000055018130",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 173.17,
+      "imported_total_hours": 190.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 173.17,
+        "total_hours": 190.0,
+        "total_hours_purchased": 190.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_841deb2e3a56",
+      "contract_number": "CN-100095",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000055118108",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 37.18,
+      "imported_total_hours": 74.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 37.18,
+        "total_hours": 74.0,
+        "total_hours_purchased": 74.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_34745bf7c29a",
+      "contract_number": "CN-100096",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000055118282",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 50.59,
+      "imported_total_hours": 41.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 50.59,
+        "total_hours": 41.0,
+        "total_hours_purchased": 41.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_96adf45f3a43",
+      "contract_number": "CN-100097",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000055118419",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 23.4,
+      "imported_total_hours": 24.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 23.4,
+        "total_hours": 24.0,
+        "total_hours_purchased": 24.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_41dc8484d5cb",
+      "contract_number": "CN-100098",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000056535221",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 18.16,
+      "imported_total_hours": 10.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 18.16,
+        "total_hours": 10.0,
+        "total_hours_purchased": 10.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_2b72d487a81d",
+      "contract_number": "CN-100099",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000057640065",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 4.5,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 4.5
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_c38775b86989",
+      "contract_number": "CN-100100",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000058338202",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 32.0,
+      "imported_total_hours": 32.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 32.0,
+        "total_hours": 32.0,
+        "total_hours_purchased": 32.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_2f2a83a605c0",
+      "contract_number": "CN-100101",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000058511188",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 84.83,
+      "imported_total_hours": 100.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 84.83,
+        "total_hours": 100.0,
+        "total_hours_purchased": 100.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_b3590a9d0011",
+      "contract_number": "CN-100102",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000059390025",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 65.3,
+      "imported_total_hours": 74.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 65.3,
+        "total_hours": 74.0,
+        "total_hours_purchased": 74.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_e9050c0acd12",
+      "contract_number": "CN-100103",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000059390094",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 2.0,
+      "imported_total_hours": 30.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 2.0,
+        "total_hours": 30.0,
+        "total_hours_purchased": 30.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_67ad87b8cac1",
+      "contract_number": "CN-100104",
+      "contract_type": "boa",
+      "external_contract_id": "zcrm_4761157000059657178",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 24.1,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources"
+      ],
+      "operator_candidate_patch": {},
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_2e59af541564",
+      "contract_number": "CN-100106",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000059899069",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 30.33,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 30.33,
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_5d555efb9d74",
+      "contract_number": "CN-100108",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000060092038",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 0.33,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 0.33
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_509b78b09378",
+      "contract_number": "CN-100109",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000060265022",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 37.51,
+      "imported_total_hours": 70.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 37.51,
+        "total_hours": 70.0,
+        "total_hours_purchased": 70.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_d6df7822b951",
+      "contract_number": "CN-100110",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000060359045",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 150.0,
+      "imported_total_hours": 100.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 150.0,
+        "total_hours": 100.0,
+        "total_hours_purchased": 100.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_f349b28b7ee2",
+      "contract_number": "CN-100111",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000060900001",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 2.99,
+      "imported_total_hours": 12.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 2.99,
+        "total_hours": 12.0,
+        "total_hours_purchased": 12.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_b02cc0416345",
+      "contract_number": "CN-100112",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000060900102",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 21.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 21.0,
+        "total_hours_purchased": 21.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_41347fcb42bd",
+      "contract_number": "CN-100114",
+      "contract_type": "fixed_fee",
+      "external_contract_id": "zcrm_4761157000061021163",
+      "gaps": [
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 0.0,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "resources"
+      ],
+      "operator_candidate_patch": {},
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": true,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_7e79981d0c8d",
+      "contract_number": "CN-100115",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000061452222",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 25.67,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 25.67,
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_4ab5385ce359",
+      "contract_number": "CN-100116",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000061452369",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 9.15,
+      "imported_total_hours": 55.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 9.15,
+        "total_hours": 55.0,
+        "total_hours_purchased": 55.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_7f7d59dfa8c7",
+      "contract_number": "CN-100117",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000061863071",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 30.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 30.0,
+        "total_hours_purchased": 30.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_7a2ec2530d98",
+      "contract_number": "CN-100118",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000062598044",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 69.85,
+      "imported_total_hours": 75.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 69.85,
+        "total_hours": 75.0,
+        "total_hours_purchased": 75.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_d550ebaba23a",
+      "contract_number": "CN-100119",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000062598150",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 80.85,
+      "imported_total_hours": 74.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 80.85,
+        "total_hours": 74.0,
+        "total_hours_purchased": 74.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_4b6c8fee52ca",
+      "contract_number": "CN-100120",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000062636084",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 36.17,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 36.17,
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_6a9af083c46a",
+      "contract_number": "CN-100122",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000063581052",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 70.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 70.0,
+        "total_hours_purchased": 70.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_bf06aa608946",
+      "contract_number": "CN-100123",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000064443081",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 180.82,
+      "imported_total_hours": 165.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 180.82,
+        "total_hours": 165.0,
+        "total_hours_purchased": 165.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_cbf152ae5c20",
+      "contract_number": "CN-100124",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000064588081",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 41.5,
+      "imported_total_hours": 40.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 41.5,
+        "total_hours": 40.0,
+        "total_hours_purchased": 40.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_02a4fe57846b",
+      "contract_number": "CN-100125",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000064959091",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 343.55,
+      "imported_total_hours": 280.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 343.55,
+        "total_hours": 280.0,
+        "total_hours_purchased": 280.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_3c79a51d732c",
+      "contract_number": "CN-100126",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000066201055",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 5.67,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 5.67,
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_4276611d1e15",
+      "contract_number": "CN-100127",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000067058058",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 127.17,
+      "imported_total_hours": 115.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 127.17,
+        "total_hours": 115.0,
+        "total_hours_purchased": 115.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_f3d1fcf9cc8a",
+      "contract_number": "CN-100128",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000067204283",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 26.85,
+      "imported_total_hours": 40.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 26.85,
+        "total_hours": 40.0,
+        "total_hours_purchased": 40.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_26424bb9a5f9",
+      "contract_number": "CN-100129",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000067204402",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 3.84,
+      "imported_total_hours": 8.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 3.84,
+        "total_hours": 8.0,
+        "total_hours_purchased": 8.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_25190690b557",
+      "contract_number": "CN-100130",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000067986113",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 43.98,
+      "imported_total_hours": 48.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 43.98,
+        "total_hours": 48.0,
+        "total_hours_purchased": 48.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_f73e954e0415",
+      "contract_number": "CN-100132",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000072316061",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 47.83,
+      "imported_total_hours": 46.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 47.83,
+        "total_hours": 46.0,
+        "total_hours_purchased": 46.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_c126eb3cb2ad",
+      "contract_number": "CN-100133",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000072393067",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 49.83,
+      "imported_total_hours": 52.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 49.83,
+        "total_hours": 52.0,
+        "total_hours_purchased": 52.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_789799e593ed",
+      "contract_number": "CN-100134",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000072967047",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 68.66,
+      "imported_total_hours": 79.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 68.66,
+        "total_hours": 79.0,
+        "total_hours_purchased": 79.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_374ae6320dac",
+      "contract_number": "CN-100135",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000073220046",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 83.49,
+      "imported_total_hours": 100.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 83.49,
+        "total_hours": 100.0,
+        "total_hours_purchased": 100.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_12c1cc86ce41",
+      "contract_number": "CN-100136",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000073382044",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 0.5,
+      "imported_total_hours": 10.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 0.5,
+        "total_hours": 10.0,
+        "total_hours_purchased": 10.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_b3e15242ab31",
+      "contract_number": "CN-100137",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000073614048",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 275.51,
+      "imported_total_hours": 260.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 275.51,
+        "total_hours": 260.0,
+        "total_hours_purchased": 260.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_ea674048ef3a",
+      "contract_number": "CN-100138",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000074886059",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 37.34,
+      "imported_total_hours": 36.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 37.34,
+        "total_hours": 36.0,
+        "total_hours_purchased": 36.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_f6e51dc989e6",
+      "contract_number": "CN-100139",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000075540001",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours"
+      ],
+      "operator_candidate_patch": {},
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_cb663ae29cf9",
+      "contract_number": "CN-100140",
+      "contract_type": "fixed_fee",
+      "external_contract_id": "zcrm_4761157000075614043",
+      "gaps": [
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 58.65,
+      "imported_total_hours": 0.0,
+      "needs_finance_review": [
+        "resources"
+      ],
+      "operator_candidate_patch": {},
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": true,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_03913ab1eae2",
+      "contract_number": "CN-100141",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000075737039",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 31.67,
+      "imported_total_hours": 30.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 31.67,
+        "total_hours": 30.0,
+        "total_hours_purchased": 30.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_09c3a963b520",
+      "contract_number": "CN-100142",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000075843063",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 1.5,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 1.5,
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_0a842ef03915",
+      "contract_number": "CN-100143",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000077194017",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 31.0,
+      "imported_total_hours": 30.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 31.0,
+        "total_hours": 30.0,
+        "total_hours_purchased": 30.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_bbf89be22833",
+      "contract_number": "CN-100144",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000077298035",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 76.16,
+      "imported_total_hours": 40.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 76.16,
+        "total_hours": 40.0,
+        "total_hours_purchased": 40.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_291c5c63bfd3",
+      "contract_number": "CN-100146",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000078157029",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 29.67,
+      "imported_total_hours": 36.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 29.67,
+        "total_hours": 36.0,
+        "total_hours_purchased": 36.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_fb7e78975768",
+      "contract_number": "CN-100147",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000079475045",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_e719e20a433c",
+      "contract_number": "CN-100149",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000080748117",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 31.18,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 31.18,
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_44ac20519d4e",
+      "contract_number": "CN-100150",
+      "contract_type": "boh_with_boa",
+      "external_contract_id": "zcrm_4761157000081192056",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 0.0,
+      "imported_total_hours": 32.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 32.0,
+        "total_hours_purchased": 32.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_5195c7c74aa9",
+      "contract_number": "CN-100151",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000081290107",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 175.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 175.0,
+        "total_hours_purchased": 175.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_dd1e1c2c09ca",
+      "contract_number": "CN-100152",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000081996055",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 20.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 20.0,
+        "total_hours_purchased": 20.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_b6d474150407",
+      "contract_number": "CN-100153",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000083436065",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 135.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 135.0,
+        "total_hours_purchased": 135.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_c1e7fa75fde1",
+      "contract_number": "CN-100154",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000084889020",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": null,
+      "imported_total_hours": 6.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "total_hours": 6.0,
+        "total_hours_purchased": 6.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    },
+    {
+      "canonical_hours_consumed": 0.0,
+      "contract_id": "contract_c91c92533e86",
+      "contract_number": "CN-100121",
+      "contract_type": "boh",
+      "external_contract_id": "zcrm_4761157000063081038",
+      "gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "imported_consumed_hours": 8.5,
+      "imported_total_hours": 8.0,
+      "needs_finance_review": [
+        "hourly_rate",
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "resources",
+        "total_hours (verify against contract record)"
+      ],
+      "operator_candidate_patch": {
+        "hours_consumed": 8.5,
+        "total_hours": 8.0,
+        "total_hours_purchased": 8.0
+      },
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "draft"
+    }
+  ],
+  "generated_at": "2026-05-22T13:52:00.442028+00:00",
+  "notes": [
+    "operator_candidate_patch is a CANDIDATE only \u2014 Finance / operator must verify imported_total_hours against the contract record before applying it. The Zoho snapshot can drift from the contract's stated block size.",
+    "Setting total_hours alone is INSUFFICIENT for historically consumed boh / boh_with_boa contracts. Without a consumed-hours baseline, every newly approved entry would push contract.hours_consumed from zero, under-counting historical consumption.",
+    "Preferred path for the consumed-hours baseline may be replaying historical Zoho Timesheets/time logs against the imported project once that export is available \u2014 that writes real contract_time_applications rows and is auditable. Directly patching contract.hours_consumed from imported_consumed_hours is the candidate fallback; it requires Finance / operator sign-off because the Zoho snapshot can drift from the ledger of approved entries.",
+    "Sell rates are never auto-derived; the Zoho export has no rate column. needs_finance_review='hourly_rate' marks the contracts where Finance must supply a number.",
+    "There is no --execute flag. The hydration executor is a separate, reviewed slice."
+  ],
+  "project_impact": {
+    "projects_linked_to_contracts_missing_consumed_hours_baseline": 83,
+    "projects_linked_to_contracts_missing_resources": 101,
+    "projects_linked_to_contracts_missing_sell_rate": 99,
+    "projects_linked_to_contracts_missing_total_hours": 95,
+    "projects_linked_to_imported_contracts": 101,
+    "projects_missing_contract_id": 0,
+    "projects_safe_for_approval_debit": 6,
+    "projects_safe_for_billable_draft_entry": 2,
+    "projects_safe_for_consumed_hours_baseline": 18,
+    "projects_safe_for_non_billable_draft_entry": 101,
+    "projects_safe_for_resource_type_entry": 0,
+    "projects_unresolved_parent_contract": 0,
+    "projects_with_contract_id": 101,
+    "total_imported_projects": 101
+  },
+  "projects": [
+    {
+      "contract_id": "contract_8f7292593f1a",
+      "external_project_id": "zcrm_4761157000023468001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Reading Bakery-Reading Bakery - Identity and Secure Access Proj.",
+      "parent_resolution": "resolved",
+      "project_id": "proj_a6013e631862",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_93110f724403",
+      "external_project_id": "zcrm_4761157000024863001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Simpay-Simpay.net - Azure Support and Assessment BOH (5/17/24)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_88720bb21a9d",
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_cccb522481bd",
+      "external_project_id": "zcrm_4761157000025314001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Miura-Miura - server assistance / troubleshooting",
+      "parent_resolution": "resolved",
+      "project_id": "proj_fa65570254c6",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_82523c73875d",
+      "external_project_id": "zcrm_4761157000025408001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Pat McCormick-Paulson Mitchell Engineering - Network and Fortinet engineering BOH",
+      "parent_resolution": "resolved",
+      "project_id": "proj_63a2110b060c",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_1623cc930d12",
+      "external_project_id": "zcrm_4761157000026117001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Pat McCormick-Randall Paulson Architects - Network and Fortinet engineering BOH",
+      "parent_resolution": "resolved",
+      "project_id": "proj_d05adc60adb0",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_cccb522481bd",
+      "external_project_id": "zcrm_4761157000026224001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Miura-AdCom -Miura - Veeam backup and Azure migration",
+      "parent_resolution": "resolved",
+      "project_id": "proj_58b98aa143a1",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_2148d267a01e",
+      "external_project_id": "zcrm_4761157000026317001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "DigiTel-DigiTel - TCO Analysis: Desktop Virtualization Solutions",
+      "parent_resolution": "resolved",
+      "project_id": "proj_a6529d879f24",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_68a87e8ebae7",
+      "external_project_id": "zcrm_4761157000026517007",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Carley Corp-Carley Corp - Jira Configuration",
+      "parent_resolution": "resolved",
+      "project_id": "proj_080355fc839d",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4d1ecd48923f",
+      "external_project_id": "zcrm_4761157000026831001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "parent_resolution": "resolved",
+      "project_id": "proj_6fb80de6c473",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_0a39865012b2",
+      "external_project_id": "zcrm_4761157000027220001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Shive Hattery - General Assistance Block",
+      "parent_resolution": "resolved",
+      "project_id": "proj_c85dac84ff3d",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_f9dae5566388",
+      "external_project_id": "zcrm_4761157000027789001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Graham Field-Graham Field - Full MSSP Proposal",
+      "parent_resolution": "resolved",
+      "project_id": "proj_4fc7e76528f6",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_d9ffcf5bcf22",
+      "external_project_id": "zcrm_4761157000028079001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Kelley Kroneberg-Kelley Kronenburg - CUCM Assessment and Upgrade",
+      "parent_resolution": "resolved",
+      "project_id": "proj_ccc85bd40046",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_17e0ac0107e1",
+      "external_project_id": "zcrm_4761157000028187001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "ATS Group-ATS - General BOH",
+      "parent_resolution": "resolved",
+      "project_id": "proj_ea8dc658bf26",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4d1ecd48923f",
+      "external_project_id": "zcrm_4761157000028251010",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "parent_resolution": "resolved",
+      "project_id": "proj_ad5f36f2bb45",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_3515a524abf0",
+      "external_project_id": "zcrm_4761157000028464001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "GSC Capital-GSC Capital - Managed WIFI",
+      "parent_resolution": "resolved",
+      "project_id": "proj_46daf7110fdb",
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": true,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4d1ecd48923f",
+      "external_project_id": "zcrm_4761157000028765009",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata - Internal - PreSales Requests",
+      "parent_resolution": "resolved",
+      "project_id": "proj_df405bccc25f",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4d1ecd48923f",
+      "external_project_id": "zcrm_4761157000030478011",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata Internal - Dialpad Deployment",
+      "parent_resolution": "resolved",
+      "project_id": "proj_3e1ff3ff0682",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4d1ecd48923f",
+      "external_project_id": "zcrm_4761157000030877001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata - Website Revamp",
+      "parent_resolution": "resolved",
+      "project_id": "proj_f3d3a10222ba",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4fb8df0c81aa",
+      "external_project_id": "zcrm_4761157000031961001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "ttmsy-TTM - SimpliSecure MRR",
+      "parent_resolution": "resolved",
+      "project_id": "proj_1d924eb5694c",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_82523c73875d",
+      "external_project_id": "zcrm_4761157000032719019",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Paulson Mitchell - Azure/Veeam Storage Project",
+      "parent_resolution": "resolved",
+      "project_id": "proj_3e60fea103ff",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_7ee8abbaa366",
+      "external_project_id": "zcrm_4761157000033566004",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Trupoint cs-Trupoint//SimpliMeta Security Assessment",
+      "parent_resolution": "resolved",
+      "project_id": "proj_81fb481a4414",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_90e568fe326c",
+      "external_project_id": "zcrm_4761157000033743004",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "ttmsy-Factory Automation - Equipment and install",
+      "parent_resolution": "resolved",
+      "project_id": "proj_888a39beb2be",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4d1ecd48923f",
+      "external_project_id": "zcrm_4761157000034391041",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "SimpliMeta - TechOps Build",
+      "parent_resolution": "resolved",
+      "project_id": "proj_6033753f504b",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_df10d41fcd7d",
+      "external_project_id": "zcrm_4761157000034472001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "KPS Global-Azure AD and Intune Migration for KPS Global",
+      "parent_resolution": "resolved",
+      "project_id": "proj_c8df9ff926b5",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_0abdecea2e78",
+      "external_project_id": "zcrm_4761157000035342002",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "CyberLogic LLC-CyberLogic - SimpliSecure",
+      "parent_resolution": "resolved",
+      "project_id": "proj_e1486c598169",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_80f34217d599",
+      "external_project_id": "zcrm_4761157000036804390",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "GovPilot - SASE Replacement Project",
+      "parent_resolution": "resolved",
+      "project_id": "proj_5b7d2951aeda",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_a88f02d8b96e",
+      "external_project_id": "zcrm_4761157000036957001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Redner's Markets Inc-Redner's - 1 site AP deployment taste test",
+      "parent_resolution": "resolved",
+      "project_id": "proj_169f3e1bf273",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_d983da927681",
+      "external_project_id": "zcrm_4761157000038788012",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "The Baldwin Group-The Baldwin Group",
+      "parent_resolution": "resolved",
+      "project_id": "proj_412bef22776d",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_2da0c949ea8e",
+      "external_project_id": "zcrm_4761157000039085001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "The Baldwin Group-Baldwin Group-- Active Directory",
+      "parent_resolution": "resolved",
+      "project_id": "proj_c65b6d98826b",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4d1ecd48923f",
+      "external_project_id": "zcrm_4761157000040003010",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata - Zoho Desk Deployment for Support",
+      "parent_resolution": "resolved",
+      "project_id": "proj_2a6dc7050265",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4d1ecd48923f",
+      "external_project_id": "zcrm_4761157000040114007",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata - Bre Internal Tasks",
+      "parent_resolution": "resolved",
+      "project_id": "proj_0025afc99f6c",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_806c7089cee4",
+      "external_project_id": "zcrm_4761157000045024001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "ISG-ISG - Bill on Actuals",
+      "parent_resolution": "resolved",
+      "project_id": "proj_357ea964b06d",
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_07de11587021",
+      "external_project_id": "zcrm_4761157000045414001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Pat McCormick-Paulson Mitchell - Domain Change (2/11/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_f6b0bf63f0b0",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_ce7e624ef3cf",
+      "external_project_id": "zcrm_4761157000046608001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Leasepath-Leasepath--M365 and Azure Forensic Investigation and remediation",
+      "parent_resolution": "resolved",
+      "project_id": "proj_740ca058dea8",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_5b2091e749f0",
+      "external_project_id": "zcrm_4761157000046743037",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Higher Information Group-Higher Info Group - Church Farm - Gap Assessment",
+      "parent_resolution": "resolved",
+      "project_id": "proj_c4641624ef9e",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_e68f0b44f9dd",
+      "external_project_id": "zcrm_4761157000047420017",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Farmers National Bank-Farmers National Bank --VXrail infrastructure Bluewave",
+      "parent_resolution": "resolved",
+      "project_id": "proj_6ff37ce1fd4a",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_0f3ad166df8b",
+      "external_project_id": "zcrm_4761157000048033012",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Simpay-Simpay-Azure discovery BOH and SOW",
+      "parent_resolution": "resolved",
+      "project_id": "proj_38e6d4e702b9",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_31a21df26be2",
+      "external_project_id": "zcrm_4761157000048289001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Caire-Care InC BOH and BOA",
+      "parent_resolution": "resolved",
+      "project_id": "proj_834ad5c5ace1",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_279aafd6c6a2",
+      "external_project_id": "zcrm_4761157000049758102",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Southeastern Underwriters-Southeastern Underwriters--Network Troubleshooting Block",
+      "parent_resolution": "resolved",
+      "project_id": "proj_4f837c2eca15",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_0631bb9a1815",
+      "external_project_id": "zcrm_4761157000049826001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "The Greenbrier Companies-Greenbrier Companies - IQ Wired - M365/Dynamics License Management Assessment",
+      "parent_resolution": "resolved",
+      "project_id": "proj_23ba375909ec",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_fe2a23abd320",
+      "external_project_id": "zcrm_4761157000049920001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "KPS Global-KPS Global -- Entra, MAM, and MDM",
+      "parent_resolution": "resolved",
+      "project_id": "proj_7e860cf38ccf",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_f74f5533534d",
+      "external_project_id": "zcrm_4761157000050257001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-Microsoft SQL Server SME",
+      "parent_resolution": "resolved",
+      "project_id": "proj_cace33524ffa",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_cd9b7d493cb6",
+      "external_project_id": "zcrm_4761157000052945097",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Miura-Miura - Veeam backup and Azure migration Phase 2 with updated SOW",
+      "parent_resolution": "resolved",
+      "project_id": "proj_2d26a7931d12",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_c4e727d1722b",
+      "external_project_id": "zcrm_4761157000053064077",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-Garber Metrology -- Microsoft Power Automate Flows",
+      "parent_resolution": "resolved",
+      "project_id": "proj_05b051224d24",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_bf4f9b75f23a",
+      "external_project_id": "zcrm_4761157000053455001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Xtel-Xtel- Proserve",
+      "parent_resolution": "resolved",
+      "project_id": "proj_43bc7a3522db",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_c3e309ae9149",
+      "external_project_id": "zcrm_4761157000054412016",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-Westmont-- Azure Project",
+      "parent_resolution": "resolved",
+      "project_id": "proj_75de7e529a94",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_dd2244694c9a",
+      "external_project_id": "zcrm_4761157000055002030",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "LSI-LSI - Horizon on Azure (4/14/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_1cc20f5428bb",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_34745bf7c29a",
+      "external_project_id": "zcrm_4761157000055115057",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Paulson Mitchell Engineering-Paulson Mitchell Engineering - General 20BOH and Remediation( 5/13/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_c961587a5fd4",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_96adf45f3a43",
+      "external_project_id": "zcrm_4761157000055115075",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Randall Paulson Architects-Randall Paulson Architects - General 20HR Block&remediation (5/13/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_85aa405a0ef5",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_841deb2e3a56",
+      "external_project_id": "zcrm_4761157000055128017",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Young Life-AppDirect- YoungLife - Ubiquity Project",
+      "parent_resolution": "resolved",
+      "project_id": "proj_4a7f16c61f05",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_41dc8484d5cb",
+      "external_project_id": "zcrm_4761157000056567001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-AppDirect -Zeneth Partners",
+      "parent_resolution": "resolved",
+      "project_id": "proj_0aabc61f0840",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_2b72d487a81d",
+      "external_project_id": "zcrm_4761157000057608009",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "parent_resolution": "resolved",
+      "project_id": "proj_0b4182cdd728",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_c38775b86989",
+      "external_project_id": "zcrm_4761157000058454011",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Randall Paulson Architects-Randall Paulson - Cyflareand S1 EDR",
+      "parent_resolution": "resolved",
+      "project_id": "proj_abcc5d42e2ce",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_2f2a83a605c0",
+      "external_project_id": "zcrm_4761157000058872037",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Simpay-Simpay -Customer Portal- install (4/23/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_6b9bda91b946",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_e9050c0acd12",
+      "external_project_id": "zcrm_4761157000059373017",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Paulson Mitchell Engineering-Paulson Mitchell - Cyflare - S1complete(6/6/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_cb6f78e8ec07",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_b3590a9d0011",
+      "external_project_id": "zcrm_4761157000059389011",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-AppdirectPSWL: Young Life - AWS Financial HealthCheck Engagement (7/1/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_a3745b096f0f",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_2e59af541564",
+      "external_project_id": "zcrm_4761157000059943009",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Beghou Consulting-Beghou - Cyflare",
+      "parent_resolution": "resolved",
+      "project_id": "proj_13475bef2d7b",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_5d555efb9d74",
+      "external_project_id": "zcrm_4761157000060043042",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "parent_resolution": "resolved",
+      "project_id": "proj_126ed3b3a5c2",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_509b78b09378",
+      "external_project_id": "zcrm_4761157000060255033",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-AppDirectPSWL - Docupace to Dropbox",
+      "parent_resolution": "resolved",
+      "project_id": "proj_126c65f487ab",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_31a21df26be2",
+      "external_project_id": "zcrm_4761157000060704041",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Caire Inc - BOA PenTest Project",
+      "parent_resolution": "resolved",
+      "project_id": "proj_abd98f7d8da7",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_f349b28b7ee2",
+      "external_project_id": "zcrm_4761157000060917001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "parent_resolution": "resolved",
+      "project_id": "proj_363e25a6c3ea",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_b02cc0416345",
+      "external_project_id": "zcrm_4761157000061077001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Paulson Mitchell Engineering-Paulson Mitchell - Azure Point-to-Site VPN configuration(7/17/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_9a546108abe9",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4ab5385ce359",
+      "external_project_id": "zcrm_4761157000061382372",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AssetMark-AssetMark - Azure Project (3/31/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_e1c68ffe12eb",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_7e79981d0c8d",
+      "external_project_id": "zcrm_4761157000061445145",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppdirectPSWL - AMBA -Tenant to Tenant Transfer(BitTitan)(7/18/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_1656f389a919",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_31a21df26be2",
+      "external_project_id": "zcrm_4761157000061751170",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Caire BOA - Networking Audit Remediation Project",
+      "parent_resolution": "resolved",
+      "project_id": "proj_413ad5e98559",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_7f7d59dfa8c7",
+      "external_project_id": "zcrm_4761157000061813182",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Trevanna-Trevanna - Annual Pen Test",
+      "parent_resolution": "resolved",
+      "project_id": "proj_1e9c1613dbca",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_d550ebaba23a",
+      "external_project_id": "zcrm_4761157000062544005",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-AppDirectPSWL: University Tees - AWS Financial Health Check (8/12/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_352b06ba905a",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_7a2ec2530d98",
+      "external_project_id": "zcrm_4761157000062607001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-AppDirectPSWL: Altaworx- AWS Health and Security HealthCheck",
+      "parent_resolution": "resolved",
+      "project_id": "proj_0e7dc8cb5c92",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4b6c8fee52ca",
+      "external_project_id": "zcrm_4761157000062673033",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Graham Field-GrahamField - BOA",
+      "parent_resolution": "resolved",
+      "project_id": "proj_c0e4c8b2d93b",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_c91c92533e86",
+      "external_project_id": "zcrm_4761157000063110003",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Winter Media-Student First Tech - Winter Media",
+      "parent_resolution": "resolved",
+      "project_id": "proj_5e657cd1ed49",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_bf06aa608946",
+      "external_project_id": "zcrm_4761157000064463001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "MMM Medicare y Mucho M\u00e1s-MMM Medicare y Mucho M\u00e1s",
+      "parent_resolution": "resolved",
+      "project_id": "proj_873d44a23a88",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_cbf152ae5c20",
+      "external_project_id": "zcrm_4761157000064563324",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Paramount Global Inc.-Paramount Global - Azure AD",
+      "parent_resolution": "resolved",
+      "project_id": "proj_f0ecbca32896",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_02a4fe57846b",
+      "external_project_id": "zcrm_4761157000064902025",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-Project Access RFP",
+      "parent_resolution": "resolved",
+      "project_id": "proj_0877a9a00073",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_3c79a51d732c",
+      "external_project_id": "zcrm_4761157000066235001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Radius GS-VMWare Storage and Reporting",
+      "parent_resolution": "resolved",
+      "project_id": "proj_eb58601a49ae",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_67ad87b8cac1",
+      "external_project_id": "zcrm_4761157000066559080",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "TEST ACCOUNT-Today Test - 09-07-25",
+      "parent_resolution": "resolved",
+      "project_id": "proj_33aeacae1cd5",
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_67ad87b8cac1",
+      "external_project_id": "zcrm_4761157000066612058",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "TEST ACCOUNT-Today Test - 09-07-25",
+      "parent_resolution": "resolved",
+      "project_id": "proj_7cf0d93dd2a5",
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_4276611d1e15",
+      "external_project_id": "zcrm_4761157000067089225",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "OU Education Services-OUES - Jira Project",
+      "parent_resolution": "resolved",
+      "project_id": "proj_ccf922a2913f",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_f3d1fcf9cc8a",
+      "external_project_id": "zcrm_4761157000067211011",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-AppDirect- MAR JAC- Dynamics engagement",
+      "parent_resolution": "resolved",
+      "project_id": "proj_8d3d9a747688",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_26424bb9a5f9",
+      "external_project_id": "zcrm_4761157000067218006",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "SouthFloridaAutism-South Florida Autism - Trupoint - Valcom Project (10/9/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_c0fe52aebd8c",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_25190690b557",
+      "external_project_id": "zcrm_4761157000068021051",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AwayDay-AwayDay - Socium - Google to MS (10/13/25",
+      "parent_resolution": "resolved",
+      "project_id": "proj_30df840460b4",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_f73e954e0415",
+      "external_project_id": "zcrm_4761157000072346009",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Miura-Miura - Azure and domain work - (10/29/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_fa1783f545ae",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_c126eb3cb2ad",
+      "external_project_id": "zcrm_4761157000072346052",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AwayDay-AwayDay - Socium - LBR Migration (12/3/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_f3d1e77abd80",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_789799e593ed",
+      "external_project_id": "zcrm_4761157000072926017",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Xtel-XTel - Server Config - Maryland Masonic",
+      "parent_resolution": "resolved",
+      "project_id": "proj_06a6c46f6316",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_374ae6320dac",
+      "external_project_id": "zcrm_4761157000073181011",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-AppDirectWL: The Bank of Monroe - Full Turnkey Proserv(12/11/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_9948a5f94812",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_12c1cc86ce41",
+      "external_project_id": "zcrm_4761157000073396047",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Socium Consulting-Socium - Bill on actuals (11/25/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_8af292edf8d9",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_b3e15242ab31",
+      "external_project_id": "zcrm_4761157000074133016",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AwayDay-AwayDay-Socium - Meredith Lodging Mirgration ( 12/3/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_9bed322d3926",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_ea674048ef3a",
+      "external_project_id": "zcrm_4761157000074914001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "MarJac-MarJac - Trupoint - Checkpoint Implementation (12/9/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_f2c96aa40506",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_f6e51dc989e6",
+      "external_project_id": "zcrm_4761157000075532066",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Metadata Engineering, LLC-Internal Metadata Projects",
+      "parent_resolution": "resolved",
+      "project_id": "proj_8fa09ea91bf9",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_cb663ae29cf9",
+      "external_project_id": "zcrm_4761157000075637001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "CrownCastle-Crown Castle - Ward Trucking - Security(11/12/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_34d15629635f",
+      "readiness": {
+        "approval_debit_ready": true,
+        "billable_draft_entry_ready": true,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_03913ab1eae2",
+      "external_project_id": "zcrm_4761157000075764043",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "CyberLogic LLC-CyberLogic - Microsoft License and Migration",
+      "parent_resolution": "resolved",
+      "project_id": "proj_45d72275d3db",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_09c3a963b520",
+      "external_project_id": "zcrm_4761157000075854001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-Garber Metrology -- Microsoft Power Automate Flows - Addendum",
+      "parent_resolution": "resolved",
+      "project_id": "proj_a41186e92ed4",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_0a842ef03915",
+      "external_project_id": "zcrm_4761157000077149002",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "AppDirect-AppDirectPSWL: Bank of Old Monroe - Part 2",
+      "parent_resolution": "resolved",
+      "project_id": "proj_ec6b1fd1da62",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_bbf89be22833",
+      "external_project_id": "zcrm_4761157000077288032",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "N-OVATE Business Solutions-NFL- NOVATE",
+      "parent_resolution": "resolved",
+      "project_id": "proj_a93597fe8a51",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_291c5c63bfd3",
+      "external_project_id": "zcrm_4761157000078083002",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Higher Information Group-HigherInfo - Exchange project",
+      "parent_resolution": "resolved",
+      "project_id": "proj_9aa6105db94a",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_fb7e78975768",
+      "external_project_id": "zcrm_4761157000079679031",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Able2-Alliance for Empowerment, Inc - Higher Info - General Block",
+      "parent_resolution": "resolved",
+      "project_id": "proj_087efa533ecb",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_e719e20a433c",
+      "external_project_id": "zcrm_4761157000080752136",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_consumed_hours_baseline_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Randall Paulson Architects-Randall Paulson - BOA- Troubleshooting (2/26/25)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_598bbb47f1b2",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": false,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_44ac20519d4e",
+      "external_project_id": "zcrm_4761157000081169025",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Lancaster Archery Supply-Lancaster Archery Supply - Outlook issue",
+      "parent_resolution": "resolved",
+      "project_id": "proj_e917b3e38af1",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_5195c7c74aa9",
+      "external_project_id": "zcrm_4761157000081286035",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "En Pointe IT Solutions-En Pointe ITS - AWS",
+      "parent_resolution": "resolved",
+      "project_id": "proj_0f7436d69ccd",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_dd1e1c2c09ca",
+      "external_project_id": "zcrm_4761157000081932033",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Cyber Savi Security-Cyber Savi Security - Deal",
+      "parent_resolution": "resolved",
+      "project_id": "proj_c826e0d52bc5",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_b6d474150407",
+      "external_project_id": "zcrm_4761157000083424042",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "HTS Data, LLC-Integrated Dermatology - RingCentral Implementation",
+      "parent_resolution": "resolved",
+      "project_id": "proj_6526d4ba7a10",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    },
+    {
+      "contract_id": "contract_c1e7fa75fde1",
+      "external_project_id": "zcrm_4761157000084921001",
+      "gaps": [],
+      "inherited_parent_gaps": [
+        "needs_sell_rate_for_billable_draft",
+        "needs_total_hours_for_debit",
+        "needs_resources_for_resource_type_entry"
+      ],
+      "name": "Volunteer Lawyers Network-Volunteer Lawyers Network - Zoom BoH (4/30/26)",
+      "parent_resolution": "resolved",
+      "project_id": "proj_980ca2b69f62",
+      "readiness": {
+        "approval_debit_ready": false,
+        "billable_draft_entry_ready": false,
+        "consumed_hours_baseline_ready": true,
+        "hydration_required": true,
+        "non_billable_draft_entry_ready": true,
+        "resource_type_entry_ready": false
+      },
+      "status": "planning"
+    }
+  ],
+  "readiness_dimensions": {
+    "approval_debit_ready": "Approval would produce defensible contract balance updates. fixed_fee / boa / other never debit a block; boh and boh_with_boa need BOTH total_hours AND a consumed-hours baseline so contract.hours_consumed has a meaningful denominator AND starts from the right historical value.",
+    "billable_draft_entry_ready": "Default POST /api/time-entries (is_billable=true) would save. fixed_fee bypasses the 409 sell-rate gate; all others need a positive contract.hourly_rate or resource_types[].sell_rate.",
+    "consumed_hours_baseline_ready": "boh / boh_with_boa only. True when imported_consumed_hours is zero/missing OR when canonical contract.hours_consumed is already positive. False when the Zoho snapshot says the contract has historical consumption but the canonical counter is still zero \u2014 newly approved entries would then under-count consumption relative to the historical block.",
+    "hydration_required": "Aggregate flag. True when any of the five readiness dimensions is False AND the corresponding gap is relevant for the contract type.",
+    "non_billable_draft_entry_ready": "POST with is_billable=false (or billing_type=non_billable) would save. True for every contract that resolves.",
+    "resource_type_entry_ready": "POST that supplies resource_type_id would pass the membership check. Requires contract.resources[] to contain at least one (user_id, resource_type_id, cost_rate) triple."
+  },
+  "source": "mongo",
+  "summary": {
+    "approval_debit_ready": 7,
+    "billable_draft_entry_ready": 3,
+    "by_contract_type": {
+      "boa": 2,
+      "boh": 75,
+      "boh_with_boa": 12,
+      "fixed_fee": 3,
+      "other": 2
+    },
+    "consumed_hours_baseline_ready": 20,
+    "hydration_required": 94,
+    "needs_consumed_hours_baseline_for_debit": 74,
+    "needs_resources_for_resource_type_entry": 94,
+    "needs_sell_rate_for_billable_draft": 91,
+    "needs_total_hours_for_debit": 87,
+    "non_billable_draft_entry_ready": 94,
+    "resource_type_entry_ready": 0,
+    "total_imported": 94
+  }
+}

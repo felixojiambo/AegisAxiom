@@ -1,0 +1,194 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# ============================================
+# IDE and Editors
+# ============================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ============================================
+# Dependencies
+# ============================================
+node_modules/
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# ============================================
+# Environment Variables
+# ============================================
+!.env.example
+*token.json*
+*credentials.json*
+*service-account*.json
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ============================================
+# Testing & Coverage
+# ============================================
+/coverage
+*.coverage
+.pytest_cache/
+.tox/
+htmlcov/
+test_result.md
+test_reports/
+TESTING_*.md
+contract_management_test_results.json
+*_test_results.json
+*_backup_*.json
+
+# ============================================
+# Build & Production
+# ============================================
+/build
+dist/
+dist
+*.tsbuildinfo
+/.next/
+/out/
+next-env.d.ts
+
+# ============================================
+# Logs & Debug Files
+# ============================================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+dump.rdb
+
+# ============================================
+# System & OS Files
+# ============================================
+.DS_Store
+*.pem
+Thumbs.db
+
+# ============================================
+# Temporary & Cache Files
+# ============================================
+*.tmp
+*.temp
+*.cache
+.cache/
+cookies.txt
+session*.txt
+
+# ============================================
+# Generated & Build Artifacts
+# ============================================
+design_guidelines.json
+*.min.js
+*.min.css
+
+# ============================================
+# Claude Code
+# ============================================
+.waves/
+.claude/plans/
+.claude/projects/
+.claude/worktrees/
+.claude/scheduled_tasks.lock
+.playwright-mcp/
+
+# ============================================
+# Development Tools
+# ============================================
+chainlit.md
+.chainlit
+.ipynb_checkpoints/
+.ac
+
+# ============================================
+# Deployment
+# ============================================
+.vercel
+
+# ============================================
+# Data & Databases (Local Development Only)
+# ============================================
+agenthub/agents/youtube/db
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# Archive Files & Large Assets
+# ============================================
+**/*.zip
+**/*.tar.gz
+**/*.tar
+**/*.tgz
+*.pack
+*.deb
+*.dylib
+
+# ============================================
+# Mobile Development
+# ============================================
+android-sdk/
+
+# ============================================
+# Emergent Platform (Keep for continuity)
+# ============================================
+.emergent/summary.txt
+
+# ============================================
+# Waves (parallel agent orchestration)
+# ============================================
+.waves/
+
+# ============================================
+# App ingestion staging (cloned Emergent repos)
+# ============================================
+# Match .ingestion/ at any depth (root or backend/.ingestion/).
+**/.ingestion/
+# Re-ingestion contracts at the repo root MUST be tracked — they're the
+# source of truth for `/reingest-app` to diff against new source state.
+# Un-ignore the root .ingestion/ and its mappings/ subtree, then re-ignore
+# the staging clones and reverse-adapt notes that should stay local.
+!/.ingestion/
+!/.ingestion/mappings/
+!/.ingestion/mappings/**
+/.ingestion/staging/
+/.ingestion/reverse-adapt/
+
+# Environment files
+*.env
+*.env.*
+!*.env.example
+.claude/settings.local.json
+
+# Local-only Docker Compose override (renames containers, etc. for dev workstations)
+docker-compose.override.yml
+
+# PR review scratch files (e.g. pr108_review_test.txt). Keep these
+# out of the repo so review-cycle artifacts don't accidentally land
+# on a feature branch.
+pr*_review_test.txt
+.claude/agents/

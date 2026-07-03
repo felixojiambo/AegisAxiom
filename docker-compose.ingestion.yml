@@ -1,0 +1,89 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: aegisaxiom-ingestion-mongo
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    volumes:
+      - ingestion_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: aegisaxiom-ingestion-chromadb
+    restart: unless-stopped
+    ports:
+      - "8101:8000"
+    volumes:
+      - ingestion_chroma_data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=false
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8000'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aegisaxiom-ingestion-backend
+    restart: unless-stopped
+    ports:
+      - "8002:8001"
+    volumes:
+      - ./backend:/app/backend
+      - ingestion_backend_uploads:/app/backend/uploads
+      - /app/backend/__pycache__
+      - /app/backend/services/bpmn/node_helpers/node_modules
+    env_file:
+      - ./backend/.env.ingestion
+    depends_on:
+      mongo:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: aegisaxiom-ingestion-frontend
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./frontend/src:/app/frontend/src
+      - ./frontend/public:/app/frontend/public
+      - ./frontend/craco.config.js:/app/frontend/craco.config.js
+      - ./frontend/plugins:/app/frontend/plugins
+    env_file:
+      - ./frontend/.env.ingestion
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=3001
+    depends_on:
+      backend:
+        condition: service_healthy
+    stdin_open: true
+
+volumes:
+  ingestion_mongo_data:
+  ingestion_backend_uploads:
+  ingestion_chroma_data:

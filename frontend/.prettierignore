@@ -1,0 +1,8 @@
+node_modules
+build
+public
+*.min.js
+yarn.lock
+package-lock.json
+.env
+.env.*

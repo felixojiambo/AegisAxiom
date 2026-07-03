@@ -1,0 +1,12 @@
+{
+  "name": "aegisaxiom-bpmn-helpers",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "bpmn-auto-layout": "^1.3.0",
+    "bpmn-js": "^18.14.0",
+    "elkjs": "^0.9.3",
+    "jsdom": "^26.0.0",
+    "puppeteer": "^24.0.0"
+  }
+}
