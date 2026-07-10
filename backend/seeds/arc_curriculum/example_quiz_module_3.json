@@ -1,0 +1,110 @@
+{
+  "module_number": 3,
+  "title": "Module 3: The Data Maturity Continuum",
+  "description": "Tests the rep's ability to diagnose a prospect's data state as Blind, Siloed, or Visible from conversational cues.",
+  "passing_score": 75,
+  "time_limit_seconds": 600,
+  "instructions": "Answer all questions to the best of your ability. You cannot ask ARC for help while the quiz is in progress. You'll get detailed feedback on every answer after you submit.",
+  "questions": [
+    {
+      "id": "m3_q1",
+      "type": "multiple_choice",
+      "prompt": "A lead operations manager says: 'The instructions for this process are in a notebook on my desk, and our IT guy keeps the rest in his head.' What is this prospect's Data Maturity state?",
+      "options": [
+        { "value": "a", "label": "Visible" },
+        { "value": "b", "label": "Siloed" },
+        { "value": "c", "label": "Blind" },
+        { "value": "d", "label": "Hybrid" }
+      ],
+      "correct_answer": "c",
+      "explanation": "This is Blind. The data lives in human memory and physical paper — there is no machine-readable form for an AI to consume. Notebooks on desks and tribal knowledge are the textbook indicators of the Blind state.",
+      "points": 10,
+      "module_section": "The Blind Data State"
+    },
+    {
+      "id": "m3_q2",
+      "type": "multiple_choice",
+      "prompt": "Which is the primary operational indicator that a prospect is in the 'Siloed' state?",
+      "options": [
+        { "value": "a", "label": "They use handwritten sticky notes for important data" },
+        { "value": "b", "label": "Their digital systems exist but lack API integration with each other" },
+        { "value": "c", "label": "They have a centralized, governed data lake" },
+        { "value": "d", "label": "They have no software at all" }
+      ],
+      "correct_answer": "b",
+      "explanation": "Siloed means the data IS digital and machine-readable, but trapped in disconnected applications. The smoking gun is when reps describe manually exporting from one system to import into another, or having to log into multiple tools to answer a single question. Sticky notes (option A) would be Blind. A governed data lake (option C) would be Visible.",
+      "points": 10,
+      "module_section": "The Siloed Data State"
+    },
+    {
+      "id": "m3_q3",
+      "type": "multiple_choice",
+      "prompt": "Which data state is the IDEAL target for immediate, complex AI agent deployment?",
+      "options": [
+        { "value": "a", "label": "Blind" },
+        { "value": "b", "label": "Siloed" },
+        { "value": "c", "label": "Visible" },
+        { "value": "d", "label": "It doesn't matter — AI works the same in all three" }
+      ],
+      "correct_answer": "c",
+      "explanation": "Visible. In the Visible state, data is centralized, accessible via APIs, and properly governed — exactly the conditions an AI agent needs to operate reliably. Deploying AI against Blind or Siloed data leads to hallucination, failed execution, and project abandonment.",
+      "points": 10,
+      "module_section": "The Visible Data State"
+    },
+    {
+      "id": "m3_q4",
+      "type": "multi_select",
+      "prompt": "Which of the following are good Power Questions for diagnosing whether a prospect is in the Siloed state? (Select all that apply.)",
+      "options": [
+        { "value": "a", "label": "How many hours a week does your team spend manually exporting data from one platform to upload it into another?" },
+        { "value": "b", "label": "If your operations manager were unavailable for a week, where would a temporary replacement find the exact instructions?" },
+        { "value": "c", "label": "When moving a project from sales to fulfillment, how does the data physically move between your CRM and your project tool?" },
+        { "value": "d", "label": "Do you currently utilize a unified data warehouse where cross-departmental data is aggregated?" }
+      ],
+      "correct_answer": ["a", "c"],
+      "explanation": "A and C both probe for fragmentation between digital systems — the hallmark of Siloed. B is a Blind-state question (it tests whether the data is documented at all). D is a Visible-state question (it tests whether the prospect has already solved the silo problem).",
+      "points": 15,
+      "module_section": "Discovery Questions to Uncover State"
+    },
+    {
+      "id": "m3_q5",
+      "type": "scenario_match",
+      "prompt": "Match each prospect quote to the correct data state.",
+      "items": [
+        { "id": "i1", "label": "We have QuickBooks for accounting, Salesforce for sales, and Asana for projects — but they don't talk to each other, so we use Excel as the glue." },
+        { "id": "i2", "label": "Honestly? Most of our pricing logic is in our head. We trained the new rep by sitting next to her for two weeks." },
+        { "id": "i3", "label": "Everything flows through our Snowflake warehouse. The CRM, the ERP, the support system — they all sync nightly and we govern access with role-based policies." }
+      ],
+      "categories": [
+        { "value": "blind", "label": "Blind" },
+        { "value": "siloed", "label": "Siloed" },
+        { "value": "visible", "label": "Visible" }
+      ],
+      "correct_answer": { "i1": "siloed", "i2": "blind", "i3": "visible" },
+      "explanation": "i1 is Siloed — the data is digital but fragmented across tools, and Excel-as-glue is a classic siloed tell. i2 is Blind — pricing logic in human memory, training by osmosis, no machine-readable system of record. i3 is Visible — a governed warehouse with cross-system sync and access policies is the textbook Visible state.",
+      "points": 20,
+      "module_section": "Data Maturity Assessment Continuum"
+    },
+    {
+      "id": "m3_q6",
+      "type": "free_text",
+      "prompt": "In your own words, explain why it is mathematically impossible to deploy an AI agent in a 'Blind' data environment. Aim for 2-4 sentences.",
+      "rubric": "A passing answer must mention at least TWO of the following: (1) the data is undocumented or only exists in human memory or physical media, (2) AI agents require machine-readable input to function, (3) without context to draw from, the agent cannot make decisions, (4) attempting deployment in a Blind environment leads to hallucination, failed execution, or project abandonment. Reward answers that use the rep's own words and concrete language over textbook regurgitation. Penalize answers that confuse Blind with Siloed.",
+      "points": 20,
+      "module_section": "Foundational Logic of Data Maturity"
+    },
+    {
+      "id": "m3_q7",
+      "type": "true_false",
+      "prompt": "True or False: A prospect that uses 15 different SaaS applications but has them all connected through a central iPaaS platform like Workato or MuleSoft should be considered Siloed.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "false",
+      "explanation": "False. The number of applications doesn't determine the state — the integration does. If those 15 apps are unified through an iPaaS that gives an AI agent a single coherent surface to query, they meet the Visible criteria. Siloed requires the integration to be ABSENT, forcing manual data movement between systems.",
+      "points": 15,
+      "module_section": "Distinguishing Siloed from Visible"
+    }
+  ]
+}

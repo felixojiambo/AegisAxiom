@@ -1,0 +1,110 @@
+{
+  "module_number": 1,
+  "title": "Module 1: Redefining Intelligence — The Build vs. Buy Paradigm",
+  "description": "Tests understanding of the strategic shift from monolithic SaaS to autonomous workflows, why legacy software is 'bloated,' how AEGISAXIOM abstracts governance, and the 'AI as an employee' analogy.",
+  "passing_score": 75,
+  "time_limit_seconds": 720,
+  "instructions": "Answer all questions to the best of your ability. You cannot ask ARC for help while the quiz is in progress. You'll get detailed feedback on every answer after you submit. Aim for 10-12 minutes.",
+  "questions": [
+    {
+      "id": "m1_q1",
+      "type": "multiple_choice",
+      "prompt": "A client tells you they want to buy a new CRM because their current one is 'too manual.' According to AEGISAXIOM strategy, what is the client actually asking for?",
+      "options": [
+        { "value": "a", "label": "A software update to their existing legacy system" },
+        { "value": "b", "label": "A larger seat license to give more employees access" },
+        { "value": "c", "label": "A customized workflow management system tailored to their specific business logic" },
+        { "value": "d", "label": "A more efficient application interface with better UX" }
+      ],
+      "correct_answer": "c",
+      "explanation": "The client doesn't actually want another CRM — they want their work to happen automatically. The 'too manual' complaint is a tell that they're being forced to contort their unique processes to fit a generic SaaS tool. The right answer is to extract the workflow from the application layer entirely and deploy autonomous agents that execute their specific logic. This is the core 'build vs buy' insight.",
+      "points": 15,
+      "module_section": "The Strategic Shift"
+    },
+    {
+      "id": "m1_q2",
+      "type": "true_false",
+      "prompt": "True or False: In the AEGISAXIOM ecosystem, security and compliance policies are built directly into individual application containers — each app handles its own governance.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "false",
+      "explanation": "False. AEGISAXIOM abstracts enterprise policies, cybersecurity, and compliance governance AWAY from individual applications. Any integrated AI workflow automatically inherits enterprise-grade protections from the AEGISAXIOM layer — apps don't have to (and shouldn't) implement their own. This is one of the biggest selling points: a citizen developer can build a workflow without knowing GRC, because AEGISAXIOM handles it.",
+      "points": 10,
+      "module_section": "How AEGISAXIOM Abstracts Governance"
+    },
+    {
+      "id": "m1_q3",
+      "type": "multiple_choice",
+      "prompt": "Which of the following best describes why legacy SaaS platforms (generic CRMs, ERPs) are called 'bloated' in the AEGISAXIOM framework?",
+      "options": [
+        { "value": "a", "label": "They consume too much disk space and memory on the server" },
+        { "value": "b", "label": "They try to accommodate the generalized needs of every potential user, forcing organizations to contort unique processes to fit rigid architectures" },
+        { "value": "c", "label": "They contain too many features that most users never click on" },
+        { "value": "d", "label": "They are written in old programming languages that need refactoring" }
+      ],
+      "correct_answer": "b",
+      "explanation": "'Bloated' here is about scope and rigidity, not disk space. Legacy SaaS tries to be everything to everyone — which means every customer has to bend their actual operational logic to fit a one-size-fits-all software model. AEGISAXIOM flips this: instead of contorting your business to fit the software, you build agents that execute your business as it actually works.",
+      "points": 15,
+      "module_section": "Why Legacy Software is Bloated"
+    },
+    {
+      "id": "m1_q4",
+      "type": "multi_select",
+      "prompt": "Which of the following are core characteristics of the 'AI as an employee' analogy that AEGISAXIOM uses? Select all that apply.",
+      "options": [
+        { "value": "a", "label": "Each AI is specialized to a single role or function (like hiring a specialist, not a generalist)" },
+        { "value": "b", "label": "AI employees can be 'recruited,' onboarded, and given specific mandates, just like human employees" },
+        { "value": "c", "label": "AI employees should be evaluated on the same KPIs as the workflows they replace" },
+        { "value": "d", "label": "AI employees replace entire human departments wholesale, not individual tasks" }
+      ],
+      "correct_answer": ["a", "b", "c"],
+      "explanation": "A, B, and C are core to the analogy. D is wrong — the AEGISAXIOM approach is to deploy AI against specific tasks and bottlenecks, not to wholesale-replace human departments. The whole point of the 'AI Recruiter' framing is precision: hire the right specialist for the right role, scaled to the workflow that actually needs it.",
+      "points": 20,
+      "module_section": "AI as an Employee Analogy"
+    },
+    {
+      "id": "m1_q5",
+      "type": "scenario_match",
+      "prompt": "Match each client statement to the underlying AEGISAXIOM concept it reveals.",
+      "items": [
+        { "id": "i1", "label": "We bought Salesforce three years ago and we use maybe 15% of what it can do — but we still pay for the full thing." },
+        { "id": "i2", "label": "Every time IT wants to change anything, legal has to review it and it takes six weeks." },
+        { "id": "i3", "label": "Honestly, we just need this one specific thing to happen automatically when an order comes in. We don't need a whole new product." }
+      ],
+      "categories": [
+        { "value": "bloated", "label": "Bloated SaaS problem" },
+        { "value": "governance", "label": "Governance abstraction opportunity" },
+        { "value": "workflow", "label": "Workflow extraction opportunity" }
+      ],
+      "correct_answer": { "i1": "bloated", "i2": "governance", "i3": "workflow" },
+      "explanation": "i1 is the textbook bloated SaaS complaint — paying full price for 15% utilization. i2 is a governance bottleneck where compliance review is locked inside the change process; AEGISAXIOM abstracts that away so policies enforce automatically. i3 is the workflow extraction insight — the client is explicitly telling you they want the workflow, not the application around it. Reps who recognize i3 close deals fastest.",
+      "points": 20,
+      "module_section": "Pattern Recognition"
+    },
+    {
+      "id": "m1_q6",
+      "type": "multiple_choice",
+      "prompt": "When you describe AEGISAXIOM to a prospect, which of these framings best captures the 'build vs buy' shift?",
+      "options": [
+        { "value": "a", "label": "AEGISAXIOM is a low-code platform for building internal apps" },
+        { "value": "b", "label": "AEGISAXIOM is an AI assistant that helps your team use your existing tools more efficiently" },
+        { "value": "c", "label": "AEGISAXIOM is a faster, cheaper alternative to Salesforce and HubSpot" },
+        { "value": "d", "label": "AEGISAXIOM lets you stop renting generic software and start building a custom digital workforce that runs your actual processes" }
+      ],
+      "correct_answer": "d",
+      "explanation": "D is the right framing. A and C position AEGISAXIOM as a cheaper or low-code competitor to existing tools — that's underselling it and reduces you to a feature comparison war you'll probably lose. B makes it sound like a productivity add-on. The actual sale is the paradigm shift: stop buying tools that force you to fit them, start hiring digital labor that fits you.",
+      "points": 10,
+      "module_section": "The AI Recruiter Positioning"
+    },
+    {
+      "id": "m1_q7",
+      "type": "free_text",
+      "prompt": "In one or two sentences, why is pitching AEGISAXIOM as 'a cheaper Salesforce' a strategic mistake?",
+      "rubric": "A passing answer captures the core idea: framing AEGISAXIOM as a SaaS competitor drops the rep into a feature/price comparison they will lose, AND misses the actual sale (paradigm shift from buying generic software to building tailored AI workflows). Either of those two ideas, expressed clearly, earns full credit. Reward concrete language. Don't penalize brevity — sales reps should be able to say this fast.",
+      "points": 10,
+      "module_section": "AI Recruiter Positioning"
+    }
+  ]
+}

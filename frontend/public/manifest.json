@@ -1,0 +1,69 @@
+{
+  "id": "/",
+  "scope": "/",
+  "lang": "en",
+  "dir": "ltr",
+  "short_name": "AEGISAXIOM",
+  "name": "AEGISAXIOM — Business Operations System",
+  "description": "AI-powered business operations platform for SimpliMeta. Manage contracts, time, field jobs, finance, contractors, and AI employees in one place.",
+  "categories": ["business", "productivity"],
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "theme_color": "#020617",
+  "background_color": "#020617",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "favicon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "favicon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open the AEGISAXIOM dashboard",
+      "url": "/dashboard",
+      "icons": [
+        { "src": "favicon-192x192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Time Management",
+      "short_name": "Time",
+      "description": "Log time entries and submit timesheets",
+      "url": "/time-management",
+      "icons": [
+        { "src": "favicon-192x192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Field Jobs",
+      "short_name": "Field Jobs",
+      "description": "View and schedule field service jobs",
+      "url": "/field-jobs",
+      "icons": [
+        { "src": "favicon-192x192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Contracts",
+      "short_name": "Contracts",
+      "description": "Browse contracts and closed-won deals",
+      "url": "/contracts",
+      "icons": [
+        { "src": "favicon-192x192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ]
+}

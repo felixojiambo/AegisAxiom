@@ -1,0 +1,84 @@
+{
+  "module_number": 7,
+  "title": "Module 7: The AI Recruiter Final Simulation",
+  "description": "Capstone module that integrates all six prior modules in realistic discovery scenarios. Tests the rep's ability to diagnose data state, apply diagnostic lenses, recommend AEGISAXIOM agents, and propose MMI inputs from a single client conversation.",
+  "passing_score": 75,
+  "time_limit_seconds": 720,
+  "instructions": "This module is the synthesis of everything you've learned. Each question is a realistic mini-scenario that requires you to apply concepts from multiple prior modules. You cannot ask ARC for help while the quiz is in progress. Aim for 12-15 minutes — these questions are denser than earlier modules.",
+  "questions": [
+    {
+      "id": "m7_q1",
+      "type": "multiple_choice",
+      "prompt": "On Call 1 with a 200-employee logistics company, the COO says: 'Honestly, our dispatch process is whatever Marco decides each morning. He's been here 15 years and he just knows. We don't write it down.' What is your MOST important takeaway from this single statement?",
+      "options": [
+        { "value": "a", "label": "Marco is a bottleneck and Vega should automate dispatch immediately" },
+        { "value": "b", "label": "This is a Blind data state — there's no machine-readable form of the dispatch logic, so AI deployment isn't feasible until digitization happens" },
+        { "value": "c", "label": "This is a Visible data state because Marco is a single source of truth" },
+        { "value": "d", "label": "Recommend Orion to draft a SOW for dispatch automation" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B is the integration point of Modules 1, 3, and 5. The honest, professional answer is to recognize that no amount of clever workflow design can extract logic that exists only in Marco's head. You can't pretend this is Visible (C is wrong). You can't jump to automation (A is wrong) or skip ahead to a SOW (D is wrong). The right move on Call 1 is to flag Blind state, and on Call 2 propose either a digitization project OR a knowledge-extraction interview process to make Marco's logic machine-readable BEFORE proposing any AI agents.",
+      "points": 15,
+      "module_section": "Synthesis: Data State + Discovery Discipline"
+    },
+    {
+      "id": "m7_q2",
+      "type": "scenario_match",
+      "prompt": "A SaaS prospect describes four pain points on Call 1. Match each to the AEGISAXIOM agent best suited to solve it.",
+      "items": [
+        { "id": "i1", "label": "Our SDRs spend half their day reading inbound emails and routing leads to the right rep" },
+        { "id": "i2", "label": "We need to score thousands of credit applications per hour against a complex policy ruleset" },
+        { "id": "i3", "label": "Our exec team has no real-time view of pipeline health across regions" },
+        { "id": "i4", "label": "After every discovery call, we spend 3 hours writing up a SOW for the client" }
+      ],
+      "categories": [
+        { "value": "lyra", "label": "Lyra" },
+        { "value": "pulsar", "label": "Pulsar" },
+        { "value": "zenith", "label": "Zenith" },
+        { "value": "orion", "label": "Orion" }
+      ],
+      "correct_answer": { "i1": "lyra", "i2": "pulsar", "i3": "zenith", "i4": "orion" },
+      "explanation": "i1 is Lyra — automated communication routing and triage. i2 is Pulsar — high-throughput rules evaluation is exactly what Pulsar is built for. i3 is Zenith — real-time analytics across the AEGISAXIOM workspace. i4 is Orion — SOW drafting from structured discovery intelligence. A rep who can do this matching live on Call 1 builds enormous credibility — the client immediately sees that AEGISAXIOM isn't a vague platform, it's a workforce with specific roles.",
+      "points": 20,
+      "module_section": "Synthesis: 6 Agents in Practice"
+    },
+    {
+      "id": "m7_q3",
+      "type": "multiple_choice",
+      "prompt": "On Call 2, the client describes a workflow: their finance team manually reconciles invoices against payments daily, ~6 hours/day, currently done by two full-time employees making $32/hour fully loaded. Errors are caught downstream about 12% of the time. Which MMI input set would you HYPOTHESIZE for this workflow?",
+      "options": [
+        { "value": "a", "label": "TSS=2, IE=4, T=2, C=2, Q=2, S=2 → score = 4" },
+        { "value": "b", "label": "TSS=4, IE=2, T=4, C=4, Q=4, S=3 → score = 30" },
+        { "value": "c", "label": "TSS=5, IE=5, T=5, C=5, Q=5, S=5 → score = 20" },
+        { "value": "d", "label": "TSS=1, IE=1, T=1, C=1, Q=1, S=1 → score = 4" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B is the most defensible hypothesis. The signals: high-frequency repeated workflow (T=4), real labor cost from two FTEs (C=4), measurable error rate that automation would reduce (Q=4), some Satisfaction value from freeing finance staff from drudgery (S=3). TSS is high but not maxed because it's an internal back-office function, not a strategic differentiator. IE is moderate (2) — invoice reconciliation involves multiple data sources and edge cases, so it's neither trivial nor heroic. The score of 30 puts it solidly in the build-this-soon zone. Option C is a trap: maxing every input is unrealistic and reveals weak rep judgment.",
+      "points": 20,
+      "module_section": "Synthesis: MMI Hypothesis from Call Data"
+    },
+    {
+      "id": "m7_q4",
+      "type": "multi_select",
+      "prompt": "Vega finishes analyzing a Call 2 transcript and produces an AI Employee Matrix with 5 workflows. Two of them have unresolved gaps (the client never described how approval thresholds work for one, and never specified the data source for another). Which of the following are CORRECT actions for the rep to take next? Select all that apply.",
+      "options": [
+        { "value": "a", "label": "Engage Vega's Flexible Decision Loop to generate a follow-up call agenda targeting only the two unresolved workflows" },
+        { "value": "b", "label": "Have Vega hallucinate plausible defaults for the gaps so the matrix can advance to Call 3 on schedule" },
+        { "value": "c", "label": "Mark the two gappy workflows as 'TBD — needs follow-up' in the matrix and communicate this to the client transparently" },
+        { "value": "d", "label": "Drop the two gappy workflows entirely and only present the 3 fully-scoped ones on Call 3" }
+      ],
+      "correct_answer": ["a", "c"],
+      "explanation": "A and C. The Flexible Decision Loop is exactly designed for this scenario — when gaps exist, replan instead of advancing. Marking the gaps explicitly in the matrix is honest and reinforces that Vega practices defensive prompting. B is the failure mode (hallucination is the cardinal sin). D is also wrong — silently dropping workflows is dishonest and may hide the most valuable opportunities, which often have the most complexity. Transparency wins.",
+      "points": 20,
+      "module_section": "Synthesis: Flexible Decision Loop Application"
+    },
+    {
+      "id": "m7_q5",
+      "type": "free_text",
+      "prompt": "On Call 1 with a manufacturing client, you hear: (1) they use SAP plus Excel for everything, (2) QC spends 3 hours/day cross-referencing inspection reports against shipment records, (3) no integration between SAP and QC. In three sentences: name the data state, name the diagnostic lens, and give your next Power Question.",
+      "rubric": "A passing answer must include all THREE elements: (1) Data state = Siloed (SAP-and-Excel-as-glue is the smoking gun). (2) Diagnostic lens = Data-Heavy (cross-referencing across multiple sources). (3) A specific Power Question — good options: 'How many inspection reports per day?', 'Is there an API on the QC system or only manual exports?', 'What's the downstream cost when a discrepancy is missed?'. Reward integrated thinking. Penalize answers that nail one or two elements but skip the third.",
+      "points": 25,
+      "module_section": "Capstone Synthesis"
+    }
+  ]
+}

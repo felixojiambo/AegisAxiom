@@ -1,0 +1,112 @@
+{
+  "module_number": 4,
+  "title": "Module 4: The AEGISAXIOM Ecosystem & Digital Workforce",
+  "description": "Tests fluency with the 6 AEGISAXIOM AI agents (Orion, Pulsar, Zenith, Lyra, Vega, Callisto), the 3 AI archetypes (Automated Workflows, Conversational AIs, Web Apps), AEGISAXIOM as central orchestrator, and dashboard literacy.",
+  "passing_score": 75,
+  "time_limit_seconds": 720,
+  "instructions": "Answer all questions to the best of your ability. You cannot ask ARC for help while the quiz is in progress. Aim for 10-12 minutes.",
+  "questions": [
+    {
+      "id": "m4_q1",
+      "type": "multiple_choice",
+      "prompt": "A prospect's CFO asks: 'Of all the AEGISAXIOM agents, which one would actually write our Statements of Work after a discovery call?' Which agent should you name?",
+      "options": [
+        { "value": "a", "label": "Pulsar" },
+        { "value": "b", "label": "Vega" },
+        { "value": "c", "label": "Orion" },
+        { "value": "d", "label": "Lyra" }
+      ],
+      "correct_answer": "c",
+      "explanation": "Orion is the SOW Builder. It takes the structured intelligence from a completed discovery process (specifically, the AI Employee Matrix that Vega produces after Call 3) and drafts the full SOW — executive summary, scope of work, milestones, financial justification, assumptions and risks. Vega does the discovery and analysis upstream of Orion, but Vega hands off to Orion — it doesn't write the SOW itself.",
+      "points": 10,
+      "module_section": "The 6 AEGISAXIOM Agents"
+    },
+    {
+      "id": "m4_q2",
+      "type": "scenario_match",
+      "prompt": "Match each client need to the AEGISAXIOM agent that solves it.",
+      "items": [
+        { "id": "i1", "label": "We need to evaluate thousands of policy rules in milliseconds every time a transaction comes in" },
+        { "id": "i2", "label": "We need an AI that listens to our sales calls and surfaces what we missed asking" },
+        { "id": "i3", "label": "We need real-time analytics dashboards that pull from our entire AEGISAXIOM workspace" },
+        { "id": "i4", "label": "We need automated communication — emails, Slack messages, follow-ups — triggered by workflow events" }
+      ],
+      "categories": [
+        { "value": "pulsar", "label": "Pulsar" },
+        { "value": "vega", "label": "Vega" },
+        { "value": "zenith", "label": "Zenith" },
+        { "value": "lyra", "label": "Lyra" }
+      ],
+      "correct_answer": { "i1": "pulsar", "i2": "vega", "i3": "zenith", "i4": "lyra" },
+      "explanation": "Pulsar is the rules engine — high-throughput policy evaluation. Vega is the research/discovery agent that analyzes call transcripts and identifies gaps. Zenith is the analytics layer. Lyra handles outbound communication. Memorize these mappings — you will be asked them on every Call 1, and getting them wrong costs you credibility on the spot.",
+      "points": 20,
+      "module_section": "The 6 AEGISAXIOM Agents"
+    },
+    {
+      "id": "m4_q3",
+      "type": "multiple_choice",
+      "prompt": "A client asks: 'What's the difference between an Automated Workflow and a Conversational AI in AEGISAXIOM?' Which is the most accurate answer?",
+      "options": [
+        { "value": "a", "label": "Automated Workflows are deterministic event-triggered pipelines (often built with LangChain). Conversational AIs are dialog-based agents that hold multi-turn conversations and call tools dynamically." },
+        { "value": "b", "label": "Automated Workflows use Python and Conversational AIs use JavaScript" },
+        { "value": "c", "label": "Automated Workflows are for finance and Conversational AIs are for customer service" },
+        { "value": "d", "label": "There's no real difference — they're just two names for the same thing" }
+      ],
+      "correct_answer": "a",
+      "explanation": "A is correct. The defining distinction is execution model: Automated Workflows are triggered by an event (a webhook fires, a row gets inserted, a schedule hits) and run a deterministic chain of steps. Conversational AIs run as long as a human is talking to them, dynamically selecting tools and keeping state across turns. Both archetypes coexist in AEGISAXIOM, plus a third (Web Apps for human-facing interfaces).",
+      "points": 15,
+      "module_section": "The 3 AI Archetypes"
+    },
+    {
+      "id": "m4_q4",
+      "type": "true_false",
+      "prompt": "True or False: AEGISAXIOM itself is a passive container — the individual agents (Orion, Pulsar, Zenith, etc.) operate independently and don't share a central orchestration layer.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "false",
+      "explanation": "False. AEGISAXIOM is the central interface and orchestrator — agents share state, route work to each other, inherit governance from the platform layer, and surface their results through unified dashboards. The whole point is that you don't manage 6 disconnected tools; you manage one platform that contains 6 specialized roles. Selling AEGISAXIOM as 'a bundle of separate agents' undersells the architecture by a wide margin.",
+      "points": 10,
+      "module_section": "AEGISAXIOM as Central Orchestrator"
+    },
+    {
+      "id": "m4_q5",
+      "type": "multiple_choice",
+      "prompt": "A skeptical prospect points at the AEGISAXIOM dashboard and says: 'Orion has 94% accuracy and 4.2 minute average completion. Why should I care about those numbers?' What's the strongest answer?",
+      "options": [
+        { "value": "a", "label": "94% means almost no errors, and 4.2 minutes means it's fast" },
+        { "value": "b", "label": "Those metrics are how you forecast ROI: 94% accuracy means human review is the exception not the rule (so labor savings are real), and 4.2 minutes vs the 4-hour human baseline tells you the velocity gain (~57x) you can plug into your MMI calculation" },
+        { "value": "c", "label": "Those are vanity metrics — the real number is the cost per execution" },
+        { "value": "d", "label": "94% is industry-leading and proves AEGISAXIOM is better than every competitor" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B is the right framing. Dashboard literacy is what separates a rep who reads numbers from a rep who CONVERTS numbers into a forecast. Accuracy ≥ 90% means review-by-exception (you can credit the labor savings honestly). Velocity gains (the ratio of human time to agent time) plug straight into the MMI Time dimension you'll use in Module 6. A is technically true but flat. C dismisses the numbers. D is salesy and doesn't actually answer the question.",
+      "points": 15,
+      "module_section": "Dashboard Literacy & ROI Signaling"
+    },
+    {
+      "id": "m4_q6",
+      "type": "multi_select",
+      "prompt": "Which of the following are TRUE about Callisto, the support agent in the AEGISAXIOM ecosystem? Select all that apply.",
+      "options": [
+        { "value": "a", "label": "Callisto handles internal user support — answering questions about how to use AEGISAXIOM, surfacing documentation, escalating to humans when needed" },
+        { "value": "b", "label": "Callisto is a Conversational AI archetype, not an Automated Workflow" },
+        { "value": "c", "label": "Callisto writes the Statements of Work after discovery is complete" },
+        { "value": "d", "label": "Callisto runs continuously and is one of the 9 of 11 currently active employees in the AEGISAXIOM workspace" }
+      ],
+      "correct_answer": ["a", "b", "d"],
+      "explanation": "A, B, and D are correct. C is wrong — that's Orion. Callisto is a Conversational AI focused on internal support and lives alongside the other active agents. The 'active 9 of 11' framing is a useful demo signal: AEGISAXIOM isn't a future promise, it's a workforce that's already running.",
+      "points": 15,
+      "module_section": "The 6 AEGISAXIOM Agents — Callisto"
+    },
+    {
+      "id": "m4_q7",
+      "type": "free_text",
+      "prompt": "In one or two sentences, why does AEGISAXIOM need a 'Web App' archetype when Automated Workflows and Conversational AIs already exist?",
+      "rubric": "A passing answer captures the core idea: some tasks need structured human input (approving an expense, filling a form) where chat is too ambiguous and an automated workflow has no human in the loop — Web Apps fill that gap. Either the 'structured input' or 'human-in-the-loop interface' framing earns full credit. Reward concrete examples. Penalize answers that just say 'because UIs are nice.'",
+      "points": 15,
+      "module_section": "The 3 AI Archetypes — Web Apps"
+    }
+  ]
+}

@@ -1,0 +1,435 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ══════════════════════════════════════════════
+     DARK THEME (default)
+     ══════════════════════════════════════════════ */
+  :root,
+  .dark {
+    --aegisaxiom-bg-base: #0c0a1a;
+    --aegisaxiom-bg-surface: #13102a;
+    --aegisaxiom-bg-elevated: #1a1638;
+    --aegisaxiom-bg-overlay: rgba(0, 0, 0, 0.6);
+    --aegisaxiom-border: rgba(139, 92, 246, 0.1);
+    --aegisaxiom-border-hover: rgba(139, 92, 246, 0.2);
+    --aegisaxiom-border-active: rgba(139, 92, 246, 0.35);
+    --aegisaxiom-text-primary: #ede9fe;
+    --aegisaxiom-text-secondary: #a5a7c0;
+    --aegisaxiom-text-muted: #6b6d85;
+    --aegisaxiom-text-inverse: #1a1638;
+    --aegisaxiom-accent: #7c3aed;
+    --aegisaxiom-accent-hover: #6d28d9;
+    --aegisaxiom-accent-soft: rgba(139, 92, 246, 0.15);
+    --aegisaxiom-accent-muted: rgba(139, 92, 246, 0.08);
+
+    /* Sidebar */
+    --aegisaxiom-sidebar-from: #1e1640;
+    --aegisaxiom-sidebar-to: #141028;
+    --aegisaxiom-sidebar-text: #8b8da3;
+    --aegisaxiom-sidebar-text-hover: #c4b5fd;
+    --aegisaxiom-sidebar-text-active: #c4b5fd;
+    --aegisaxiom-sidebar-active-bg: rgba(124, 58, 237, 0.2);
+    --aegisaxiom-sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+
+    /* Header */
+    --aegisaxiom-header-bg: linear-gradient(90deg, rgba(30, 22, 64, 0.4), rgba(12, 10, 26, 0.6), rgba(30, 22, 64, 0.4));
+    --aegisaxiom-header-border: rgba(255, 255, 255, 0.06);
+
+    /* Cards */
+    --aegisaxiom-card-bg: linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(99, 102, 241, 0.04) 50%, rgba(59, 130, 246, 0.03) 100%);
+    --aegisaxiom-card-border: rgba(139, 92, 246, 0.1);
+    --aegisaxiom-card-shadow: none;
+    --aegisaxiom-card-hover-shadow: 0 4px 24px -4px rgba(139, 92, 246, 0.08);
+
+    /* Inputs */
+    --aegisaxiom-input-bg: rgba(12, 10, 26, 0.6);
+    --aegisaxiom-input-placeholder: #4b5563;
+
+    /* Table */
+    --aegisaxiom-table-header-bg: rgba(139, 92, 246, 0.06);
+    --aegisaxiom-table-row-hover: linear-gradient(90deg, rgba(139, 92, 246, 0.04), transparent);
+    --aegisaxiom-table-border: rgba(139, 92, 246, 0.08);
+
+    /* Status colors */
+    --aegisaxiom-success: #10b981;
+    --aegisaxiom-success-soft: rgba(16, 185, 129, 0.15);
+    --aegisaxiom-warning: #f59e0b;
+    --aegisaxiom-warning-soft: rgba(245, 158, 11, 0.15);
+    --aegisaxiom-danger: #ef4444;
+    --aegisaxiom-danger-soft: rgba(239, 68, 68, 0.15);
+    --aegisaxiom-info: #3b82f6;
+    --aegisaxiom-info-soft: rgba(59, 130, 246, 0.15);
+
+    /* Scrollbar */
+    --aegisaxiom-scrollbar-track: var(--aegisaxiom-bg-base);
+    --aegisaxiom-scrollbar-thumb: rgba(139, 92, 246, 0.2);
+    --aegisaxiom-scrollbar-thumb-hover: rgba(139, 92, 246, 0.35);
+
+    /* shadcn/ui variables */
+    --background: 260 40% 5%;
+    --foreground: 260 30% 92%;
+    --card: 260 35% 8%;
+    --card-foreground: 260 30% 92%;
+    --popover: 260 35% 8%;
+    --popover-foreground: 260 30% 92%;
+    --primary: 263 70% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 25% 15%;
+    --secondary-foreground: 260 30% 92%;
+    --muted: 260 25% 15%;
+    --muted-foreground: 260 15% 55%;
+    --accent: 260 25% 15%;
+    --accent-foreground: 260 30% 92%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 260 20% 16%;
+    --input: 260 20% 16%;
+    --ring: 263 70% 58%;
+    --radius: 0.5rem;
+    --chart-1: 263 70% 58%;
+    --chart-2: 300 65% 50%;
+    --chart-3: 160 60% 45%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  /* ══════════════════════════════════════════════
+     LIGHT THEME
+     ══════════════════════════════════════════════ */
+  .light {
+    --aegisaxiom-bg-base: #e2e0ed;
+    --aegisaxiom-bg-surface: #f7f6fb;
+    --aegisaxiom-bg-elevated: #ffffff;
+    --aegisaxiom-bg-overlay: rgba(0, 0, 0, 0.3);
+    --aegisaxiom-border: rgba(124, 58, 237, 0.18);
+    --aegisaxiom-border-hover: rgba(124, 58, 237, 0.32);
+    --aegisaxiom-border-active: rgba(124, 58, 237, 0.45);
+    --aegisaxiom-text-primary: #1e1b3a;
+    --aegisaxiom-text-secondary: #4a4c66;
+    --aegisaxiom-text-muted: #6b6d85;
+    --aegisaxiom-text-inverse: #ede9fe;
+    --aegisaxiom-accent: #7c3aed;
+    --aegisaxiom-accent-hover: #6d28d9;
+    --aegisaxiom-accent-soft: rgba(124, 58, 237, 0.1);
+    --aegisaxiom-accent-muted: rgba(124, 58, 237, 0.05);
+
+    /* Sidebar — stays dark in both themes for brand consistency */
+    --aegisaxiom-sidebar-from: #2d1f6b;
+    --aegisaxiom-sidebar-to: #1e1450;
+    --aegisaxiom-sidebar-text: #b8b9d0;
+    --aegisaxiom-sidebar-text-hover: #e0dff8;
+    --aegisaxiom-sidebar-text-active: #e0dff8;
+    --aegisaxiom-sidebar-active-bg: rgba(139, 92, 246, 0.25);
+    --aegisaxiom-sidebar-hover-bg: rgba(255, 255, 255, 0.08);
+
+    /* Header */
+    --aegisaxiom-header-bg: linear-gradient(90deg, rgba(241, 238, 249, 0.95), rgba(255, 255, 255, 0.9), rgba(241, 238, 249, 0.95));
+    --aegisaxiom-header-border: rgba(124, 58, 237, 0.08);
+
+    /* Cards */
+    --aegisaxiom-card-bg: #ffffff;
+    --aegisaxiom-card-border: rgba(124, 58, 237, 0.15);
+    --aegisaxiom-card-shadow: 0 1px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+    --aegisaxiom-card-hover-shadow: 0 4px 16px -4px rgba(124, 58, 237, 0.14), 0 2px 6px rgba(0, 0, 0, 0.05);
+
+    /* Inputs */
+    --aegisaxiom-input-bg: #ffffff;
+    --aegisaxiom-input-placeholder: #9294a8;
+    --aegisaxiom-input-border: rgba(124, 58, 237, 0.15);
+
+    /* Table */
+    --aegisaxiom-table-header-bg: rgba(124, 58, 237, 0.04);
+    --aegisaxiom-table-row-hover: linear-gradient(90deg, rgba(124, 58, 237, 0.03), transparent);
+    --aegisaxiom-table-border: rgba(124, 58, 237, 0.06);
+
+    /* Status colors */
+    --aegisaxiom-success: #059669;
+    --aegisaxiom-success-soft: rgba(5, 150, 105, 0.1);
+    --aegisaxiom-warning: #d97706;
+    --aegisaxiom-warning-soft: rgba(217, 119, 6, 0.1);
+    --aegisaxiom-danger: #dc2626;
+    --aegisaxiom-danger-soft: rgba(220, 38, 38, 0.1);
+    --aegisaxiom-info: #2563eb;
+    --aegisaxiom-info-soft: rgba(37, 99, 235, 0.1);
+
+    /* Scrollbar */
+    --aegisaxiom-scrollbar-track: var(--aegisaxiom-bg-base);
+    --aegisaxiom-scrollbar-thumb: rgba(124, 58, 237, 0.15);
+    --aegisaxiom-scrollbar-thumb-hover: rgba(124, 58, 237, 0.3);
+
+    /* shadcn/ui variables — light */
+    --background: 255 20% 90%;
+    --foreground: 260 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 260 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 260 30% 12%;
+    --primary: 263 70% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 20% 94%;
+    --secondary-foreground: 260 25% 25%;
+    --muted: 260 15% 93%;
+    --muted-foreground: 260 10% 40%;
+    --accent: 260 20% 94%;
+    --accent-foreground: 260 25% 25%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 260 15% 88%;
+    --input: 260 15% 88%;
+    --ring: 263 70% 58%;
+    --radius: 0.5rem;
+    --chart-1: 263 70% 58%;
+    --chart-2: 300 65% 50%;
+    --chart-3: 160 60% 45%;
+    --chart-4: 43 74% 50%;
+    --chart-5: 27 87% 55%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    background: var(--aegisaxiom-bg-base);
+    color: var(--aegisaxiom-text-primary);
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Manrope', sans-serif;
+  }
+  code,
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@layer components {
+  /* ── Glass Card — the core card style ── */
+  .glass-card {
+    background: var(--aegisaxiom-card-bg);
+    border: 0.5px solid var(--aegisaxiom-card-border);
+    border-radius: 0.75rem;
+    box-shadow: var(--aegisaxiom-card-shadow);
+    backdrop-filter: blur(8px);
+    transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+  }
+  .glass-card:hover {
+    border-color: var(--aegisaxiom-border-hover);
+    box-shadow: var(--aegisaxiom-card-hover-shadow);
+  }
+
+  /* ── Neon Border ── */
+  .neon-border {
+    border-color: rgba(124, 58, 237, 0.25);
+    box-shadow: 0 0 20px -4px rgba(139, 92, 246, 0.2);
+  }
+
+  /* ── Stat Card ── */
+  .stat-card {
+    @apply glass-card p-6;
+    transition: all 0.2s ease;
+  }
+  .stat-card:hover {
+    border-color: var(--aegisaxiom-border-active);
+    box-shadow: 0 8px 32px -8px rgba(139, 92, 246, 0.12);
+    transform: translateY(-1px);
+  }
+
+  /* ── Buttons ── */
+  .btn-primary {
+    background: linear-gradient(135deg, #7c3aed, #6366f1);
+    @apply text-white rounded-lg px-5 py-2.5 font-medium transition-all duration-200 text-sm;
+    box-shadow: 0 2px 12px -2px rgba(124, 58, 237, 0.4);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #6d28d9, #4f46e5);
+    box-shadow: 0 4px 16px -2px rgba(124, 58, 237, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: var(--aegisaxiom-bg-elevated);
+    border: 0.5px solid var(--aegisaxiom-border);
+    color: var(--aegisaxiom-text-primary);
+    @apply rounded-lg px-5 py-2.5 font-medium transition-all duration-200 text-sm;
+  }
+  .btn-secondary:hover {
+    border-color: var(--aegisaxiom-border-hover);
+    background: var(--aegisaxiom-accent-muted);
+  }
+
+  /* ── Input ── */
+  .input-field {
+    background: var(--aegisaxiom-input-bg);
+    border: 0.5px solid var(--aegisaxiom-border);
+    @apply focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 rounded-lg px-4 py-2.5 w-full transition-all outline-none text-sm;
+    color: var(--aegisaxiom-text-primary);
+  }
+  .input-field::placeholder {
+    color: var(--aegisaxiom-input-placeholder);
+  }
+  /* Variant for compact / sized-by-component inputs (filter dropdowns, etc.) — */
+  /* applies colors/border/focus only; component owns padding, height, width.  */
+  .aegisaxiom-input {
+    background: var(--aegisaxiom-input-bg);
+    border: 0.5px solid var(--aegisaxiom-border);
+    @apply focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 rounded-lg transition-all outline-none;
+    color: var(--aegisaxiom-text-primary);
+  }
+  .aegisaxiom-input::placeholder {
+    color: var(--aegisaxiom-input-placeholder);
+  }
+
+  /* ── Page Title ── */
+  .page-title {
+    font-family: 'Manrope', sans-serif;
+    @apply text-2xl font-bold;
+    color: var(--aegisaxiom-text-primary);
+  }
+
+  /* ── Badge ── */
+  .badge-stage {
+    @apply text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap inline-block;
+  }
+
+  /* ── Table Rows — subtle gradient on hover ── */
+  .table-row-hover:hover {
+    background: var(--aegisaxiom-table-row-hover);
+  }
+
+  /* ── Section Header — for module page headings ── */
+  .section-header {
+    background: var(--aegisaxiom-table-header-bg);
+    border-left: 2px solid rgba(139, 92, 246, 0.5);
+    padding: 0.75rem 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+
+  /* ── Icon Container — gradient icon boxes ── */
+  .icon-box {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-box-blue {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+  }
+  .icon-box-green {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+  }
+  .icon-box-amber {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+  }
+  .icon-box-rose {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(244, 63, 94, 0.05));
+  }
+
+  /* ── Gradient Text ── */
+  .gradient-text {
+    background: linear-gradient(135deg, #c4b5fd, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Theme-aware utility classes ──
+     Use these instead of hardcoded slate-* values
+     ──────────────────────────────────────────── */
+  .aegisaxiom-bg-base { background: var(--aegisaxiom-bg-base); }
+  .aegisaxiom-bg-surface { background: var(--aegisaxiom-bg-surface); }
+  .aegisaxiom-bg-elevated { background: var(--aegisaxiom-bg-elevated); }
+  .aegisaxiom-text-primary { color: var(--aegisaxiom-text-primary); }
+  .aegisaxiom-text-secondary { color: var(--aegisaxiom-text-secondary); }
+  .aegisaxiom-text-muted { color: var(--aegisaxiom-text-muted); }
+  .aegisaxiom-border { border-color: var(--aegisaxiom-border); }
+  .aegisaxiom-border-hover { border-color: var(--aegisaxiom-border-hover); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--aegisaxiom-scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--aegisaxiom-scrollbar-thumb);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--aegisaxiom-scrollbar-thumb-hover);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(124, 58, 237, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(124, 58, 237, 0.5);
+  }
+}
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+.animate-pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes indeterminateBar {
+  0% {
+    transform: translateX(-100%) scaleX(0.4);
+  }
+  50% {
+    transform: translateX(20%) scaleX(0.6);
+  }
+  100% {
+    transform: translateX(120%) scaleX(0.4);
+  }
+}
+.animate-indeterminate-bar {
+  animation: indeterminateBar 1.4s cubic-bezier(0.65, 0.05, 0.35, 1) infinite;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+[data-debug-wrapper='true'] {
+  display: contents !important;
+}

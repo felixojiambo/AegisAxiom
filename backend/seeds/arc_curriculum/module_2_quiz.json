@@ -1,0 +1,97 @@
+{
+  "module_number": 2,
+  "title": "Module 2: Identifying the AI Opportunity — The 3 Diagnostic Lenses",
+  "description": "Tests the rep's ability to classify operational problems as Repeated Workflows (high volume, low variance), Data-Heavy Workflows (high cognitive load, unstructured inputs), or Bottleneck Workflows (latency and coordination friction).",
+  "passing_score": 75,
+  "time_limit_seconds": 720,
+  "instructions": "Answer all questions to the best of your ability. You cannot ask ARC for help while the quiz is in progress. Aim for 10-12 minutes.",
+  "questions": [
+    {
+      "id": "m2_q1",
+      "type": "multiple_choice",
+      "prompt": "An accounting firm spends 4 hours a day manually cross-referencing vendor invoices against entries in a procurement database to find discrepancies. Which diagnostic lens BEST describes this workflow?",
+      "options": [
+        { "value": "a", "label": "Repeated Workflow" },
+        { "value": "b", "label": "Data-Heavy Workflow" },
+        { "value": "c", "label": "Bottleneck Workflow" },
+        { "value": "d", "label": "All three equally" }
+      ],
+      "correct_answer": "b",
+      "explanation": "This is a Data-Heavy Workflow. The defining feature is that humans are reading, comparing, and synthesizing large volumes of information across multiple sources — exactly what 'cross-referencing' means. While there's repetition (it happens daily) and possibly some bottleneck behavior, the dominant friction is cognitive load on unstructured data. The trigger phrase to listen for: 'we spend hours reviewing' or 'we have to cross-reference multiple documents to verify.'",
+      "points": 15,
+      "module_section": "Data-Heavy Workflows"
+    },
+    {
+      "id": "m2_q2",
+      "type": "multiple_choice",
+      "prompt": "A SaaS company says: 'Every new customer onboarding has to wait until our compliance officer reviews their security questionnaire — and she's only available Tuesday afternoons.' Which diagnostic lens does this fit?",
+      "options": [
+        { "value": "a", "label": "Repeated Workflow" },
+        { "value": "b", "label": "Data-Heavy Workflow" },
+        { "value": "c", "label": "Bottleneck Workflow" },
+        { "value": "d", "label": "None of the three — it's a staffing problem, not an AI problem" }
+      ],
+      "correct_answer": "c",
+      "explanation": "Classic Bottleneck Workflow. The actual work isn't the problem — the WAITING is. The process stalls because of a single resource constraint (the compliance officer's availability). AI bottleneck-busters resolve this by executing rapid pre-reviews, routing context-rich approvals instantly, or autonomously executing decisions within mathematically defined confidence thresholds. D is a trap: even if it looks like a staffing issue, the real solution is automating the routing and pre-validation so the human only handles edge cases.",
+      "points": 15,
+      "module_section": "Bottleneck Workflows"
+    },
+    {
+      "id": "m2_q3",
+      "type": "multiple_choice",
+      "prompt": "Which is the strongest indicator that a process is a 'Repeated Workflow' candidate for automation?",
+      "options": [
+        { "value": "a", "label": "It's frustrating and unpopular with employees" },
+        { "value": "b", "label": "It can be mapped as a decision tree with limited, highly predictable branches" },
+        { "value": "c", "label": "It involves more than 10 employees" },
+        { "value": "d", "label": "It runs on legacy software" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B is the diagnostic. The core marker of a Repeated Workflow is high frequency PLUS deterministic outcomes — if you can draw it as a decision tree with a small number of predictable branches, it's prime AI territory. Frustration (A), team size (C), and legacy tooling (D) are all common around repeated workflows but none is the actual diagnostic. Decision-tree mappability is what tells you the AI can actually execute it reliably.",
+      "points": 15,
+      "module_section": "Repeated Workflows"
+    },
+    {
+      "id": "m2_q4",
+      "type": "scenario_match",
+      "prompt": "Match each friction point to the diagnostic lens it best fits.",
+      "items": [
+        { "id": "i1", "label": "Waiting for an engineering manager to estimate every ticket before sprint planning can start" },
+        { "id": "i2", "label": "Copy-pasting customer info from inbound emails into Salesforce, 200 times a day" },
+        { "id": "i3", "label": "Summarizing 90-minute sales call transcripts into a one-paragraph CRM note" }
+      ],
+      "categories": [
+        { "value": "repeated", "label": "Repeated Workflow" },
+        { "value": "data_heavy", "label": "Data-Heavy Workflow" },
+        { "value": "bottleneck", "label": "Bottleneck Workflow" }
+      ],
+      "correct_answer": { "i1": "bottleneck", "i2": "repeated", "i3": "data_heavy" },
+      "explanation": "i1 is a Bottleneck — the work waits on a single human gatekeeper. i2 is Repeated — high volume, deterministic, the same thing over and over. i3 is Data-Heavy — synthesizing a long unstructured input (transcript) into a structured output (CRM note) is exactly the cognitive-load problem AI solves. Note that some workflows can fit multiple lenses; the diagnostic is whichever lens captures the DOMINANT friction.",
+      "points": 20,
+      "module_section": "Pattern Recognition Across All Three Lenses"
+    },
+    {
+      "id": "m2_q5",
+      "type": "multi_select",
+      "prompt": "Which of the following are good reasons to apply 'first-principles thinking' (stripping away the human element to look at raw mechanics) when diagnosing a workflow? Select all that apply.",
+      "options": [
+        { "value": "a", "label": "It exposes which steps are actually value-adding vs. which are just routing or rework" },
+        { "value": "b", "label": "It reveals when human intervention is just a routing mechanism, not a judgment call" },
+        { "value": "c", "label": "It lets you spot the underlying inputs, transformations, and outputs that an AI agent would need" },
+        { "value": "d", "label": "It tells you exactly which programming language to use for the implementation" }
+      ],
+      "correct_answer": ["a", "b", "c"],
+      "explanation": "A, B, and C are all good reasons. D is wrong — first-principles thinking is a discovery tool, not an implementation choice. The big insight in this module is B: a huge amount of so-called 'human work' is actually just routing — moving information from one place to another. Once you see that, you see automation opportunities everywhere.",
+      "points": 20,
+      "module_section": "First-Principles Thinking"
+    },
+    {
+      "id": "m2_q6",
+      "type": "free_text",
+      "prompt": "A client says: 'Our finance team spends every Monday morning pulling data from QuickBooks, our payroll system, and our expense tool, then putting it all into a board report.' Name the diagnostic lens AND one Power Question you'd ask to confirm. Two sentences max.",
+      "rubric": "A passing answer (1) identifies this as a Data-Heavy Workflow (the dominant friction is synthesizing data from multiple sources) and (2) provides a specific follow-up question. Acceptable Power Questions: 'How many hours per week does that take?', 'Are these systems all accessible via API?', 'What format does the final board report take?'. Reward specificity. Penalize answers that name the lens but skip the Power Question, or vice versa.",
+      "points": 15,
+      "module_section": "Power Questions"
+    }
+  ]
+}

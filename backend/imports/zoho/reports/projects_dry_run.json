@@ -1,0 +1,180 @@
+{
+  "duplicates": {
+    "record_ids": []
+  },
+  "enumerations": {
+    "project_statuses": {
+      "Active": 105,
+      "Completed": 1
+    },
+    "project_types": {}
+  },
+  "errors": [
+    {
+      "count": 2,
+      "kind": "missing_contract_id",
+      "samples": [
+        {
+          "project_name": "TEST UCS 19-11-Nerw Test Contact",
+          "record_id": "zcrm_4761157000036877051",
+          "row": 27
+        },
+        {
+          "project_name": "TEST ACCOUNT-Today Test - 09-07-25",
+          "record_id": "zcrm_4761157000059609052",
+          "row": 58
+        }
+      ]
+    },
+    {
+      "count": 3,
+      "kind": "unresolved_contract_id",
+      "samples": [
+        {
+          "contract_id": "zcrm_4761157000069277003",
+          "project_name": "Commissions Revamp",
+          "record_id": "zcrm_4761157000069286001",
+          "row": 83
+        },
+        {
+          "contract_id": "zcrm_4761157000078155003",
+          "project_name": "Metadata Engineering, LLC-Internal Metadata Projects",
+          "record_id": "zcrm_4761157000078140015",
+          "row": 98
+        },
+        {
+          "contract_id": "zcrm_4761157000080026003",
+          "project_name": "Metadata Engineering, LLC-Internal Metadata Projects",
+          "record_id": "zcrm_4761157000079989166",
+          "row": 100
+        }
+      ]
+    }
+  ],
+  "headers_present": [
+    "Record Id",
+    "Project Name",
+    "Project Owner.id",
+    "Project Owner",
+    "Created By.id",
+    "Created By",
+    "Created Time",
+    "Modified Time",
+    "Last Activity Time",
+    "Tag",
+    "Unsubscribed Mode",
+    "Unsubscribed Time",
+    "Locked",
+    "Project Id",
+    "Contract.id",
+    "Contract",
+    "ZOHO Project URL",
+    "Deal.id",
+    "Deal",
+    "Account.id",
+    "Account",
+    "Total Project Consumed Hour's",
+    "Status",
+    "deleted field",
+    "Connected To.module",
+    "Connected To.id"
+  ],
+  "missing_required": {
+    "account_id": [],
+    "contract_id": [
+      {
+        "project_name": "TEST UCS 19-11-Nerw Test Contact",
+        "record_id": "zcrm_4761157000036877051",
+        "row": 27
+      },
+      {
+        "project_name": "TEST ACCOUNT-Today Test - 09-07-25",
+        "record_id": "zcrm_4761157000059609052",
+        "row": 58
+      }
+    ],
+    "deal_id": [
+      {
+        "record_id": "zcrm_4761157000036877051",
+        "row": 27
+      }
+    ],
+    "project_name": [],
+    "record_id": []
+  },
+  "ready_for_import_plan": false,
+  "relationship_resolution": {
+    "account_mismatches": 2,
+    "contracts_map_size": 94,
+    "contracts_resolved": 101,
+    "contracts_unresolved": 3,
+    "deal_mismatches": 2,
+    "skipped": false
+  },
+  "source_file": "imports/zoho/raw/Projects.csv",
+  "summary": {
+    "account_mismatch_count": 2,
+    "consumed_hours_populated_count": 93,
+    "date_warning_count": 0,
+    "deal_mismatch_count": 2,
+    "duplicate_record_id_count": 0,
+    "error_count": 2,
+    "invalid_consumed_hours_count": 0,
+    "negative_consumed_hours_count": 0,
+    "unresolved_contract_count": 3,
+    "warning_count": 3
+  },
+  "total_rows": 106,
+  "warnings": [
+    {
+      "count": 1,
+      "kind": "missing_deal_id",
+      "samples": [
+        {
+          "record_id": "zcrm_4761157000036877051",
+          "row": 27
+        }
+      ]
+    },
+    {
+      "count": 2,
+      "kind": "account_id_mismatch_with_contract",
+      "samples": [
+        {
+          "contract_account_id": "zcrm_4761157000022603076",
+          "contract_id": "zcrm_4761157000038844137",
+          "project_account_id": "zcrm_4761157000036279158",
+          "record_id": "zcrm_4761157000038788012",
+          "row": 29
+        },
+        {
+          "contract_account_id": "zcrm_4761157000022603076",
+          "contract_id": "zcrm_4761157000038940192",
+          "project_account_id": "zcrm_4761157000036279158",
+          "record_id": "zcrm_4761157000039085001",
+          "row": 30
+        }
+      ]
+    },
+    {
+      "count": 2,
+      "kind": "deal_id_mismatch_with_contract",
+      "samples": [
+        {
+          "contract_deal_id": "zcrm_4761157000025903046",
+          "contract_id": "zcrm_4761157000026190010",
+          "project_deal_id": "zcrm_4761157000025254052",
+          "record_id": "zcrm_4761157000025314001",
+          "row": 3
+        },
+        {
+          "contract_deal_id": "zcrm_4761157000025192072",
+          "contract_id": "zcrm_4761157000025292019",
+          "project_deal_id": "zcrm_4761157000030265194",
+          "record_id": "zcrm_4761157000032719019",
+          "row": 20
+        }
+      ]
+    }
+  ]
+}

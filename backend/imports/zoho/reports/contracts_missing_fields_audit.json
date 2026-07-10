@@ -1,0 +1,812 @@
+{
+  "ap_issues_observed": {},
+  "aegisaxiom_imported_count": 94,
+  "aegisaxiom_only_zoho_contract_ids": [
+    "zcrm_4761157000023461001",
+    "zcrm_4761157000023561001",
+    "zcrm_4761157000024861001",
+    "zcrm_4761157000025292019",
+    "zcrm_4761157000025292049",
+    "zcrm_4761157000026108009",
+    "zcrm_4761157000026190010",
+    "zcrm_4761157000026308001",
+    "zcrm_4761157000026506093",
+    "zcrm_4761157000026692030",
+    "zcrm_4761157000027216038",
+    "zcrm_4761157000027443001",
+    "zcrm_4761157000028068035",
+    "zcrm_4761157000028164057",
+    "zcrm_4761157000028454049",
+    "zcrm_4761157000031722101",
+    "zcrm_4761157000031928205",
+    "zcrm_4761157000032813020",
+    "zcrm_4761157000033800253",
+    "zcrm_4761157000034391280",
+    "zcrm_4761157000035356101",
+    "zcrm_4761157000036804328",
+    "zcrm_4761157000038844137",
+    "zcrm_4761157000038940192",
+    "zcrm_4761157000044947034",
+    "zcrm_4761157000045393079",
+    "zcrm_4761157000046538204",
+    "zcrm_4761157000046760088",
+    "zcrm_4761157000047415155",
+    "zcrm_4761157000047777090",
+    "zcrm_4761157000048238198",
+    "zcrm_4761157000049782212",
+    "zcrm_4761157000049782493",
+    "zcrm_4761157000049824294",
+    "zcrm_4761157000050238264",
+    "zcrm_4761157000052959177",
+    "zcrm_4761157000052994243",
+    "zcrm_4761157000053258135",
+    "zcrm_4761157000054413001",
+    "zcrm_4761157000055018130",
+    "zcrm_4761157000055118108",
+    "zcrm_4761157000055118282",
+    "zcrm_4761157000055118419",
+    "zcrm_4761157000056535221",
+    "zcrm_4761157000057640065",
+    "zcrm_4761157000058338202",
+    "zcrm_4761157000058511188",
+    "zcrm_4761157000059390025",
+    "zcrm_4761157000059390094",
+    "zcrm_4761157000059657178",
+    "zcrm_4761157000059899069",
+    "zcrm_4761157000060092038",
+    "zcrm_4761157000060265022",
+    "zcrm_4761157000060359045",
+    "zcrm_4761157000060900001",
+    "zcrm_4761157000060900102",
+    "zcrm_4761157000061021163",
+    "zcrm_4761157000061452222",
+    "zcrm_4761157000061452369",
+    "zcrm_4761157000061863071",
+    "zcrm_4761157000062598044",
+    "zcrm_4761157000062598150",
+    "zcrm_4761157000062636084",
+    "zcrm_4761157000063081038",
+    "zcrm_4761157000063581052",
+    "zcrm_4761157000064443081",
+    "zcrm_4761157000064588081",
+    "zcrm_4761157000064959091",
+    "zcrm_4761157000066201055",
+    "zcrm_4761157000067058058",
+    "zcrm_4761157000067204283",
+    "zcrm_4761157000067204402",
+    "zcrm_4761157000067986113",
+    "zcrm_4761157000072316061",
+    "zcrm_4761157000072393067",
+    "zcrm_4761157000072967047",
+    "zcrm_4761157000073220046",
+    "zcrm_4761157000073382044",
+    "zcrm_4761157000073614048",
+    "zcrm_4761157000074886059",
+    "zcrm_4761157000075540001",
+    "zcrm_4761157000075614043",
+    "zcrm_4761157000075737039",
+    "zcrm_4761157000075843063",
+    "zcrm_4761157000077194017",
+    "zcrm_4761157000077298035",
+    "zcrm_4761157000078157029",
+    "zcrm_4761157000079475045",
+    "zcrm_4761157000080748117",
+    "zcrm_4761157000081192056",
+    "zcrm_4761157000081290107",
+    "zcrm_4761157000081996055",
+    "zcrm_4761157000083436065",
+    "zcrm_4761157000084889020"
+  ],
+  "contract_type_mismatches": [],
+  "field_population": {
+    "aegisaxiom": {
+      "account_name": {
+        "empty": 0,
+        "present": 94
+      },
+      "contract_id": {
+        "empty": 0,
+        "present": 94
+      },
+      "contract_number": {
+        "empty": 0,
+        "present": 94
+      },
+      "contract_type": {
+        "empty": 0,
+        "present": 94
+      },
+      "contract_type_raw": {
+        "empty": 0,
+        "present": 94
+      },
+      "external_ids.zoho_account_id": {
+        "empty": 0,
+        "present": 94
+      },
+      "external_ids.zoho_contract_id": {
+        "empty": 0,
+        "present": 94
+      },
+      "external_ids.zoho_deal_id": {
+        "empty": 0,
+        "present": 94
+      },
+      "hourly_rate": {
+        "empty": 94,
+        "present": 0
+      },
+      "hours_consumed": {
+        "empty": 0,
+        "present": 94
+      },
+      "import_source": {
+        "empty": 0,
+        "present": 94
+      },
+      "imported_at": {
+        "empty": 0,
+        "present": 94
+      },
+      "imported_consumed_hours": {
+        "empty": 12,
+        "present": 82
+      },
+      "imported_consumed_percent": {
+        "empty": 8,
+        "present": 86
+      },
+      "imported_remaining_hours": {
+        "empty": 0,
+        "present": 94
+      },
+      "imported_total_hours": {
+        "empty": 0,
+        "present": 94
+      },
+      "invoice_type_raw": {
+        "empty": 1,
+        "present": 93
+      },
+      "name": {
+        "empty": 0,
+        "present": 94
+      },
+      "resource_types": {
+        "empty": 94,
+        "present": 0
+      },
+      "resources": {
+        "empty": 94,
+        "present": 0
+      },
+      "source_created_at": {
+        "empty": 0,
+        "present": 94
+      },
+      "source_modified_at": {
+        "empty": 0,
+        "present": 94
+      },
+      "status": {
+        "empty": 0,
+        "present": 94
+      },
+      "status_raw": {
+        "empty": 0,
+        "present": 94
+      },
+      "total_hours": {
+        "empty": 94,
+        "present": 0
+      },
+      "total_hours_purchased": {
+        "empty": 0,
+        "present": 94
+      }
+    },
+    "zoho": {}
+  },
+  "generated_at": "2026-05-22T16:09:09.679557+00:00",
+  "hour_mismatches": [],
+  "invoice_type_mismatches": [],
+  "mapping_gaps": {
+    "aegisaxiom_fields_empty_with_zoho_value": {
+      "ap_issues_raw": 0,
+      "bill_on_actual_hours": 0,
+      "contract_status_raw": 0,
+      "hours_to_be_paid": 0,
+      "imported_consumed_hours": 0,
+      "imported_consumed_percent": 0,
+      "imported_remaining_hours": 0,
+      "imported_total_hours": 0,
+      "invoice_type_raw": 0,
+      "number_of_invoices": 0,
+      "paid_hours": 0,
+      "source_created_at": 0,
+      "source_created_by": 0,
+      "status_raw": 0
+    },
+    "zoho_columns_not_mapped_to_aegisaxiom": []
+  },
+  "notes": [
+    "Read-only audit. No DB writes, no Zoho API calls, no --execute flag. Companion planner: zoho_contracts_missing_fields_plan.py.",
+    "aegisaxiom_fields_empty_with_zoho_value counts only rows where Zoho carries a non-empty value AND the AEGISAXIOM-side import left the field blank \u2014 the actionable hydration set."
+  ],
+  "number_of_invoices_observed": {},
+  "owner_mapping_gaps": [],
+  "per_contract": [
+    {
+      "aegisaxiom_contract_id": "contract_8f7292593f1a",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100008",
+      "zoho_contract_id": "zcrm_4761157000023461001"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_956b50815c5f",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100009",
+      "zoho_contract_id": "zcrm_4761157000023561001"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_93110f724403",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100025",
+      "zoho_contract_id": "zcrm_4761157000024861001"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_82523c73875d",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100026",
+      "zoho_contract_id": "zcrm_4761157000025292019"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_d0c074fd4ec4",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100027",
+      "zoho_contract_id": "zcrm_4761157000025292049"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_1623cc930d12",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100032",
+      "zoho_contract_id": "zcrm_4761157000026108009"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_cccb522481bd",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100033",
+      "zoho_contract_id": "zcrm_4761157000026190010"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_2148d267a01e",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100038",
+      "zoho_contract_id": "zcrm_4761157000026308001"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_68a87e8ebae7",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100041",
+      "zoho_contract_id": "zcrm_4761157000026506093"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_4d1ecd48923f",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100044",
+      "zoho_contract_id": "zcrm_4761157000026692030"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_0a39865012b2",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100045",
+      "zoho_contract_id": "zcrm_4761157000027216038"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_f9dae5566388",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100046",
+      "zoho_contract_id": "zcrm_4761157000027443001"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_d9ffcf5bcf22",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100047",
+      "zoho_contract_id": "zcrm_4761157000028068035"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_17e0ac0107e1",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100048",
+      "zoho_contract_id": "zcrm_4761157000028164057"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_3515a524abf0",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100049",
+      "zoho_contract_id": "zcrm_4761157000028454049"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_a88f02d8b96e",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100061",
+      "zoho_contract_id": "zcrm_4761157000031722101"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_4fb8df0c81aa",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100062",
+      "zoho_contract_id": "zcrm_4761157000031928205"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_7ee8abbaa366",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100064",
+      "zoho_contract_id": "zcrm_4761157000032813020"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_90e568fe326c",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100066",
+      "zoho_contract_id": "zcrm_4761157000033800253"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_df10d41fcd7d",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100067",
+      "zoho_contract_id": "zcrm_4761157000034391280"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_0abdecea2e78",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100069",
+      "zoho_contract_id": "zcrm_4761157000035356101"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_80f34217d599",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100072",
+      "zoho_contract_id": "zcrm_4761157000036804328"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_d983da927681",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100076",
+      "zoho_contract_id": "zcrm_4761157000038844137"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_2da0c949ea8e",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100077",
+      "zoho_contract_id": "zcrm_4761157000038940192"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_806c7089cee4",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100078",
+      "zoho_contract_id": "zcrm_4761157000044947034"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_07de11587021",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100079",
+      "zoho_contract_id": "zcrm_4761157000045393079"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_ce7e624ef3cf",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100080",
+      "zoho_contract_id": "zcrm_4761157000046538204"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_5b2091e749f0",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100081",
+      "zoho_contract_id": "zcrm_4761157000046760088"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_e68f0b44f9dd",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100082",
+      "zoho_contract_id": "zcrm_4761157000047415155"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_0f3ad166df8b",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100083",
+      "zoho_contract_id": "zcrm_4761157000047777090"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_31a21df26be2",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100084",
+      "zoho_contract_id": "zcrm_4761157000048238198"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_279aafd6c6a2",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100085",
+      "zoho_contract_id": "zcrm_4761157000049782212"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_0631bb9a1815",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100086",
+      "zoho_contract_id": "zcrm_4761157000049782493"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_fe2a23abd320",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100087",
+      "zoho_contract_id": "zcrm_4761157000049824294"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_f74f5533534d",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100088",
+      "zoho_contract_id": "zcrm_4761157000050238264"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_cd9b7d493cb6",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100090",
+      "zoho_contract_id": "zcrm_4761157000052959177"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_c4e727d1722b",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100091",
+      "zoho_contract_id": "zcrm_4761157000052994243"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_bf4f9b75f23a",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100092",
+      "zoho_contract_id": "zcrm_4761157000053258135"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_c3e309ae9149",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100093",
+      "zoho_contract_id": "zcrm_4761157000054413001"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_dd2244694c9a",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100094",
+      "zoho_contract_id": "zcrm_4761157000055018130"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_841deb2e3a56",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100095",
+      "zoho_contract_id": "zcrm_4761157000055118108"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_34745bf7c29a",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100096",
+      "zoho_contract_id": "zcrm_4761157000055118282"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_96adf45f3a43",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100097",
+      "zoho_contract_id": "zcrm_4761157000055118419"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_41dc8484d5cb",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100098",
+      "zoho_contract_id": "zcrm_4761157000056535221"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_2b72d487a81d",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100099",
+      "zoho_contract_id": "zcrm_4761157000057640065"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_c38775b86989",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100100",
+      "zoho_contract_id": "zcrm_4761157000058338202"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_2f2a83a605c0",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100101",
+      "zoho_contract_id": "zcrm_4761157000058511188"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_b3590a9d0011",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100102",
+      "zoho_contract_id": "zcrm_4761157000059390025"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_e9050c0acd12",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100103",
+      "zoho_contract_id": "zcrm_4761157000059390094"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_67ad87b8cac1",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100104",
+      "zoho_contract_id": "zcrm_4761157000059657178"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_2e59af541564",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100106",
+      "zoho_contract_id": "zcrm_4761157000059899069"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_5d555efb9d74",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100108",
+      "zoho_contract_id": "zcrm_4761157000060092038"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_509b78b09378",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100109",
+      "zoho_contract_id": "zcrm_4761157000060265022"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_d6df7822b951",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100110",
+      "zoho_contract_id": "zcrm_4761157000060359045"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_f349b28b7ee2",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100111",
+      "zoho_contract_id": "zcrm_4761157000060900001"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_b02cc0416345",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100112",
+      "zoho_contract_id": "zcrm_4761157000060900102"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_41347fcb42bd",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100114",
+      "zoho_contract_id": "zcrm_4761157000061021163"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_7e79981d0c8d",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100115",
+      "zoho_contract_id": "zcrm_4761157000061452222"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_4ab5385ce359",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100116",
+      "zoho_contract_id": "zcrm_4761157000061452369"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_7f7d59dfa8c7",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100117",
+      "zoho_contract_id": "zcrm_4761157000061863071"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_7a2ec2530d98",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100118",
+      "zoho_contract_id": "zcrm_4761157000062598044"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_d550ebaba23a",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100119",
+      "zoho_contract_id": "zcrm_4761157000062598150"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_4b6c8fee52ca",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100120",
+      "zoho_contract_id": "zcrm_4761157000062636084"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_6a9af083c46a",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100122",
+      "zoho_contract_id": "zcrm_4761157000063581052"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_bf06aa608946",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100123",
+      "zoho_contract_id": "zcrm_4761157000064443081"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_cbf152ae5c20",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100124",
+      "zoho_contract_id": "zcrm_4761157000064588081"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_02a4fe57846b",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100125",
+      "zoho_contract_id": "zcrm_4761157000064959091"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_3c79a51d732c",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100126",
+      "zoho_contract_id": "zcrm_4761157000066201055"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_4276611d1e15",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100127",
+      "zoho_contract_id": "zcrm_4761157000067058058"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_f3d1fcf9cc8a",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100128",
+      "zoho_contract_id": "zcrm_4761157000067204283"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_26424bb9a5f9",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100129",
+      "zoho_contract_id": "zcrm_4761157000067204402"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_25190690b557",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100130",
+      "zoho_contract_id": "zcrm_4761157000067986113"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_f73e954e0415",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100132",
+      "zoho_contract_id": "zcrm_4761157000072316061"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_c126eb3cb2ad",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100133",
+      "zoho_contract_id": "zcrm_4761157000072393067"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_789799e593ed",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100134",
+      "zoho_contract_id": "zcrm_4761157000072967047"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_374ae6320dac",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100135",
+      "zoho_contract_id": "zcrm_4761157000073220046"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_12c1cc86ce41",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100136",
+      "zoho_contract_id": "zcrm_4761157000073382044"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_b3e15242ab31",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100137",
+      "zoho_contract_id": "zcrm_4761157000073614048"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_ea674048ef3a",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100138",
+      "zoho_contract_id": "zcrm_4761157000074886059"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_f6e51dc989e6",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100139",
+      "zoho_contract_id": "zcrm_4761157000075540001"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_cb663ae29cf9",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100140",
+      "zoho_contract_id": "zcrm_4761157000075614043"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_03913ab1eae2",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100141",
+      "zoho_contract_id": "zcrm_4761157000075737039"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_09c3a963b520",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100142",
+      "zoho_contract_id": "zcrm_4761157000075843063"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_0a842ef03915",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100143",
+      "zoho_contract_id": "zcrm_4761157000077194017"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_bbf89be22833",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100144",
+      "zoho_contract_id": "zcrm_4761157000077298035"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_291c5c63bfd3",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100146",
+      "zoho_contract_id": "zcrm_4761157000078157029"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_fb7e78975768",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100147",
+      "zoho_contract_id": "zcrm_4761157000079475045"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_e719e20a433c",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100149",
+      "zoho_contract_id": "zcrm_4761157000080748117"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_44ac20519d4e",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100150",
+      "zoho_contract_id": "zcrm_4761157000081192056"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_5195c7c74aa9",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100151",
+      "zoho_contract_id": "zcrm_4761157000081290107"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_dd1e1c2c09ca",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100152",
+      "zoho_contract_id": "zcrm_4761157000081996055"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_b6d474150407",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100153",
+      "zoho_contract_id": "zcrm_4761157000083436065"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_c1e7fa75fde1",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100154",
+      "zoho_contract_id": "zcrm_4761157000084889020"
+    },
+    {
+      "aegisaxiom_contract_id": "contract_c91c92533e86",
+      "aegisaxiom_only": true,
+      "contract_number": "CN-100121",
+      "zoho_contract_id": "zcrm_4761157000063081038"
+    }
+  ],
+  "related_counts": {
+    "projects_per_contract": {},
+    "transactions_per_contract": {}
+  },
+  "source": "aegisaxiom=mongo",
+  "status_mismatches": [],
+  "zoho_contract_count": 0,
+  "zoho_only_zoho_contract_ids": []
+}

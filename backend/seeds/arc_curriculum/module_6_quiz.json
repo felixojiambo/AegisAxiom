@@ -1,0 +1,112 @@
+{
+  "module_number": 6,
+  "title": "Module 6: ROI Scoring with the MetaMetrics Index",
+  "description": "Tests the rep's fluency with the MMI formula, the four input dimensions (Time, Cost, Quality, Satisfaction), the TSS and IE multipliers, and the ability to compare workflows by score.",
+  "passing_score": 75,
+  "time_limit_seconds": 720,
+  "instructions": "Answer all questions to the best of your ability. The MMI formula is (TSS / IE) × (Time + Cost + Quality + Satisfaction), with each input rated 1-5. You cannot ask ARC for help while the quiz is in progress. Aim for 10-12 minutes.",
+  "questions": [
+    {
+      "id": "m6_q1",
+      "type": "multiple_choice",
+      "prompt": "What does the 'TSS / IE' multiplier represent in the MMI formula?",
+      "options": [
+        { "value": "a", "label": "Total Sales Score divided by Industry Estimate" },
+        { "value": "b", "label": "Task Strategic Significance divided by Implementation Effort — how much the workflow matters scaled against how hard it is to build" },
+        { "value": "c", "label": "Time Spent Saved divided by Initial Expense" },
+        { "value": "d", "label": "Total Sentiment Score divided by Internal Evaluation" }
+      ],
+      "correct_answer": "b",
+      "explanation": "TSS / IE is the multiplier that adjusts the raw dimensional sum based on strategic value relative to build difficulty. A workflow with high strategic significance (TSS=5) and low implementation effort (IE=1) gets a 5× multiplier on its (T+C+Q+S) sum — making it a Priority One target. Inverting that (TSS=1, IE=5) yields a 0.2× multiplier, demoting the workflow. This is how AEGISAXIOM surfaces the highest-leverage automations first.",
+      "points": 15,
+      "module_section": "The MMI Formula"
+    },
+    {
+      "id": "m6_q2",
+      "type": "multiple_choice",
+      "prompt": "Calculate the MMI score for this workflow: TSS=5, IE=1, Time=4, Cost=4, Quality=3, Satisfaction=3.",
+      "options": [
+        { "value": "a", "label": "14" },
+        { "value": "b", "label": "20" },
+        { "value": "c", "label": "70" },
+        { "value": "d", "label": "100" }
+      ],
+      "correct_answer": "c",
+      "explanation": "The math: (TSS/IE) × (T+C+Q+S) = (5/1) × (4+4+3+3) = 5 × 14 = 70. This is a Priority One workflow — high strategic value, easy to implement, strong dimensional contributions across the board. You'd put this at the top of the AI Employee Matrix and lead with it in the SOW.",
+      "points": 15,
+      "module_section": "MMI Calculation Practice"
+    },
+    {
+      "id": "m6_q3",
+      "type": "multiple_choice",
+      "prompt": "Which of the following workflows would you EXPECT to score highest on the Time dimension?",
+      "options": [
+        { "value": "a", "label": "A monthly task that takes 10 minutes once a month" },
+        { "value": "b", "label": "A daily task that takes 4 hours and currently consumes a full headcount" },
+        { "value": "c", "label": "A one-off project that takes 80 hours but never repeats" },
+        { "value": "d", "label": "A real-time alert system that runs in milliseconds" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B. The Time dimension measures velocity — the gap between human time spent and the agent's execution time, multiplied by frequency. A high-frequency, high-duration manual task (like option B's 4 hours/day) generates massive Time-dimension savings when automated. A is too low-frequency, C is non-recurring, D is already fast. The signature of a high Time score is a worker doing 'the same thing over and over for a meaningful chunk of every day.'",
+      "points": 15,
+      "module_section": "Time Dimension"
+    },
+    {
+      "id": "m6_q4",
+      "type": "true_false",
+      "prompt": "True or False: The Satisfaction dimension in MMI measures only external customer NPS — it doesn't include internal employee experience.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "false",
+      "explanation": "False. Satisfaction is intentionally double-sided: it captures both external customer satisfaction (NPS, CSAT, churn risk) AND internal employee experience (the cost of tedium, retention risk on roles stuck doing soul-crushing manual work). A workflow that frees a senior analyst from copy-pasting all day scores high on Satisfaction even if no external customer ever notices the change. Reps who only frame Satisfaction as 'customer NPS' miss a huge portion of the ROI story.",
+      "points": 10,
+      "module_section": "Satisfaction Dimension"
+    },
+    {
+      "id": "m6_q5",
+      "type": "multiple_choice",
+      "prompt": "You have two workflows to recommend to a client. Workflow A: TSS=5, IE=2, T=3, C=3, Q=3, S=3 → score = (5/2) × 12 = 30. Workflow B: TSS=4, IE=1, T=3, C=2, Q=3, S=2 → score = (4/1) × 10 = 40. Which should you lead with in the SOW, and why?",
+      "options": [
+        { "value": "a", "label": "Workflow A — it has the higher strategic significance (TSS=5)" },
+        { "value": "b", "label": "Workflow B — it has the higher MMI score (40 vs 30), meaning the lower implementation effort outweighs A's higher TSS for total ROI ranking" },
+        { "value": "c", "label": "Workflow A — its dimensional sum (12) is higher" },
+        { "value": "d", "label": "Either — the difference is too small to matter" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B is correct, and this is the central insight of MMI: raw strategic importance does NOT win — the SCORE wins. Workflow A is more strategically significant in isolation (TSS=5 vs 4), but its higher implementation effort (IE=2) cuts the multiplier in half. Workflow B's lower IE more than compensates. This is why we always sort the AI Employee Matrix by MMI score, not by any single input. A 'quick win' workflow can absolutely outrank a 'big strategic project' for ROI — and clients respect reps who lead with the math.",
+      "points": 20,
+      "module_section": "Comparing Workflows by MMI Score"
+    },
+    {
+      "id": "m6_q6",
+      "type": "scenario_match",
+      "prompt": "Match each client signal to the MMI dimension it most directly affects.",
+      "items": [
+        { "id": "i1", "label": "Our outbound team makes the same data entry mistakes about 8% of the time, and we have to re-do orders" },
+        { "id": "i2", "label": "Our junior analysts have a 40% turnover rate, mostly because they hate the manual reporting work" },
+        { "id": "i3", "label": "We're paying three full-time contractors $90/hour each just to keep the spreadsheets in sync" },
+        { "id": "i4", "label": "Sales reps lose deals because they can't get a quote out faster than 48 hours" }
+      ],
+      "categories": [
+        { "value": "time", "label": "Time" },
+        { "value": "cost", "label": "Cost" },
+        { "value": "quality", "label": "Quality" },
+        { "value": "satisfaction", "label": "Satisfaction" }
+      ],
+      "correct_answer": { "i1": "quality", "i2": "satisfaction", "i3": "cost", "i4": "time" },
+      "explanation": "i1 is Quality — error reduction is the textbook Quality signal. i2 is Satisfaction (internal employee retention angle). i3 is Cost — direct labor arbitrage on the contractors. i4 is Time — quote velocity directly drives the Time dimension. Notice that several of these workflows would actually score on multiple dimensions; the question asks for the MOST direct mapping.",
+      "points": 20,
+      "module_section": "MMI Dimensions in Practice"
+    },
+    {
+      "id": "m6_q7",
+      "type": "free_text",
+      "prompt": "A client says: 'I don't really care about MMI scores — just tell me if this is going to save us money.' In two sentences, how do you respond?",
+      "rubric": "A passing answer (1) doesn't dismiss the client's concern, and (2) reframes MMI as the rigorous way to GET to a credible cost answer (not in opposition to it). Bonus credit for noting that scoring on all 4 dimensions surfaces savings the client hadn't considered (turnover, quality, opportunity cost). Penalize answers that lecture or get defensive about the methodology.",
+      "points": 15,
+      "module_section": "Communicating MMI to Skeptics"
+    }
+  ]
+}

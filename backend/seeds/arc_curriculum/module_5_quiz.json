@@ -1,0 +1,111 @@
+{
+  "module_number": 5,
+  "title": "Module 5: The 3-Call Discovery Workflow & RACI",
+  "description": "Tests fluency with the three-call structure (pain identification, scoping, MMI review), the RACI split between human reps and Vega, Vega's Flexible Decision Loop, and defensive prompting.",
+  "passing_score": 75,
+  "time_limit_seconds": 720,
+  "instructions": "Answer all questions to the best of your ability. You cannot ask ARC for help while the quiz is in progress. Aim for 10-12 minutes.",
+  "questions": [
+    {
+      "id": "m5_q1",
+      "type": "multiple_choice",
+      "prompt": "Which of the following is the PRIMARY goal of Call 1 in the 3-Call Discovery Workflow?",
+      "options": [
+        { "value": "a", "label": "Calculate MMI scores for every workflow the client mentioned" },
+        { "value": "b", "label": "Identify the client's pain points and assess data maturity (Blind / Siloed / Visible)" },
+        { "value": "c", "label": "Walk the client through the Orion-generated SOW for signature" },
+        { "value": "d", "label": "Demo the AEGISAXIOM dashboard live in front of the executive team" }
+      ],
+      "correct_answer": "b",
+      "explanation": "Call 1 is the discovery call. You're not selling, demoing, or scoring yet — you're listening for pain and probing for data state so Vega can build a useful agenda for Call 2. Trying to compress MMI scoring or SOW review into Call 1 is the #1 mistake new reps make. Stay disciplined: pain + data maturity, that's it.",
+      "points": 10,
+      "module_section": "Call 1 — Pain Identification"
+    },
+    {
+      "id": "m5_q2",
+      "type": "scenario_match",
+      "prompt": "Match each task in the 3-call process to who is RESPONSIBLE for it (Sales Rep / TA, Vega, or Client).",
+      "items": [
+        { "id": "i1", "label": "Asking the Power Questions during the live discovery call" },
+        { "id": "i2", "label": "Analyzing the call transcript afterward to identify missed questions and gaps" },
+        { "id": "i3", "label": "Generating the Call 2 agenda based on Call 1 findings" },
+        { "id": "i4", "label": "Validating that the AI Employee Matrix matches their actual operations" }
+      ],
+      "categories": [
+        { "value": "rep", "label": "Sales Rep / TA" },
+        { "value": "vega", "label": "Vega" },
+        { "value": "client", "label": "Client" }
+      ],
+      "correct_answer": { "i1": "rep", "i2": "vega", "i3": "vega", "i4": "client" },
+      "explanation": "The split is clean: humans are Responsible for live calls (you can't outsource emotional intelligence). Vega is Responsible for post-call analytical work — transcript analysis, gap detection, agenda generation, MMI calculation. The client is Responsible for validating that Vega's interpretation matches their reality. The Sales Rep / TA is ALWAYS Accountable for the deliverable, even on the steps Vega executes — you own the outcome.",
+      "points": 20,
+      "module_section": "AI + Human RACI"
+    },
+    {
+      "id": "m5_q3",
+      "type": "multiple_choice",
+      "prompt": "Vega finishes analyzing a Call 2 transcript and discovers that 3 of the 7 workflows discussed are missing critical data — for example, the client never explained how their approval thresholds work. According to the Flexible Decision Loop, what should happen next?",
+      "options": [
+        { "value": "a", "label": "Advance to Call 3 anyway and let the SOW reflect the gaps as 'TBD'" },
+        { "value": "b", "label": "Have Vega generate a follow-up call agenda targeting the specific gaps, instead of advancing to Call 3" },
+        { "value": "c", "label": "Have Vega hallucinate the missing details based on similar past clients" },
+        { "value": "d", "label": "Cancel the engagement — the client isn't ready" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B is the Flexible Decision Loop in action. Vega dynamically replans when Call 2 has gaps — instead of mechanically marching to Call 3, it generates a new follow-up call agenda targeting only the unresolved questions. This is the 'flexible' part: the workflow adapts to reality instead of running on rails. Defensive prompting (option C is the failure mode) is exactly what we DON'T want — Vega must explicitly fail on ambiguity, never hallucinate.",
+      "points": 15,
+      "module_section": "Flexible Decision Loop"
+    },
+    {
+      "id": "m5_q4",
+      "type": "true_false",
+      "prompt": "True or False: During the live discovery call, Vega is INFORMED but not ACCOUNTABLE — it doesn't drive the conversation, the human rep does.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "true",
+      "explanation": "True. The split between human EQ and AI AQ (analytical quotient) is intentional: humans run the live call because building rapport, reading the room, and following emotional threads are not jobs you can hand to an LLM. Vega is INFORMED during the call (it has access to the transcript afterward) but it's not driving. After the call ends, the responsibilities flip — Vega becomes Responsible for the analytical work and the human stays Accountable for the outcome.",
+      "points": 10,
+      "module_section": "Human EQ vs AI AQ"
+    },
+    {
+      "id": "m5_q5",
+      "type": "multiple_choice",
+      "prompt": "What is the PRIMARY goal of Call 3 in the 3-call workflow?",
+      "options": [
+        { "value": "a", "label": "Run MMI scoring on the workflows from the AI Employee Matrix and confirm scope so Orion can draft the SOW" },
+        { "value": "b", "label": "Repeat the Call 1 pain identification with new stakeholders" },
+        { "value": "c", "label": "Negotiate the price and contract terms" },
+        { "value": "d", "label": "Onboard the client onto the AEGISAXIOM platform and start training" }
+      ],
+      "correct_answer": "a",
+      "explanation": "Call 3 is the lock-in call: walk through the AI Employee Matrix one final time, score each workflow on the MMI dimensions, confirm gaps from Call 2 are resolved, and freeze the scope so Orion can take it from there. You're not selling on Call 3 — by Call 3, the sale should already be implicit. You're confirming.",
+      "points": 10,
+      "module_section": "Call 3 — MMI Review"
+    },
+    {
+      "id": "m5_q6",
+      "type": "multi_select",
+      "prompt": "Which of the following are characteristics of 'defensive prompting' as practiced by Vega? Select all that apply.",
+      "options": [
+        { "value": "a", "label": "Vega explicitly fails on ambiguity instead of guessing" },
+        { "value": "b", "label": "When Vega can't resolve a question from the transcript alone, it flags the gap for the human to address on the next call" },
+        { "value": "c", "label": "Vega invents plausible-sounding details when the transcript is incomplete, to keep the workflow moving" },
+        { "value": "d", "label": "Vega refuses to make any inference whatsoever and only outputs verbatim quotes from the transcript" }
+      ],
+      "correct_answer": ["a", "b"],
+      "explanation": "A and B are correct. Defensive prompting is the discipline of explicit failure — when Vega doesn't know, it says it doesn't know, and routes the question back to the human. C is the dangerous failure mode (hallucination) and D is the over-corrected failure mode (refusing all inference, which would make Vega useless). The right balance: confident inference where the transcript supports it, explicit failure where it doesn't.",
+      "points": 20,
+      "module_section": "Defensive Prompting"
+    },
+    {
+      "id": "m5_q7",
+      "type": "free_text",
+      "prompt": "A new TA suggests letting Vega join the live discovery call to answer client questions in real time. In two sentences, why is this a bad idea?",
+      "rubric": "A passing answer captures the core idea: live calls are the human's job (EQ, rapport, reading the room), and pushing Vega into real-time response invites hallucination — Vega's value comes from analyzing the FULL transcript afterward with defensive prompting. Either the 'EQ split' framing OR the 'hallucination risk' framing earns full credit. Penalize answers that just say 'AI shouldn't talk to clients' without explaining why.",
+      "points": 15,
+      "module_section": "AI + Human RACI"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "accounts_file": "imports/zoho/raw/Accounts.csv",
+  "contracts_file": "imports/zoho/raw/Contract.csv",
+  "deals_file": "imports/zoho/raw/Deals.csv",
+  "duplicates": {
+    "account_record_ids": {},
+    "deal_record_ids": {}
+  },
+  "errors": [],
+  "ready_for_import_plan": false,
+  "resolved": {
+    "accounts": 94,
+    "both": 93,
+    "deals": 93
+  },
+  "total_accounts": 725,
+  "total_contracts": 94,
+  "total_deals": 1432,
+  "unresolved": {
+    "accounts": [],
+    "both": [],
+    "deals": [
+      {
+        "contract_label": "CN-100121",
+        "contract_record_id": "zcrm_4761157000063081038",
+        "deal_id": "zcrm_4761157000061877009",
+        "row": 64
+      }
+    ]
+  },
+  "warnings": [
+    {
+      "count": 1,
+      "kind": "contract_deal_id_not_in_deals_export",
+      "samples": [
+        {
+          "contract_label": "CN-100121",
+          "contract_record_id": "zcrm_4761157000063081038",
+          "deal_id": "zcrm_4761157000061877009",
+          "row": 64
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,387 @@
+{
+  "module_number": null,
+  "test_type": "final_certification",
+  "title": "AI Recruiter Final Certification Test",
+  "description": "Comprehensive assessment covering all 7 modules of the AI Recruiter Certification program. Passing this test (75% or higher) awards the AI Recruiter credential and unlocks the Vega agent for client discovery work.",
+  "passing_score": 75,
+  "time_limit_seconds": 1800,
+  "instructions": "This is the final test. 25 questions covering all 7 modules. You have 30 minutes. You cannot ask ARC for help. You'll get detailed feedback on every question after you submit, regardless of pass or fail. If you pass, you'll be officially certified as an AI Recruiter and granted access to Vega. If you don't pass on the first attempt, ARC will remediate the weak areas and offer a retry — there's no penalty for needing more than one try.",
+  "questions": [
+    {
+      "id": "ft_q1",
+      "type": "multiple_choice",
+      "prompt": "What is the strongest framing of AEGISAXIOM for a CFO who's already invested heavily in Salesforce and Workday?",
+      "options": [
+        { "value": "a", "label": "AEGISAXIOM replaces Salesforce and Workday with a cheaper alternative" },
+        { "value": "b", "label": "AEGISAXIOM doesn't compete with your existing tools — it builds the digital workforce that runs the workflows your existing tools have always required humans to do" },
+        { "value": "c", "label": "AEGISAXIOM is an AI assistant that helps your team click around in Salesforce faster" },
+        { "value": "d", "label": "AEGISAXIOM is a low-code platform for building custom Salesforce add-ons" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B is the integration framing — it positions AEGISAXIOM as additive to existing investments, not in competition. This matters most for CFOs who don't want to hear about replacing what they bought. The 'AEGISAXIOM hires the workforce that runs the workflows your tools have always required humans to do' framing reframes AEGISAXIOM as digital labor, not a SaaS replacement.",
+      "points": 4,
+      "module_reference": 1
+    },
+    {
+      "id": "ft_q2",
+      "type": "true_false",
+      "prompt": "True or False: In the AEGISAXIOM architecture, individual AI agents (like Orion or Pulsar) each implement their own security and compliance policies independently.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "false",
+      "explanation": "False. Governance is abstracted to the AEGISAXIOM platform layer. Individual agents inherit security and compliance controls from AEGISAXIOM itself — they don't implement them independently. This is what makes citizen development viable.",
+      "points": 3,
+      "module_reference": 1
+    },
+    {
+      "id": "ft_q3",
+      "type": "multiple_choice",
+      "prompt": "A prospect tells you: 'Our procurement team manually keys 300 purchase orders into NetSuite every day.' Which diagnostic lens applies?",
+      "options": [
+        { "value": "a", "label": "Repeated Workflow" },
+        { "value": "b", "label": "Data-Heavy Workflow" },
+        { "value": "c", "label": "Bottleneck Workflow" },
+        { "value": "d", "label": "Not an AI opportunity" }
+      ],
+      "correct_answer": "a",
+      "explanation": "Repeated Workflow. High frequency, deterministic, low variance — the same operation 300 times a day. This is prime AI territory: a workflow that can be drawn as a small decision tree and executed reliably.",
+      "points": 3,
+      "module_reference": 2
+    },
+    {
+      "id": "ft_q4",
+      "type": "multiple_choice",
+      "prompt": "Which of these scenarios is the clearest example of a Bottleneck Workflow?",
+      "options": [
+        { "value": "a", "label": "A team that processes 500 invoices per day in a deterministic fashion" },
+        { "value": "b", "label": "A team that has to read and synthesize 90-minute call transcripts into structured CRM notes" },
+        { "value": "c", "label": "A team whose entire pipeline pauses every Friday until the legal lead approves new contract templates" },
+        { "value": "d", "label": "A team that uses 12 different SaaS tools without integration" }
+      ],
+      "correct_answer": "c",
+      "explanation": "C. A bottleneck is a workflow that stalls because of waiting on a single resource (the legal lead, in this case). The dominant friction is latency, not volume or cognitive load. A is Repeated. B is Data-Heavy. D is a Siloed data state, not a single-lens diagnosis.",
+      "points": 3,
+      "module_reference": 2
+    },
+    {
+      "id": "ft_q5",
+      "type": "multi_select",
+      "prompt": "Which are signs that 'first-principles thinking' is being applied correctly during workflow analysis? Select all that apply.",
+      "options": [
+        { "value": "a", "label": "The rep strips away the human element to look at raw inputs, transformations, and outputs" },
+        { "value": "b", "label": "The rep recognizes that some 'human steps' are just routing, not judgment" },
+        { "value": "c", "label": "The rep maps the workflow exactly as the client describes it, preserving every human handoff" },
+        { "value": "d", "label": "The rep identifies which parts of the workflow are actually value-adding vs just passing information along" }
+      ],
+      "correct_answer": ["a", "b", "d"],
+      "explanation": "A, B, and D. C is the opposite of first-principles thinking — preserving human handoffs without questioning them is exactly the trap that prevents reps from spotting automation opportunities. The whole point is to see past the way the work is currently structured and identify the underlying mechanics.",
+      "points": 4,
+      "module_reference": 2
+    },
+    {
+      "id": "ft_q6",
+      "type": "multiple_choice",
+      "prompt": "A prospect says: 'Our engineers all keep their own scripts and runbooks on their personal laptops. There's no central repository.' What is the data state?",
+      "options": [
+        { "value": "a", "label": "Visible" },
+        { "value": "b", "label": "Siloed" },
+        { "value": "c", "label": "Blind" },
+        { "value": "d", "label": "Hybrid Visible-Siloed" }
+      ],
+      "correct_answer": "c",
+      "explanation": "Blind. Personal-laptop scripts and individual runbooks are functionally undocumented for the organization — no central, machine-readable system of record exists. This is harder to spot than a notebook on a desk because the data IS digital, but it's effectively invisible to anyone who isn't the specific engineer.",
+      "points": 3,
+      "module_reference": 3
+    },
+    {
+      "id": "ft_q7",
+      "type": "multiple_choice",
+      "prompt": "Which Power Question is the strongest probe for a Visible-state confirmation?",
+      "options": [
+        { "value": "a", "label": "Where do you keep your SOPs?" },
+        { "value": "b", "label": "Do you currently utilize a unified data warehouse where cross-departmental data is aggregated?" },
+        { "value": "c", "label": "How many spreadsheets does your team use?" },
+        { "value": "d", "label": "Who's the most senior person on the team?" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B. The unified data warehouse question directly probes for the centralization, accessibility, and governance criteria that define the Visible state. A and C are more useful for probing Blind or Siloed states. D is generic discovery, not a data state diagnostic.",
+      "points": 3,
+      "module_reference": 3
+    },
+    {
+      "id": "ft_q8",
+      "type": "true_false",
+      "prompt": "True or False: An organization that uses 20 SaaS tools but has them all unified through an iPaaS like MuleSoft should be considered Siloed because of the high tool count.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "false",
+      "explanation": "False. Tool count is irrelevant — what matters is integration. A 20-tool environment unified through iPaaS meets the Visible criteria because an AI agent has a single coherent surface to query. Siloed requires the integration to be MISSING.",
+      "points": 3,
+      "module_reference": 3
+    },
+    {
+      "id": "ft_q9",
+      "type": "multiple_choice",
+      "prompt": "Which AEGISAXIOM agent would be responsible for analyzing thousands of incoming insurance claims against a complex policy ruleset in milliseconds?",
+      "options": [
+        { "value": "a", "label": "Orion" },
+        { "value": "b", "label": "Pulsar" },
+        { "value": "c", "label": "Zenith" },
+        { "value": "d", "label": "Vega" }
+      ],
+      "correct_answer": "b",
+      "explanation": "Pulsar. The high-throughput rules evaluation use case is exactly Pulsar's purpose. Orion writes SOWs, Zenith does analytics, Vega does discovery research.",
+      "points": 3,
+      "module_reference": 4
+    },
+    {
+      "id": "ft_q10",
+      "type": "scenario_match",
+      "prompt": "Match each agent to its primary function.",
+      "items": [
+        { "id": "i1", "label": "Orion" },
+        { "id": "i2", "label": "Zenith" },
+        { "id": "i3", "label": "Lyra" },
+        { "id": "i4", "label": "Callisto" }
+      ],
+      "categories": [
+        { "value": "sow", "label": "SOW Builder" },
+        { "value": "analytics", "label": "Analytics & Dashboards" },
+        { "value": "comm", "label": "Outbound Communication" },
+        { "value": "support", "label": "Internal User Support" }
+      ],
+      "correct_answer": { "i1": "sow", "i2": "analytics", "i3": "comm", "i4": "support" },
+      "explanation": "Orion → SOW Builder. Zenith → Analytics. Lyra → Communication. Callisto → Internal Support. These four plus Pulsar (rules) and Vega (research/discovery) are the six core AEGISAXIOM agents you need to know cold.",
+      "points": 4,
+      "module_reference": 4
+    },
+    {
+      "id": "ft_q11",
+      "type": "multiple_choice",
+      "prompt": "Which AI archetype best describes Vega?",
+      "options": [
+        { "value": "a", "label": "Automated Workflow" },
+        { "value": "b", "label": "Conversational AI" },
+        { "value": "c", "label": "Web App" },
+        { "value": "d", "label": "It's not an archetype — Vega is its own category" }
+      ],
+      "correct_answer": "b",
+      "explanation": "Conversational AI. Vega holds multi-turn conversations with the rep, dynamically calls tools (transcript ingestion, MMI scoring, session save), and maintains state across the discovery process. This is the textbook Conversational AI archetype.",
+      "points": 3,
+      "module_reference": 4
+    },
+    {
+      "id": "ft_q12",
+      "type": "multiple_choice",
+      "prompt": "What is the primary deliverable that Call 1 should produce, in Vega's hands?",
+      "options": [
+        { "value": "a", "label": "A finalized SOW" },
+        { "value": "b", "label": "An MMI score for every workflow discussed" },
+        { "value": "c", "label": "A Call 2 agenda built from identified pains, missed questions, and potential workflows" },
+        { "value": "d", "label": "A signed contract" }
+      ],
+      "correct_answer": "c",
+      "explanation": "C. Call 1 feeds Call 2. Vega's job after Call 1 is to extract pain points, assess data state, identify what the rep missed asking, and produce a structured Call 2 agenda. Trying to get to a SOW or MMI scores in Call 1 is a discipline failure.",
+      "points": 3,
+      "module_reference": 5
+    },
+    {
+      "id": "ft_q13",
+      "type": "scenario_match",
+      "prompt": "Match each role to its RACI status during the LIVE discovery call (not post-call analysis).",
+      "items": [
+        { "id": "i1", "label": "Sales Rep / TA" },
+        { "id": "i2", "label": "Vega" },
+        { "id": "i3", "label": "Client" }
+      ],
+      "categories": [
+        { "value": "ar", "label": "Accountable + Responsible" },
+        { "value": "i", "label": "Informed" },
+        { "value": "c", "label": "Consulted" }
+      ],
+      "correct_answer": { "i1": "ar", "i2": "i", "i3": "c" },
+      "explanation": "During the live call: the Sales Rep / TA is both Accountable and Responsible (they own and execute the call). Vega is Informed (it has access to the transcript, but it's not driving). The Client is Consulted (they're being asked questions, not driving the agenda). This split flips after the call ends, when Vega becomes Responsible for the analytical work.",
+      "points": 4,
+      "module_reference": 5
+    },
+    {
+      "id": "ft_q14",
+      "type": "true_false",
+      "prompt": "True or False: When Call 2 has gaps, the correct action under the Flexible Decision Loop is to advance to Call 3 anyway and flag the gaps in the SOW as 'TBD'.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "false",
+      "explanation": "False. The Flexible Decision Loop dynamically replans — when Call 2 has gaps, Vega generates a follow-up call agenda targeting those gaps INSTEAD of advancing to Call 3. Pushing forward with TBDs violates the design intent and produces SOWs Orion can't reliably draft.",
+      "points": 3,
+      "module_reference": 5
+    },
+    {
+      "id": "ft_q15",
+      "type": "multiple_choice",
+      "prompt": "What does 'defensive prompting' mean in the context of Vega?",
+      "options": [
+        { "value": "a", "label": "Vega refuses to make any inference and only outputs verbatim transcript text" },
+        { "value": "b", "label": "Vega explicitly fails on ambiguity and routes the question back to the human, instead of hallucinating" },
+        { "value": "c", "label": "Vega defends its conclusions against pushback from the rep" },
+        { "value": "d", "label": "Vega uses a defensive system prompt to refuse off-topic questions" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B. Defensive prompting is the discipline of explicit failure on ambiguity. Vega must say 'I don't know — you need to ask this on the next call' rather than inventing plausible details. A is the over-corrected failure mode (refuses to infer at all). C and D are unrelated.",
+      "points": 3,
+      "module_reference": 5
+    },
+    {
+      "id": "ft_q16",
+      "type": "multiple_choice",
+      "prompt": "Calculate the MMI score: TSS=4, IE=2, Time=5, Cost=4, Quality=3, Satisfaction=2.",
+      "options": [
+        { "value": "a", "label": "14" },
+        { "value": "b", "label": "20" },
+        { "value": "c", "label": "28" },
+        { "value": "d", "label": "56" }
+      ],
+      "correct_answer": "c",
+      "explanation": "(4/2) × (5+4+3+2) = 2 × 14 = 28. A solid mid-tier workflow worth implementing.",
+      "points": 4,
+      "module_reference": 6
+    },
+    {
+      "id": "ft_q17",
+      "type": "multiple_choice",
+      "prompt": "Workflow A scores 30. Workflow B scores 45. Workflow A has higher TSS (5 vs 3). Which should you prioritize in the AI Employee Matrix?",
+      "options": [
+        { "value": "a", "label": "Workflow A — higher TSS means more strategic" },
+        { "value": "b", "label": "Workflow B — the score is what ranks the matrix, regardless of which input drove it" },
+        { "value": "c", "label": "Workflow A — clients always prefer the more strategic option" },
+        { "value": "d", "label": "Either is fine — they're close enough" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B. The MMI score is the final ranking. A high TSS doesn't override a lower total score. Workflow B is winning because its lower IE (or stronger dimensional contributions) more than offsets A's TSS advantage. This is the central insight of the MMI methodology.",
+      "points": 3,
+      "module_reference": 6
+    },
+    {
+      "id": "ft_q18",
+      "type": "multi_select",
+      "prompt": "Which of the following correctly describe the Satisfaction dimension in MMI? Select all that apply.",
+      "options": [
+        { "value": "a", "label": "It includes external customer satisfaction (NPS, CSAT, churn risk)" },
+        { "value": "b", "label": "It includes internal employee experience (turnover risk on tedious roles)" },
+        { "value": "c", "label": "It only measures Net Promoter Score from external customers" },
+        { "value": "d", "label": "A workflow that frees senior staff from drudgery scores high on Satisfaction even if no external customer notices" }
+      ],
+      "correct_answer": ["a", "b", "d"],
+      "explanation": "A, B, and D. C is the common misconception — Satisfaction is intentionally double-sided (external AND internal). Reps who only frame it as customer NPS miss a huge portion of the ROI story for back-office automation.",
+      "points": 4,
+      "module_reference": 6
+    },
+    {
+      "id": "ft_q19",
+      "type": "multiple_choice",
+      "prompt": "A prospect on Call 1 says: 'Our SOPs live in a 200-page Confluence space, and our QC team has full API access to our Snowflake warehouse.' What is the data state?",
+      "options": [
+        { "value": "a", "label": "Blind" },
+        { "value": "b", "label": "Siloed" },
+        { "value": "c", "label": "Visible" },
+        { "value": "d", "label": "Cannot be determined from this statement alone" }
+      ],
+      "correct_answer": "c",
+      "explanation": "Visible. SOPs in a centralized, accessible system (Confluence) plus API access to a governed data warehouse (Snowflake) meets the Visible criteria. This is the ideal state for immediate complex AI agent deployment — you can bypass digitization and propose ambitious workflows confidently.",
+      "points": 3,
+      "module_reference": 3
+    },
+    {
+      "id": "ft_q20",
+      "type": "scenario_match",
+      "prompt": "On a single Call 1, you hear all of these signals from the same client. Match each to the framework or concept it most directly relates to.",
+      "items": [
+        { "id": "i1", "label": "Our marketing team copies leads from HubSpot into Salesforce by hand because the integration broke a year ago" },
+        { "id": "i2", "label": "Compliance review on every customer agreement takes two weeks because Sarah is the only approver" },
+        { "id": "i3", "label": "We have no idea how our pricing model works — Phil just sets it" },
+        { "id": "i4", "label": "Our QA team spends 4 hours a day reading defect reports and synthesizing weekly summaries" }
+      ],
+      "categories": [
+        { "value": "siloed", "label": "Siloed data state" },
+        { "value": "bottleneck", "label": "Bottleneck Workflow" },
+        { "value": "blind", "label": "Blind data state" },
+        { "value": "data_heavy", "label": "Data-Heavy Workflow" }
+      ],
+      "correct_answer": { "i1": "siloed", "i2": "bottleneck", "i3": "blind", "i4": "data_heavy" },
+      "explanation": "i1 is the textbook Siloed pattern (broken integration, manual export/import). i2 is a Bottleneck Workflow (single approver constraint). i3 is Blind (pricing logic in a human's head). i4 is Data-Heavy (synthesizing unstructured input volume). A skilled rep can map all four signals from a single 30-minute Call 1 — that's what the certification is preparing you to do.",
+      "points": 5,
+      "module_reference": "1-7"
+    },
+    {
+      "id": "ft_q21",
+      "type": "multiple_choice",
+      "prompt": "On Call 3, Vega computes MMI scores for each workflow in the matrix. The session status flips to 'ready_for_sow.' What happens next in the AEGISAXIOM pipeline?",
+      "options": [
+        { "value": "a", "label": "Vega writes the SOW directly" },
+        { "value": "b", "label": "Orion takes the structured intelligence from Vega's session and drafts the SOW" },
+        { "value": "c", "label": "The rep manually retypes the matrix into a Word document" },
+        { "value": "d", "label": "The session is archived and the engagement ends" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B. The handoff is Vega → Orion. Vega does the discovery and analysis; Orion takes the structured AI Employee Matrix plus MMI scores and produces the SOW (executive summary, scope, milestones, financial justification, assumptions and risks). This separation of concerns is intentional — discovery and drafting are different jobs.",
+      "points": 3,
+      "module_reference": "4, 5"
+    },
+    {
+      "id": "ft_q22",
+      "type": "multi_select",
+      "prompt": "A prospect's COO says: 'I love this stuff but I don't believe AI is reliable enough for finance work.' Which of these are good rep responses that draw on the certification material? Select all that apply.",
+      "options": [
+        { "value": "a", "label": "Point to the dashboard data showing accuracy ≥ 90% for shipped agents like Orion, and explain that high accuracy means review-by-exception not blind trust" },
+        { "value": "b", "label": "Acknowledge the concern and offer to start with a low-IE high-Quality workflow (where errors are easy to detect) to build trust before expanding scope" },
+        { "value": "c", "label": "Tell the COO they're behind the times and need to get on board with AI" },
+        { "value": "d", "label": "Explain that AEGISAXIOM uses defensive prompting — agents explicitly fail rather than hallucinating, which is exactly the safety property finance teams need" }
+      ],
+      "correct_answer": ["a", "b", "d"],
+      "explanation": "A, B, and D are all good rep responses that use specific concepts from the curriculum: dashboard literacy, MMI-driven prioritization, and defensive prompting. C is a bad-rep response that loses the deal. The right pattern: meet skepticism with specific evidence and an incremental plan, not with pressure.",
+      "points": 5,
+      "module_reference": "1, 4, 5, 6"
+    },
+    {
+      "id": "ft_q23",
+      "type": "multiple_choice",
+      "prompt": "Which is the strongest single indicator that an organization is ready for COMPLEX, multi-step AI workflows (vs simple point automations)?",
+      "options": [
+        { "value": "a", "label": "They have a Conversational AI champion on the executive team" },
+        { "value": "b", "label": "They are in the Visible data state with centralized, API-accessible, governed data" },
+        { "value": "c", "label": "They have more than 500 employees" },
+        { "value": "d", "label": "They use Salesforce" }
+      ],
+      "correct_answer": "b",
+      "explanation": "B. Data state is the gating factor for workflow complexity. Visible-state organizations can absorb complex multi-step agentic workflows immediately. Blind and Siloed organizations need foundational work first regardless of size, executive enthusiasm, or tooling choices.",
+      "points": 3,
+      "module_reference": 3
+    },
+    {
+      "id": "ft_q24",
+      "type": "true_false",
+      "prompt": "True or False: A workflow with TSS=5, IE=5 (extremely strategic but extremely hard to build) automatically ranks higher than a workflow with TSS=3, IE=1 (moderate strategic value but trivial to build), regardless of dimensional inputs.",
+      "options": [
+        { "value": "true", "label": "True" },
+        { "value": "false", "label": "False" }
+      ],
+      "correct_answer": "false",
+      "explanation": "False. TSS=5, IE=5 yields a multiplier of 1.0. TSS=3, IE=1 yields a multiplier of 3.0. The 'easy moderate' workflow gets a 3× boost on its dimensional sum, while the 'hard heroic' workflow only gets 1×. Quick wins routinely outrank big strategic projects in the MMI matrix — and that's a feature, not a bug.",
+      "points": 4,
+      "module_reference": 6
+    },
+    {
+      "id": "ft_q25",
+      "type": "free_text",
+      "prompt": "Call 1, 15 minutes in. Prospect tells you: (1) they use NetSuite + Google Drive + Excel without integration, (2) AP clerk Tara spends 5 hours/day matching invoices to POs by clicking between NetSuite tabs and Excel, (3) AP director has been asking IT for automation for 18 months. In three or four sentences: name the data state, name the diagnostic lens, name the AEGISAXIOM approach (which agent or archetype), and propose rough MMI inputs (TSS / IE / T / C / Q / S) with one-line justification.",
+      "rubric": "A passing answer must include all FOUR elements: (1) Data state = Siloed (NetSuite + Excel without integration is the textbook pattern). (2) Diagnostic lens = Data-Heavy (cross-referencing across sources is dominant; Repeated is acceptable as secondary). (3) AEGISAXIOM approach = an Automated Workflow archetype, or Pulsar for the rules-based matching. NOT Orion or Vega — those are upstream/downstream of execution. (4) MMI hypothesis with brief justification. Reasonable values: TSS≈3-4 (back-office), IE≈2 (moderate), Time≈4-5 (5 hrs/day is high), Cost≈3-4 (single FTE), Quality≈3-4 (matching errors have downstream cost), Satisfaction≈3 (Tara hates this work). Score in the 25-50 range. Reward concise, integrated answers. Heavily penalize answers that miss any of the four elements or that max every MMI dimension unrealistically.",
+      "points": 10,
+      "module_reference": "1-7"
+    }
+  ]
+}

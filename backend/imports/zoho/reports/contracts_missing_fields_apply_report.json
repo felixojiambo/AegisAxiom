@@ -1,0 +1,2930 @@
+{
+  "action_counts": {
+    "actual_creates": 0,
+    "actual_updates": 94,
+    "skipped": 0,
+    "would_create": 0,
+    "would_update": 94
+  },
+  "conflicts_total": 0,
+  "csv_path": "imports/zoho/raw/Contract.csv",
+  "csv_rows_seen": 94,
+  "csv_warnings": [],
+  "field_patch_counts": {
+    "bill_on_actual_hours": 16,
+    "consumed_hours_percent": 86,
+    "contract_owner_name_raw": 94,
+    "contract_status_raw": 94,
+    "contract_type": 2,
+    "deal_name": 94,
+    "external_ids": 94,
+    "hours_consumed": 74,
+    "hours_to_be_paid": 16,
+    "import_raw": 94,
+    "imported_total_hours_alt": 56,
+    "number_of_invoices": 87,
+    "paid_hours": 9,
+    "remaining_hours": 94,
+    "source_created_by": 94,
+    "source_last_activity_at": 94,
+    "total_hours": 83,
+    "total_hours_purchased": 83,
+    "zoho_locked": 94,
+    "zoho_status_raw": 3
+  },
+  "finished_at": "2026-05-22T19:32:31.204921+00:00",
+  "match_counts": {
+    "matched": 94,
+    "unmatched": 0
+  },
+  "mode": "execute",
+  "notes": [
+    "Default mode is dry-run. Writes happen only when --execute is explicitly passed.",
+    "Never overwrites resources, resource_types, hourly_rate, project_ids, projects, approval configuration, or local AEGISAXIOM audit fields. Use git history to verify.",
+    "Canonical fields (total_hours, hours_consumed, status) are gated behind --overwrite-existing / --promote-status. Finance review required where flagged."
+  ],
+  "options": {
+    "allow_create": false,
+    "overwrite_existing": false,
+    "promote_status": false
+  },
+  "per_row": [
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_8f7292593f1a",
+      "contract_number": "CN-100008",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000023461001",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_956b50815c5f",
+      "contract_number": "CN-100009",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "contract_type",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "imported_total_hours_alt",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [],
+      "record_id": "zcrm_4761157000023561001",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_93110f724403",
+      "contract_number": "CN-100025",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "contract_type",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "imported_total_hours_alt",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [],
+      "record_id": "zcrm_4761157000024861001",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_82523c73875d",
+      "contract_number": "CN-100026",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000025292019",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_d0c074fd4ec4",
+      "contract_number": "CN-100027",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000025292049",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_1623cc930d12",
+      "contract_number": "CN-100032",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000026108009",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_cccb522481bd",
+      "contract_number": "CN-100033",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000026190010",
+      "warnings": [
+        {
+          "apos": 25.0,
+          "kind": "total_hours_conflict_between_columns",
+          "plain": 45.0
+        }
+      ]
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_2148d267a01e",
+      "contract_number": "CN-100038",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000026308001",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_68a87e8ebae7",
+      "contract_number": "CN-100041",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000026506093",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_4d1ecd48923f",
+      "contract_number": "CN-100044",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)"
+      ],
+      "record_id": "zcrm_4761157000026692030",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_0a39865012b2",
+      "contract_number": "CN-100045",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000027216038",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_f9dae5566388",
+      "contract_number": "CN-100046",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000027443001",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_d9ffcf5bcf22",
+      "contract_number": "CN-100047",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000028068035",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_17e0ac0107e1",
+      "contract_number": "CN-100048",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000028164057",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_3515a524abf0",
+      "contract_number": "CN-100049",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [],
+      "record_id": "zcrm_4761157000028454049",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_a88f02d8b96e",
+      "contract_number": "CN-100061",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000031722101",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_4fb8df0c81aa",
+      "contract_number": "CN-100062",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000031928205",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_7ee8abbaa366",
+      "contract_number": "CN-100064",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000032813020",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_90e568fe326c",
+      "contract_number": "CN-100066",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000033800253",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_df10d41fcd7d",
+      "contract_number": "CN-100067",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000034391280",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_0abdecea2e78",
+      "contract_number": "CN-100069",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000035356101",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_80f34217d599",
+      "contract_number": "CN-100072",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000036804328",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_d983da927681",
+      "contract_number": "CN-100076",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000038844137",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_2da0c949ea8e",
+      "contract_number": "CN-100077",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000038940192",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_806c7089cee4",
+      "contract_number": "CN-100078",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [],
+      "record_id": "zcrm_4761157000044947034",
+      "warnings": [
+        {
+          "apos": 16.33,
+          "kind": "total_hours_conflict_between_columns",
+          "plain": 0.0
+        }
+      ]
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_07de11587021",
+      "contract_number": "CN-100079",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000045393079",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_ce7e624ef3cf",
+      "contract_number": "CN-100080",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000046538204",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_5b2091e749f0",
+      "contract_number": "CN-100081",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000046760088",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_e68f0b44f9dd",
+      "contract_number": "CN-100082",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000047415155",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_0f3ad166df8b",
+      "contract_number": "CN-100083",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000047777090",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_31a21df26be2",
+      "contract_number": "CN-100084",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000048238198",
+      "warnings": [
+        {
+          "apos": 120.0,
+          "kind": "total_hours_conflict_between_columns",
+          "plain": 40.0
+        }
+      ]
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_279aafd6c6a2",
+      "contract_number": "CN-100085",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000049782212",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_0631bb9a1815",
+      "contract_number": "CN-100086",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000049782493",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_fe2a23abd320",
+      "contract_number": "CN-100087",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000049824294",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_f74f5533534d",
+      "contract_number": "CN-100088",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000050238264",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_cd9b7d493cb6",
+      "contract_number": "CN-100090",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000052959177",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_c4e727d1722b",
+      "contract_number": "CN-100091",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000052994243",
+      "warnings": [
+        {
+          "apos": 35.0,
+          "kind": "total_hours_conflict_between_columns",
+          "plain": 30.0
+        }
+      ]
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_bf4f9b75f23a",
+      "contract_number": "CN-100092",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000053258135",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_c3e309ae9149",
+      "contract_number": "CN-100093",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000054413001",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_dd2244694c9a",
+      "contract_number": "CN-100094",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000055018130",
+      "warnings": [
+        {
+          "apos": 190.0,
+          "kind": "total_hours_conflict_between_columns",
+          "plain": 170.0
+        }
+      ]
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_841deb2e3a56",
+      "contract_number": "CN-100095",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000055118108",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_34745bf7c29a",
+      "contract_number": "CN-100096",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000055118282",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_96adf45f3a43",
+      "contract_number": "CN-100097",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000055118419",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_41dc8484d5cb",
+      "contract_number": "CN-100098",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000056535221",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_2b72d487a81d",
+      "contract_number": "CN-100099",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)"
+      ],
+      "record_id": "zcrm_4761157000057640065",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_c38775b86989",
+      "contract_number": "CN-100100",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000058338202",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_2f2a83a605c0",
+      "contract_number": "CN-100101",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000058511188",
+      "warnings": [
+        {
+          "apos": 100.0,
+          "kind": "total_hours_conflict_between_columns",
+          "plain": 50.0
+        }
+      ]
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_b3590a9d0011",
+      "contract_number": "CN-100102",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000059390025",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_e9050c0acd12",
+      "contract_number": "CN-100103",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000059390094",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_67ad87b8cac1",
+      "contract_number": "CN-100104",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_to_be_paid",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked",
+        "zoho_status_raw"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [],
+      "record_id": "zcrm_4761157000059657178",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_2e59af541564",
+      "contract_number": "CN-100106",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000059899069",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_5d555efb9d74",
+      "contract_number": "CN-100108",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)"
+      ],
+      "record_id": "zcrm_4761157000060092038",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_509b78b09378",
+      "contract_number": "CN-100109",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000060265022",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_d6df7822b951",
+      "contract_number": "CN-100110",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked",
+        "zoho_status_raw"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000060359045",
+      "warnings": [
+        {
+          "apos": 100.0,
+          "kind": "total_hours_conflict_between_columns",
+          "plain": 5.0
+        }
+      ]
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_f349b28b7ee2",
+      "contract_number": "CN-100111",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000060900001",
+      "warnings": [
+        {
+          "apos": 12.0,
+          "kind": "total_hours_conflict_between_columns",
+          "plain": 0.0
+        }
+      ]
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_b02cc0416345",
+      "contract_number": "CN-100112",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "imported_total_hours_alt",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000060900102",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_41347fcb42bd",
+      "contract_number": "CN-100114",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked",
+        "zoho_status_raw"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [],
+      "record_id": "zcrm_4761157000061021163",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_7e79981d0c8d",
+      "contract_number": "CN-100115",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000061452222",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_4ab5385ce359",
+      "contract_number": "CN-100116",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000061452369",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_7f7d59dfa8c7",
+      "contract_number": "CN-100117",
+      "fields_patched": [
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000061863071",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_7a2ec2530d98",
+      "contract_number": "CN-100118",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000062598044",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_d550ebaba23a",
+      "contract_number": "CN-100119",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000062598150",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_4b6c8fee52ca",
+      "contract_number": "CN-100120",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000062636084",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_c91c92533e86",
+      "contract_number": "CN-100121",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000063081038",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_6a9af083c46a",
+      "contract_number": "CN-100122",
+      "fields_patched": [
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000063581052",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_bf06aa608946",
+      "contract_number": "CN-100123",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000064443081",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_cbf152ae5c20",
+      "contract_number": "CN-100124",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000064588081",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_02a4fe57846b",
+      "contract_number": "CN-100125",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000064959091",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_3c79a51d732c",
+      "contract_number": "CN-100126",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000066201055",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_4276611d1e15",
+      "contract_number": "CN-100127",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000067058058",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_f3d1fcf9cc8a",
+      "contract_number": "CN-100128",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000067204283",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_26424bb9a5f9",
+      "contract_number": "CN-100129",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000067204402",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_25190690b557",
+      "contract_number": "CN-100130",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000067986113",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_f73e954e0415",
+      "contract_number": "CN-100132",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000072316061",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_c126eb3cb2ad",
+      "contract_number": "CN-100133",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000072393067",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_789799e593ed",
+      "contract_number": "CN-100134",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000072967047",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_374ae6320dac",
+      "contract_number": "CN-100135",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000073220046",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_12c1cc86ce41",
+      "contract_number": "CN-100136",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000073382044",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_b3e15242ab31",
+      "contract_number": "CN-100137",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000073614048",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_ea674048ef3a",
+      "contract_number": "CN-100138",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000074886059",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_f6e51dc989e6",
+      "contract_number": "CN-100139",
+      "fields_patched": [
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [],
+      "record_id": "zcrm_4761157000075540001",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_cb663ae29cf9",
+      "contract_number": "CN-100140",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [],
+      "record_id": "zcrm_4761157000075614043",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_03913ab1eae2",
+      "contract_number": "CN-100141",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000075737039",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_09c3a963b520",
+      "contract_number": "CN-100142",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000075843063",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_0a842ef03915",
+      "contract_number": "CN-100143",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000077194017",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_bbf89be22833",
+      "contract_number": "CN-100144",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000077298035",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_291c5c63bfd3",
+      "contract_number": "CN-100146",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000078157029",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_fb7e78975768",
+      "contract_number": "CN-100147",
+      "fields_patched": [
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000079475045",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_e719e20a433c",
+      "contract_number": "CN-100149",
+      "fields_patched": [
+        "bill_on_actual_hours",
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "hours_consumed",
+        "hours_to_be_paid",
+        "import_raw",
+        "number_of_invoices",
+        "paid_hours",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "hours_consumed (verify against historical time replay / Zoho snapshot)",
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000080748117",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_44ac20519d4e",
+      "contract_number": "CN-100150",
+      "fields_patched": [
+        "consumed_hours_percent",
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000081192056",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_5195c7c74aa9",
+      "contract_number": "CN-100151",
+      "fields_patched": [
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000081290107",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_dd1e1c2c09ca",
+      "contract_number": "CN-100152",
+      "fields_patched": [
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000081996055",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_b6d474150407",
+      "contract_number": "CN-100153",
+      "fields_patched": [
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000083436065",
+      "warnings": []
+    },
+    {
+      "action": "updated",
+      "conflicts": [],
+      "contract_id": "contract_c1e7fa75fde1",
+      "contract_number": "CN-100154",
+      "fields_patched": [
+        "contract_owner_name_raw",
+        "contract_status_raw",
+        "deal_name",
+        "external_ids",
+        "import_raw",
+        "number_of_invoices",
+        "remaining_hours",
+        "source_created_by",
+        "source_last_activity_at",
+        "total_hours",
+        "total_hours_purchased",
+        "zoho_locked"
+      ],
+      "match_source": "zoho_contract_id",
+      "matched": true,
+      "needs_finance_review": [
+        "total_hours (verify against contract record)"
+      ],
+      "record_id": "zcrm_4761157000084889020",
+      "warnings": []
+    }
+  ],
+  "warning_kinds": {
+    "total_hours_conflict_between_columns": 8
+  }
+}
