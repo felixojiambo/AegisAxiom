@@ -134,6 +134,14 @@ To begin the development, run `npm start` or `yarn start`.
 To create a production bundle, use `npm run build` or `yarn build`.
 -->
 <script>
+    // PostHog analytics — gated on REACT_APP_POSTHOG_KEY. CRA interpolates
+    // %REACT_APP_*% at build time. A blank key (or an uninterpolated
+    // placeholder) → no-op: the loader stub is never defined, no analytics
+    // script is fetched, and no request goes to posthog.com. Set the key only
+    // in the untracked frontend/.env to enable analytics.
+    (function () {
+    var __POSTHOG_KEY = "%REACT_APP_POSTHOG_KEY%";
+    if (!__POSTHOG_KEY || __POSTHOG_KEY.charAt(0) === "%") { return; }
     !(function (t, e) {
         var o, n, p, r;
         e.__SV ||
@@ -195,7 +203,7 @@ To create a production bundle, use `npm run build` or `yarn build`.
             }),
             (e.__SV = 1));
     })(document, window.posthog || []);
-    posthog.init("phc_xAvL2Iq4tFmANRE7kzbKwaSqp1HJjN7x48s3vr0CMjs", {
+    posthog.init(__POSTHOG_KEY, {
         api_host: "https://us.i.posthog.com",
         person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well,
         session_recording: {
@@ -203,6 +211,7 @@ To create a production bundle, use `npm run build` or `yarn build`.
             capturePerformance: false,
         },
     });
+    })();
 </script>
 </body>
 </html>

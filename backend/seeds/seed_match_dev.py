@@ -52,7 +52,10 @@ _DEFAULT_APPDIRECT_BEARER = (
 )
 _DEFAULT_N8N_TRIGGER_URL = "https://n8n.simplimeta.io/webhook/process-provider-report"
 _DEFAULT_N8N_MAGIC_URL = "https://n8n.simplimeta.io/webhook/suggest-mappings"
-_DEFAULT_N8N_TOKEN = "cOMoIwEz-6IKeMGFOAfIXTqD6IiniI8efLkWMMp6OZQ"
+# No hardcoded default — the n8n bearer must come from the environment. When
+# unset, the settings seeder skips the n8n credential rather than storing a
+# blank/placeholder bearer (see _seed_settings_singleton).
+_DEFAULT_N8N_TOKEN = os.getenv("MATCH_DEV_N8N_TOKEN", "")
 
 _SINGLETON_FILTER: Dict[str, Any] = {"_singleton": True}
 _DEV_TEMPLATE_ID = "m_tmpl_dev_nextiva"
@@ -123,8 +126,13 @@ async def _seed_settings_singleton(db) -> list:
     _fill_if_blank(n8n, "trigger_webhook_url", n8n_trigger_url, filled, "n8n.trigger_webhook_url")
     _fill_if_blank(n8n, "magic_mapping_webhook_url", n8n_magic_url, filled, "n8n.magic_mapping_webhook_url")
     if _is_blank(n8n.get("shared_auth_token")):
-        n8n["shared_auth_token"] = encrypt_value(n8n_token_plaintext)
-        filled.append("n8n.shared_auth_token (encrypted)")
+        if n8n_token_plaintext:
+            n8n["shared_auth_token"] = encrypt_value(n8n_token_plaintext)
+            filled.append("n8n.shared_auth_token (encrypted)")
+        else:
+            logger.info(
+                "MATCH dev seed: MATCH_DEV_N8N_TOKEN unset — skipping n8n.shared_auth_token seed"
+            )
 
     # AppDirect block.
     _fill_if_blank(appdirect, "base_url", appdirect_url, filled, "appdirect.base_url")
