@@ -1166,3 +1166,9 @@ async def shutdown_db_client():
     client = database.get_client()
     if client:
         client.close()
+    # Phase 0 (Postgres re-platform): dispose the async SQLAlchemy engine if one
+    # was ever created. Imported locally and lazy — this is a no-op when Postgres
+    # was never touched (the entire Mongo-only Phase 0 run), so it cannot connect
+    # or fail here. See db/session.py and postgres-migration-plan.md §A1.
+    from db.session import dispose_engine
+    await dispose_engine()
