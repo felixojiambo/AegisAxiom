@@ -1,0 +1,31 @@
+# Dedicated PostgreSQL test database for the backend test suite (Phase 0).
+#
+# This is the PRIMARY CI path for the Postgres repository tests (plan §A11).
+# Bring it up, point TEST_DATABASE_URL at it, and run pytest:
+#
+#   docker compose -f docker-compose.test.yml up -d
+#   export TEST_DATABASE_URL=postgresql+asyncpg://aegis:aegis@localhost:5544/aegis_test
+#   (cd backend && pytest)
+#   docker compose -f docker-compose.test.yml down -v
+#
+# Uses the pgvector image so the `vector` extension exists for the baseline
+# migration. Ephemeral: no named volume, so `down` discards all data. Port 5544
+# avoids clashing with a running primary stack (5432) or ingestion stack (5433).
+services:
+  postgres-test:
+    image: pgvector/pgvector:pg16
+    container_name: aegisaxiom-postgres-test
+    ports:
+      - "5544:5432"
+    environment:
+      - POSTGRES_USER=aegis
+      - POSTGRES_PASSWORD=aegis
+      - POSTGRES_DB=aegis_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegis_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
