@@ -328,8 +328,9 @@ class TestZohoIntegration:
         data = resp.json()
         
         assert "zoho" in data
-        assert "qbo" in data
-        
+        # (External accounting integration removed in Phase 1 — the status
+        # endpoint no longer reports that provider key.)
+
         zoho_connected = data["zoho"].get("connected", False)
         print(f"✓ Integration status: Zoho {'connected' if zoho_connected else 'not connected'}")
     

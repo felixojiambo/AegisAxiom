@@ -1403,10 +1403,6 @@ class AdminSetupRequest(BaseModel):
 class OAuthCodeRequest(BaseModel):
     code: str
 
-class QBOCallbackRequest(BaseModel):
-    code: str
-    realm_id: str = ""
-
 class RoleCreateRequest(BaseModel):
     name: str
     display_name: Optional[str] = None
@@ -1456,7 +1452,6 @@ class OAuthToken(BaseModel):
     refresh_token: Optional[str] = None
     expires_at: Optional[datetime] = None
     scope: Optional[str] = None
-    realm_id: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

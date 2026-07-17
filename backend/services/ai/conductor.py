@@ -276,9 +276,10 @@ def _is_vega_nova_bridge_agent(agent) -> bool:
 
 
 def _get_nova_tool_schemas() -> list[dict]:
-    from services.ai.agents.tools.nova_tools import NOVA_TOOL_SCHEMAS
-
-    return list(NOVA_TOOL_SCHEMAS)
+    # Nova finance tooling was removed (Nova/FCC park, Phase 1). No finance
+    # tool schemas are exposed anymore; the Vega→Nova finance bridge below
+    # degrades to offering no tools rather than importing a deleted module.
+    return []
 
 
 def _nova_tool_names(agent) -> set[str]:
@@ -405,86 +406,7 @@ async def _run_agent_turn(
         except Exception:  # noqa: BLE001 — instrumentation must not crash chat
             _pp_record = None
 
-    # Finance Query Planner shadow-mode (NOVA_FINANCE_QUERY_PLANNER env
-    # var). Off by default. When enabled, runs plan→validate→compile
-    # alongside the existing tool loop and logs the result for
-    # comparison. Never mutates state, dispatches a tool, or talks to
-    # Mongo through the planner code path — but the shadow hook itself
-    # makes one indexed count_documents query against chat_messages
-    # to derive has_prior_total. Failures are swallowed inside the
-    # helper so a planner bug can't break the user's reply.
-    #
-    # NOTE: ``run_shadow_evaluation`` is dispatched via
-    # ``asyncio.to_thread`` so it cannot block the event loop even
-    # if a future refactor inside ``plan_finance_query`` /
-    # ``validate_finance_plan`` / ``compile_finance_plan`` adds an
-    # HTTP or DB call. The planner pipeline is pure CPU today, but
-    # the wrap is cheap and removes the latent footgun the review
-    # flagged. Exceptions stay non-fatal via the outer try/except
-    # below — the shadow path must never break a user reply.
-    if route == "nova" and isinstance(user_message, str):
-        _pp_planner_start = None
-        if _pp_record is not None:
-            try:
-                from services.ai.nova_perf import now_perf as _pp_now
-                _pp_planner_start = _pp_now()
-            except Exception:  # noqa: BLE001
-                _pp_planner_start = None
-        try:
-            from services.ai.agents.finance_query_shadow import run_shadow_evaluation
-
-            # available_tools — the closed set of Nova tool names
-            # registered for this deployment. The shadow path uses it
-            # to flag plans that target a tool the deployment can't
-            # satisfy (compile branch returns is_supported=False with
-            # the routing failure surfaced in the log).
-            available_tools: set[str] = set()
-            try:
-                schemas = getattr(agent, "tool_schemas", None) or []
-                for schema in schemas:
-                    if isinstance(schema, dict):
-                        nm = schema.get("name")
-                        if isinstance(nm, str):
-                            available_tools.add(nm)
-            except Exception:  # noqa: BLE001 — best effort only
-                available_tools = set()
-
-            # has_prior_total — proxy for "this conversation has
-            # already produced a numeric finance answer the user
-            # could be drilling into." Scope to assistant turns in
-            # this session so the back-reference planner branch only
-            # fires when there's prior context. Intentionally coarse
-            # (not parsing tool results); the shadow path is for
-            # routing audit, not user-facing decisions.
-            has_prior_total = False
-            try:
-                if session_id:
-                    has_prior_total = (
-                        await db.chat_messages.count_documents(
-                            {"session_id": session_id, "role": "assistant"},
-                            limit=1,
-                        )
-                    ) > 0
-            except Exception:  # noqa: BLE001 — best effort only
-                has_prior_total = False
-
-            await asyncio.to_thread(
-                run_shadow_evaluation,
-                user_message,
-                runtime_today=datetime.now(timezone.utc).date(),
-                has_prior_total=has_prior_total,
-                available_tools=available_tools,
-                session_id=session_id,
-            )
-        except Exception as e:  # noqa: BLE001 — shadow must not crash chat
-            logger.warning(f"finance_query_planner shadow hook failed: {e}")
-        finally:
-            if _pp_record is not None and _pp_planner_start is not None:
-                try:
-                    from services.ai.nova_perf import elapsed_ms as _pp_elapsed
-                    _pp_planner_ms_acc += _pp_elapsed(_pp_planner_start)
-                except Exception:  # noqa: BLE001
-                    pass
+    # (Finance Query Planner shadow-mode was removed with Nova in Phase 1.)
 
     # Fetch knowledge base + user state
     fetch_result = await agent.fetch_data(db, user, {})
@@ -784,33 +706,8 @@ async def _run_agent_turn(
         static_defs = _tool_definitions_from_static_schemas(exposed_static_tool_schemas)
         tool_defs = (tool_defs or []) + (static_defs or [])
 
-    if nova_tool_names:
-        from services.ai.agents.tools.nova_tools import _ScenarioState
-        # Rehydrate scenario state from the session so manual cost
-        # assumptions and overrides survive across user turns. Without
-        # this, "add a payroll cost" → "now run the projection" would
-        # lose the cost between turns. We persist via session.nova_state
-        # at the end of the turn.
-        persisted_nova_state: dict | None = None
-        if session_id:
-            try:
-                nova_session_doc = await db.chat_sessions.find_one(
-                    {"session_id": session_id},
-                    {"_id": 0, "nova_state": 1},
-                )
-                if nova_session_doc:
-                    persisted_nova_state = nova_session_doc.get("nova_state")
-            except Exception as e:
-                logger.warning(
-                    f"Failed to load nova_state from session {session_id}: {e}"
-                )
-        try:
-            nova_state = _ScenarioState.from_dict(persisted_nova_state)
-        except Exception as e:
-            logger.warning(
-                f"Failed to rehydrate nova_state, starting fresh: {e}"
-            )
-            nova_state = _ScenarioState()
+    # (Nova scenario-state rehydration removed with Nova in Phase 1;
+    # nova_tool_names is always empty now, so no finance tools are dispatched.)
 
     # ── Gemini explicit-cache lookup (Nova only) ──
     # The stable prompt + tool schema block is the same every Nova
@@ -868,19 +765,6 @@ async def _run_agent_turn(
     # unchanged. See services.ai.agents.nova.wrap_user_message_for_nova
     # and the matching contract note in services.ai.gemini_cache.
     _llm_user_message = user_message
-    if route == "nova" and isinstance(user_message, str):
-        try:
-            from services.ai.agents.nova import (
-                wrap_user_message_for_nova as _wrap_nova_user_message,
-            )
-            _llm_user_message = _wrap_nova_user_message(user_message)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning(
-                "Nova user message date wrap failed (%s). Falling "
-                "back to raw user message.",
-                exc,
-            )
-            _llm_user_message = user_message
 
     # Initial LLM call with tools. This is the tool-selection /
     # planning step — the model is being asked "given these tools,
@@ -959,33 +843,7 @@ async def _run_agent_turn(
                 except Exception:  # noqa: BLE001
                     _pp_tool_start = None
             try:
-                if fc["name"] in nova_tool_names:
-                    from auth_helper import has_perm
-                    if not has_perm(user, "nova.use"):
-                        result = {
-                            "error": "permission_denied",
-                            "tool": fc["name"],
-                            "required_permission": "nova.use",
-                            "detail": "You do not have permission to use Nova tools.",
-                        }
-                    else:
-                        from services.ai.agents.tools.nova_tools import execute_tool as execute_nova_tool
-                        result = await execute_nova_tool(
-                            fc["name"],
-                            fc["args"],
-                            nova_state,
-                            user_id=user.user_id,
-                            session_id=session_id,
-                            message_id=message_id,
-                        )
-                    if isinstance(result, dict):
-                        if result.get("error"):
-                            last_nova_error_result = result
-                        elif fc["name"] == "run_projection":
-                            last_nova_projection_result = result
-                        elif fc["name"] == "compare_runs":
-                            last_nova_compare_result = result
-                elif execute_conversational_tool:
+                if execute_conversational_tool:
                     result = await execute_conversational_tool(
                         fc["name"], fc["args"], db, user,
                         session_id=session_id,
