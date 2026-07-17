@@ -9,15 +9,13 @@ import logging
 
 from database import get_db
 from auth_helper import get_current_user, has_perm, get_frontend_url
-from models import OAuthCodeRequest, QBOCallbackRequest
+from models import OAuthCodeRequest
 from services.zoho_service import ZohoService
-from services.qbo_service import QBOService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 zoho = ZohoService()
-qbo = QBOService()
 
 
 def _callback_base(request: Request) -> str:
@@ -58,10 +56,8 @@ async def get_status(current_user=Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     db = get_db()
     zoho_tok = await db.oauth_tokens.find_one({"provider": "zoho"}, {"_id": 0})
-    qbo_tok = await db.oauth_tokens.find_one({"provider": "qbo"}, {"_id": 0})
     return {
         "zoho": {"connected": bool(zoho_tok and zoho_tok.get("access_token")), "expires_at": str(zoho_tok.get("expires_at")) if zoho_tok else None},
-        "qbo": {"connected": bool(qbo_tok and qbo_tok.get("access_token")), "expires_at": str(qbo_tok.get("expires_at")) if qbo_tok else None, "realm_id": qbo_tok.get("realm_id") if qbo_tok else None},
     }
 
 
@@ -146,39 +142,6 @@ async def zoho_disconnect(current_user=Depends(get_current_user)):
     return {"message": "Zoho disconnected"}
 
 
-@router.get("/qbo/auth-url")
-async def qbo_auth_url(request: Request, current_user=Depends(get_current_user)):
-    if not has_perm(current_user, "integrations.manage"):
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    env_redirect = os.environ.get("QBO_REDIRECT_URI", "").strip()
-    redirect_uri = env_redirect if env_redirect else f"{_callback_base(request)}/api/integrations/qbo/callback"
-    return {"url": qbo.get_auth_url(redirect_uri=redirect_uri)}
-
-
-@router.post("/qbo/callback")
-async def qbo_callback(request: Request, data: QBOCallbackRequest, current_user=Depends(get_current_user)):
-    if not has_perm(current_user, "integrations.manage"):
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    redirect_uri = f"{_callback_base(request)}/api/integrations/qbo/callback"
-    result = await qbo.exchange_code(data.code, data.realm_id, redirect_uri=redirect_uri)
-    db = get_db()
-    await db.oauth_tokens.update_one(
-        {"provider": "qbo"},
-        {"$set": {**result, "provider": "qbo", "updated_at": datetime.now(timezone.utc)}},
-        upsert=True,
-    )
-    return {"message": "QuickBooks Online connected successfully"}
-
-
-@router.delete("/qbo/disconnect")
-async def qbo_disconnect(current_user=Depends(get_current_user)):
-    # SECURITY FIX H-5: Use has_perm() instead of hardcoded role check
-    if not has_perm(current_user, "integrations.manage"):
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    await get_db().oauth_tokens.delete_one({"provider": "qbo"})
-    return {"message": "QuickBooks Online disconnected"}
-
-
 @router.get("/webhook-logs")
 async def get_webhook_logs(current_user=Depends(get_current_user)):
     # SECURITY FIX H-5: Use has_perm() instead of hardcoded role check
@@ -259,16 +222,6 @@ async def sync_zoho_full(current_user=Depends(get_current_user)):
     return {"message": "Full sync complete", "results": results}
 
 
-@router.post("/sync/qbo")
-async def sync_qbo(current_user=Depends(get_current_user)):
-    # SECURITY FIX H-5: Use has_perm() instead of hardcoded role check
-    if not has_perm(current_user, "integrations.manage"):
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
-    synced = await qbo.sync_payment_status(db)
-    return {"message": f"Updated {synced} invoice statuses from QuickBooks"}
-
-
 # ---- PUBLIC WEBHOOK RECEIVERS ----
 
 def verify_webhook_signature(payload: bytes, signature: str, secret: str) -> bool:
@@ -308,30 +261,5 @@ async def zoho_crm_webhook(request: Request):
         processed, error = False, str(e)
     await db.webhook_logs.insert_one(
         {"log_id": log_id, "source": "zoho_crm", "event_type": payload.get("operation", "unknown"), "payload": payload, "processed": processed, "error": error, "created_at": datetime.now(timezone.utc)}
-    )
-    return {"status": "received"}
-
-
-@router.post("/webhooks/qbo")
-async def qbo_webhook(request: Request):
-    # SECURITY FIX C-5: Add webhook signature verification
-    signature = request.headers.get("intuit-signature", "")
-    secret = os.getenv("QBO_WEBHOOK_SECRET", "")
-    
-    body = await request.body()
-    
-    if not verify_webhook_signature(body, signature, secret):
-        raise HTTPException(status_code=401, detail="Invalid webhook signature")
-    
-    db = get_db()
-    payload = await request.json()
-    log_id = f"log_{uuid.uuid4().hex[:12]}"
-    processed, error = True, None
-    try:
-        await qbo.process_webhook(payload, db)
-    except Exception as e:
-        processed, error = False, str(e)
-    await db.webhook_logs.insert_one(
-        {"log_id": log_id, "source": "qbo", "event_type": "payment_update", "payload": payload, "processed": processed, "error": error, "created_at": datetime.now(timezone.utc)}
     )
     return {"status": "received"}

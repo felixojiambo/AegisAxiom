@@ -47,18 +47,17 @@ BUILTIN_APPS = [
         "slug": "finance",
         "app_slug": "finance",
         "description": (
-            "Single-tenant financial analytics + operations command center "
-            "reading the QBO data lake. Wholesale replacement of the legacy "
-            "AEGISAXIOM finance namespace (released 2026-05-05). Includes 4 writable "
-            "entities (drafts, dashboards, widgets, CoA mappings), ~30 "
-            "analytical endpoints, and 19 QBO virtual entities."
+            "Single-tenant financial command center. The external accounting "
+            "data lake and its analytical/reporting surfaces were removed in "
+            "Phase 1 (accounting-integration removal + Nova/FCC park). The "
+            "surviving internally-sourced writable entities are drafts, "
+            "dashboards, and widgets; externally-fed analytical views are parked."
         ),
         "source_repo_url": "https://github.com/aharrelson/Ryan-Finance-App",
         "ingestion_mode": "internal",
         "status": "active",
         "ingestion_version": 1,
         "modules_imported": [
-            {"name": "coa_mapping", "entity_name": "coa_mapping"},
             {"name": "draft", "entity_name": "draft"},
             {"name": "dashboard", "entity_name": "dashboard"},
             {"name": "widget", "entity_name": "widget"},

@@ -59,7 +59,6 @@ from routes.roles import router as roles_router
 from routes.agent_dashboard import router as agent_dashboard_router
 from routes.audit import router as audit_router
 from routes.zoho_sync import router as zoho_sync_router
-from routes.qbo_sync import router as qbo_sync_router
 from routes.contracts import router as contracts_router
 from routes.projects_project import router as projects_project_router
 from routes.projects_task import router as projects_task_router
@@ -117,17 +116,6 @@ from routes.orion import router as orion_router
 from routes.bpmn import router as bpmn_router
 from routes.app_ingestion import router as app_ingestion_router
 from routes.nova import router as nova_router
-from routes.nova_exports import router as nova_exports_router
-from routes.finance_meta import router as finance_meta_router
-from routes.finance_kpis import router as finance_kpis_router
-from routes.finance_statements import router as finance_statements_router
-from routes.finance_working_capital import router as finance_working_capital_router
-from routes.finance_qbo_payables import router as finance_qbo_payables_router
-from routes.finance_revenue import router as finance_revenue_router
-from routes.finance_lists import router as finance_lists_router
-from routes.finance_gl import router as finance_gl_router
-from routes.finance_operations_coa import router as finance_operations_coa_router
-from routes.finance_coa_mapping import router as finance_coa_mapping_router
 from routes.finance_draft import router as finance_draft_router
 from routes.finance_draft_autogen import router as finance_draft_autogen_router
 from routes.finance_dashboard import router as finance_dashboard_router
@@ -146,7 +134,6 @@ from routes.match_provider_template import router as match_provider_template_rou
 from routes.match_settings import router as match_settings_router
 from routes.match_webhooks import router as match_webhooks_router
 from routes.match_uploads import router as match_uploads_router
-import services.field_registry_finance_qbo  # noqa: F401  (import-time registration)
 
 app = FastAPI(
     title="AEGISAXIOM API",
@@ -228,16 +215,6 @@ api_router.include_router(integrations_router, prefix="/integrations", tags=["In
 api_router.include_router(roles_router, prefix="/roles", tags=["Roles"])
 api_router.include_router(agent_dashboard_router, tags=["Agent Dashboard"])
 api_router.include_router(audit_router, prefix="/audit", tags=["Audit Log"])
-api_router.include_router(finance_meta_router, prefix="/finance", tags=["Finance FCC - Meta"])
-api_router.include_router(finance_kpis_router, prefix="/finance", tags=["Finance FCC - KPIs"])
-api_router.include_router(finance_statements_router, prefix="/finance", tags=["Finance FCC - Statements"])
-api_router.include_router(finance_working_capital_router, prefix="/finance", tags=["Finance FCC - Working Capital"])
-api_router.include_router(finance_qbo_payables_router, prefix="/finance", tags=["Finance FCC - QBO Payables"])
-api_router.include_router(finance_revenue_router, prefix="/finance", tags=["Finance FCC - Revenue"])
-api_router.include_router(finance_lists_router, prefix="/finance", tags=["Finance FCC - Lists"])
-api_router.include_router(finance_gl_router, prefix="/finance", tags=["Finance FCC - GL Explorer"])
-api_router.include_router(finance_operations_coa_router, prefix="/finance", tags=["Finance FCC - CoA"])
-api_router.include_router(finance_coa_mapping_router, prefix="/finance", tags=["Finance FCC - CoA Mappings"])
 api_router.include_router(finance_draft_router, prefix="/finance", tags=["Finance FCC - Drafts / Sync Queue"])
 api_router.include_router(finance_draft_autogen_router, prefix="/finance", tags=["Finance FCC - Drafts / Auto-Generate"])
 api_router.include_router(finance_dashboard_router, prefix="/finance", tags=["Finance FCC - Workspace Dashboards"])
@@ -247,7 +224,6 @@ api_router.include_router(finance_commissions_router, prefix="/finance", tags=["
 api_router.include_router(finance_referral_mrr_router, prefix="/finance", tags=["Finance FCC - Referral MRR"])
 api_router.include_router(operations_contracts_router, prefix="/operations", tags=["Operations - Contracts"])
 api_router.include_router(zoho_sync_router, tags=["Zoho Sync"])
-api_router.include_router(qbo_sync_router, tags=["QBO Sync"])
 api_router.include_router(contracts_router, tags=["Contracts"])
 # Wave 4 (contracts-time-mgmt) — billing triggers + adjustments. Mounted
 # without a prefix because their route paths already start with
@@ -325,7 +301,6 @@ api_router.include_router(nova_router, prefix="/nova", tags=["Nova"])
 # v1.3 Wave 3.5 — frontend error forwarder (POST /api/errors). Mounts at the
 # api_router (already prefixed with /api), so the final path is /api/errors.
 api_router.include_router(api_errors_router, tags=["Observability - Frontend Errors"])
-api_router.include_router(nova_exports_router, prefix="/nova", tags=["Nova - Exports"])
 # v1.3 Wave 3.5 — frontend error forwarder (POST /api/errors). Mounts at the
 # api_router (already prefixed with /api), so the final path is /api/errors.
 api_router.include_router(api_errors_router, tags=["Observability - Frontend Errors"])
@@ -758,43 +733,9 @@ async def on_startup():
             await db.audit_logs.create_index([("actor_email", 1), ("timestamp", -1)])
             await db.audit_logs.create_index([("resource_type", 1), ("resource_id", 1), ("timestamp", -1)])
 
-            # qbo_sync_requests — AEGISAXIOM-side orchestration record for
-            # the n8n-driven QBO ingestion. Indexes mirror the access
-            # patterns in routes/qbo_sync.py:
-            #   * sync_request_id  — exact lookup (callback + status)
-            #   * created_at desc  — "latest" probe
-            #   * status           — running/queued filter
-            #   * requested_by_user_id — admin per-user view
-            #   * finished_at desc — freshness signal
-            await db.qbo_sync_requests.create_index("sync_request_id", unique=True)
-            await db.qbo_sync_requests.create_index([("created_at", -1)])
-            await db.qbo_sync_requests.create_index("status")
-            await db.qbo_sync_requests.create_index("requested_by_user_id")
-            await db.qbo_sync_requests.create_index([("finished_at", -1)])
-            # Partial unique index for the atomic active-sync guard.
-            # acquire_sync_slot inserts a record carrying
-            # is_active_lock="global"; this index ensures at most one
-            # such record can exist at a time, so two concurrent
-            # trigger calls cannot both start a sync. release_sync_slot
-            # $unsets the field on terminal status transitions so the
-            # next sync can claim the slot. See qbo_sync_service.py.
-            await db.qbo_sync_requests.create_index(
-                "is_active_lock",
-                unique=True,
-                partialFilterExpression={"is_active_lock": "global"},
-                name="qbo_sync_active_lock_partial_unique",
-            )
-
-            # nova_export_artifacts — chat-native finance export
-            # metadata. Indexes were previously created on every
-            # POST/persist call from routes/nova_exports.py and from
-            # the create_finance_export tool dispatcher; moving them
-            # here keeps the export hot path free of the per-request
-            # ensure_indexes round-trip.
-            from services.nova_engine.nova_export_storage import (
-                ensure_indexes as _ensure_nova_export_indexes,
-            )
-            await _ensure_nova_export_indexes(db)
+            # (External-accounting sync-request and Nova export-artifact
+            # indexes removed in Phase 1 — accounting-integration removal +
+            # Nova/FCC park. The collections they indexed no longer exist.)
 
             await db.projects.create_index("project_id", unique=True)
             await db.projects.create_index("contract_id")
@@ -908,46 +849,13 @@ async def on_startup():
             await db.ingestion_field_catalogue.create_index([("app_id", 1), ("module_name", 1), ("version", 1)], unique=True)
             await db.ingestion_state.create_index([("app_id", 1), ("ingestion_version", 1)], unique=True)
 
-            # Nova query optimization — covers tx_date+basis range scans used
-            # by load_revenue_history, load_gross_profit_history,
-            # query_finance_data, detect_wholesale_history_from_gl, and
-            # get_latest_tx_date. Without this, every Nova GL aggregate is a
-            # full collection scan (~35k rows). Ref: nova_engine performance
-            # audit 2026-05-06.
-            #
-            # Names + key specs MUST match the indexes already created on the
-            # live DB during the audit, otherwise create_index throws
-            # IndexOptionsConflict on startup. create_index is a no-op when
-            # the spec matches.
-            #
-            # `db` resolves to database.get_db() (the app DB). General-ledger
-            # collections are co-located on the app DB in production
-            # (services/nova_engine/db.py:get_qbo_db() defaults to
-            # database.get_db() unless QBO_MONGO_URL is set). If QBO
-            # collections ever move to a separate cluster (QBO_MONGO_URL set),
-            # switch this block to use qbo_db = get_qbo_db().
-            await db.general_ledger.create_index(
-                [("tx_date", 1), ("basis", 1)],
-                name="nova_tx_date_basis",
-                background=True,
-            )
-            # Nova MRR query optimization — covers load_mrr_history which
-            # filters by account_id prefix + tx_date range.
-            await db.general_ledger.create_index(
-                [("account_id", 1), ("tx_date", 1), ("basis", 1)],
-                name="nova_account_tx_basis",
-                background=True,
-            )
+            # (Nova general_ledger indexes + projection_runs indexes removed in
+            # Phase 1 — accounting-integration removal + Nova/FCC park. Those
+            # collections no longer exist.)
 
-            await db.projection_runs.create_index("projection_run_id", unique=True)
-            await db.projection_runs.create_index("user_id")
-            await db.projection_runs.create_index([("user_id", 1), ("created_at", -1)])
-            await db.projection_runs.create_index("session_id", sparse=True)
-            await db.projection_runs.create_index("inputs_hash")
-
-            # Optimization for customer_deal_finance._aggregate_revenue and
-            # finance_snapshots aging — both filter by kind+sync_status.
-            # Ref: nova_engine performance audit 2026-05-06.
+            # finance_snapshots aging filters the surviving finance_drafts
+            # collection by kind+sync_status. Index name kept stable so
+            # create_index stays a no-op on existing deployments.
             await db.finance_drafts.create_index(
                 [("kind", 1), ("sync_status", 1)],
                 name="nova_kind_sync_status",

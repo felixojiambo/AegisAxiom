@@ -7,7 +7,10 @@ Differences from source:
   * State changes routed through crud_envelope for audit/policy/events.
   * `kind` is immutable after create; validated at creation time.
   * `sync_status` transitions trigger a secondary crud_envelope("status_changed").
-  * Mocked sync endpoint sets sync_status=Synced and qbo_id="QBO-<random_hex>".
+  * Mocked sync endpoint sets sync_status=Synced and stamps qbo_id with a
+    mock "SYNC-<random_hex>" id. (The qbo_id key is a legacy finance_drafts
+    schema field still read by the Cashflow Planner adapter; kept for schema
+    compatibility after the external-accounting integration was removed.)
   * `source_origin` defaults to "manual" — auto-draft endpoints (auto-generate-ar /
     auto-generate-ap) are Thread 2D's responsibility and NOT in this file.
   * Legacy /sync-queue alias returns drafts with sync_status in {Draft, Sent}.
@@ -102,13 +105,16 @@ register_fields(
             "type": "string",
             "label": "Sync Status",
             "options": SYNC_STATUS_OPTIONS,
-            "description": "QBO sync lifecycle: Draft → Sent → Synced | Failed.",
+            "description": "Sync lifecycle: Draft → Sent → Synced | Failed.",
         },
         {
             "name": "qbo_id",
             "type": "string",
-            "label": "QBO ID",
-            "description": "Set when sync_status=Synced. Mocked in Phase 1.",
+            "label": "Sync ID",
+            "description": (
+                "Set when sync_status=Synced. Mocked. Legacy finance_drafts "
+                "schema field retained for Cashflow Planner compatibility."
+            ),
         },
         {
             "name": "error",
@@ -221,8 +227,8 @@ def _user_dict(current_user: Any) -> dict:
     return current_user.model_dump() if hasattr(current_user, "model_dump") else current_user
 
 
-def _mock_qbo_id() -> str:
-    return "QBO-" + uuid.uuid4().hex[:8].upper()
+def _mock_sync_id() -> str:
+    return "SYNC-" + uuid.uuid4().hex[:8].upper()
 
 
 # ---------------------------------------------------------------------------
@@ -498,9 +504,10 @@ async def sync_draft(
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
 ):
-    """Mocked Phase-1 QBO sync. Sets sync_status=Synced and qbo_id=QBO-XXXXXXXX.
+    """Mocked sync. Sets sync_status=Synced and stamps a mock SYNC-XXXXXXXX id.
 
-    Returns 409 if the draft is already Synced. Real QBO push lives in Phase 2.
+    Returns 409 if the draft is already Synced. A real external-accounting push
+    is deferred to a later phase (the direct integration was removed).
     """
     if not has_perm(_user_dict(current_user), "finance.draft.sync"):
         raise HTTPException(status_code=403, detail="Permission denied")
@@ -513,12 +520,12 @@ async def sync_draft(
         raise HTTPException(status_code=404, detail="Draft not found")
 
     if before.get("sync_status") == "Synced":
-        raise HTTPException(status_code=409, detail="Draft is already synced to QBO")
+        raise HTTPException(status_code=409, detail="Draft is already synced")
 
     updated = {
         **before,
         "sync_status": "Synced",
-        "qbo_id": _mock_qbo_id(),
+        "qbo_id": _mock_sync_id(),
         "error": None,
         "updated_at": _utc_now_iso(),
     }
