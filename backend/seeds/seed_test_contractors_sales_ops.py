@@ -162,10 +162,9 @@ async def seed_contractor_sales_ops_data():
     
     for contractor in contractors:
         await db.contractor_businesses.insert_one(contractor)
-        print(f'✅ Created: {contractor[\"business_name\"]}')
+        print(f'✅ Created: {contractor["business_name"]}')
     
     print(f'\n✅ Created {len(contractors)} test contractors!')
     client.close()
 
 asyncio.run(create_contractors())
-"
