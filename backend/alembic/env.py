@@ -31,11 +31,12 @@ if str(BACKEND_DIR) not in sys.path:
 
 from db.base import Base  # noqa: E402
 
-# --- Phase 0 scaffolding model registration -------------------------------
-# Registers the throwaway `_scaffolding_hello` table against Base.metadata so
-# the hello-world migration/test loop has a model. REMOVE THIS IMPORT in Phase 2
-# together with the repositories/_scaffolding/ package.
-import repositories._scaffolding.hello_model  # noqa: E402,F401
+# --- Domain ORM model registration ----------------------------------------
+# Importing the models package registers every domain's tables against
+# Base.metadata (Phase 2a: platform-core identity — users, tenants, auth,
+# org_branding). Later phases extend db/models/ and this single import picks
+# them up. This replaced the Phase-0 scaffolding import when Phase 2a landed.
+import db.models  # noqa: E402,F401
 
 config = context.config
 
