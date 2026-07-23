@@ -44,8 +44,13 @@ async def seed_opportunities():
         print("❌ No accounts found. Please seed accounts first.")
         return
     
-    # Get admin user
-    admin_user = await db.users.find_one({"role": "admin"}, {"_id": 0})
+    # Get admin user (Postgres users repository)
+    from db.session import get_sessionmaker
+    from repositories.users import UserRepository
+    _sm = get_sessionmaker()
+    async with _sm() as _pg:
+        _admins = await UserRepository(_pg).list_users(role="admin", limit=1)
+    admin_user = _admins[0].model_dump() if _admins else None
     if not admin_user:
         print("❌ No admin user found.")
         return

@@ -13,7 +13,11 @@ import mimetypes
 import os
 import re
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from models import (
     Opportunity, OpportunityCreate, OpportunityUpdate,
     OPPORTUNITY_STAGES
@@ -112,7 +116,8 @@ async def get_opportunities(
     search: Optional[str] = None,
     view_as_user_id: Optional[str] = None,
     view_as_account_id: Optional[str] = None,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)
 ):
     """Get all opportunities with optional filters."""
     db = get_db()
@@ -127,7 +132,7 @@ async def get_opportunities(
             raise HTTPException(status_code=403, detail="Only users with View All Opportunities permission can use View As")
         if view_as_user_id:
             # Validate the target user exists
-            target_user = await db.users.find_one({"user_id": view_as_user_id}, {"_id": 0, "user_id": 1})
+            target_user = await UserRepository(pg).get_user_by_id(view_as_user_id)
             if not target_user:
                 raise HTTPException(status_code=404, detail="View As user not found")
             base_filter["opportunity_owner_id"] = view_as_user_id
@@ -194,11 +199,12 @@ async def get_opportunities(
 
 
 @router.post("/opportunities")
-async def create_opportunity(data: OpportunityCreate, current_user=Depends(get_current_user)):
+async def create_opportunity(data: OpportunityCreate, current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)):
     """Create a new opportunity."""
     if not has_perm(current_user, "opportunities.create"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    
+
     db = get_db()
     
     # Validate account exists
@@ -233,10 +239,10 @@ async def create_opportunity(data: OpportunityCreate, current_user=Depends(get_c
     # Validate assigned sales ops if provided
     sales_ops_name = None
     if data.assigned_sales_ops_id:
-        sales_ops = await db.users.find_one({"user_id": data.assigned_sales_ops_id}, {"_id": 0})
+        sales_ops = await UserRepository(pg).get_user_by_id(data.assigned_sales_ops_id)
         if not sales_ops:
             raise HTTPException(status_code=404, detail="Sales Ops person not found")
-        sales_ops_name = sales_ops.get("name")
+        sales_ops_name = sales_ops.name
     
     # Validate stage
     if data.stage not in OPPORTUNITY_STAGES:
@@ -293,7 +299,8 @@ async def create_opportunity(data: OpportunityCreate, current_user=Depends(get_c
 
 
 @router.get("/opportunities/hierarchy")
-async def get_opportunity_hierarchy(current_user=Depends(get_current_user)):
+async def get_opportunity_hierarchy(current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)):
     """Get hierarchy of users/accounts for the View As dropdown."""
     if not has_perm(current_user, "opportunities.view.all") and current_user.role not in ("admin", "director"):
         raise HTTPException(status_code=403, detail="Admin/Director only")
@@ -329,11 +336,11 @@ async def get_opportunity_hierarchy(current_user=Depends(get_current_user)):
     ))
     users = {}
     if all_user_ids:
-        user_docs = await db.users.find(
-            {"user_id": {"$in": all_user_ids}},
-            {"_id": 0, "user_id": 1, "name": 1, "email": 1, "role": 1}
-        ).to_list(200)
-        users = {u["user_id"]: u for u in user_docs}
+        user_docs = await UserRepository(pg).get_users_by_ids(all_user_ids)
+        users = {
+            u.user_id: {"user_id": u.user_id, "name": u.name, "email": u.email, "role": u.role}
+            for u in user_docs
+        }
 
     # Resolve account details
     all_acct_ids = [a["_id"] for a in acct_owners_raw]
@@ -366,6 +373,7 @@ async def get_opportunity_trash(
     skip: int = 0,
     limit: int = 100,
     current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
 ):
     """List soft-deleted opportunities for admin recovery."""
     if not has_perm(current_user, "opportunities.view.trash"):
@@ -384,11 +392,8 @@ async def get_opportunity_trash(
     # Enrich with deleted_by user name
     user_ids = list(set(d.get("deleted_by") for d in docs if d.get("deleted_by")))
     if user_ids:
-        users = await db.users.find(
-            {"user_id": {"$in": user_ids}},
-            {"_id": 0, "user_id": 1, "name": 1}
-        ).to_list(len(user_ids))
-        user_map = {u["user_id"]: u["name"] for u in users}
+        users = await UserRepository(pg).get_users_by_ids(user_ids)
+        user_map = {u.user_id: u.name for u in users}
         for doc in docs:
             doc["deleted_by_name"] = user_map.get(doc.get("deleted_by"), "Unknown")
 
@@ -419,7 +424,8 @@ async def get_opportunity(opportunity_id: str, current_user=Depends(get_current_
 async def update_opportunity(
     opportunity_id: str,
     data: OpportunityUpdate,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)
 ):
     """Update an opportunity."""
     db = get_db()
@@ -488,11 +494,11 @@ async def update_opportunity(
     
     if data.assigned_sales_ops_id is not None:
         if data.assigned_sales_ops_id:
-            sales_ops = await db.users.find_one({"user_id": data.assigned_sales_ops_id}, {"_id": 0})
+            sales_ops = await UserRepository(pg).get_user_by_id(data.assigned_sales_ops_id)
             if not sales_ops:
                 raise HTTPException(status_code=404, detail="Sales Ops person not found")
             update_data["assigned_sales_ops_id"] = data.assigned_sales_ops_id
-            update_data["assigned_sales_ops_name"] = sales_ops.get("name")
+            update_data["assigned_sales_ops_name"] = sales_ops.name
         else:
             update_data["assigned_sales_ops_id"] = None
             update_data["assigned_sales_ops_name"] = None
@@ -890,7 +896,8 @@ async def delete_attachment(
 @router.get("/opportunities/dropdown-data/all")
 async def get_dropdown_data(
     account_id: Optional[str] = None,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)
 ):
     """Get all dropdown data for opportunity forms (accounts, contacts, users, partners)."""
     db = get_db()
@@ -912,14 +919,18 @@ async def get_dropdown_data(
     ).sort("name", 1).to_list(1000)
     
     # Get users (for opportunity owner and sales ops) with is_test_data flag
-    users = await db.users.find(
-        {"is_active": True},
-        {"_id": 0, "user_id": 1, "name": 1, "email": 1, "role": 1}
-    ).sort("name", 1).to_list(500)
-    
+    user_objs = await UserRepository(pg).list_users(is_active=True, limit=500)
     # Add is_test_data flag for users (all system users are not test data unless specified)
-    for u in users:
-        u["is_test_data"] = False  # Users don't have test flag, default to False
+    users = [
+        {
+            "user_id": u.user_id,
+            "name": u.name,
+            "email": u.email,
+            "role": u.role,
+            "is_test_data": False,  # Users don't have test flag, default to False
+        }
+        for u in user_objs
+    ]
     
     # Get partners (for agent of record) with is_test_data flag. Uses the same
     # _SELECTABLE_PARTNER_FILTER as the create/update validators so the dropdown

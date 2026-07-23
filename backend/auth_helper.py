@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Cookie, Header
+from fastapi import HTTPException, Cookie, Header, Depends
 from typing import Optional
 from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
@@ -8,7 +8,10 @@ import time
 import uuid
 import logging
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
 from services.security_logger import log_security_event
 from services.permission_implications import resolve_implications
 from services.permission_registry import get_implication_graph
@@ -207,10 +210,25 @@ async def require_perm(user, perm: str, *, resource: str = None, resource_id: st
 async def get_current_user(
     session_token: Optional[str] = Cookie(None),
     authorization: Optional[str] = Header(None),
+    pg: AsyncSession = Depends(get_session),
 ):
-    from models import User
+    """Resolve the authenticated user.
 
-    db = get_db()
+    Phase 2a cutover: ``user_sessions`` and ``users`` are read from **Postgres**
+    via the repositories (``pg`` session threaded in as a nested dependency — no
+    change required at the 466 ``Depends(get_current_user)`` call sites). Two
+    reads remain Mongo-backed during the parallel run and are marked as shims:
+
+      * ``roles_legacy_read`` — ``db.roles`` + the implication graph. Roles /
+        permissions are Phase **2b**; deleted then.
+      * ``ai_employees_legacy_read`` — ``db.ai_employees`` (the AI-employee tag).
+        ``ai_employees`` is Phase **8**; deleted then.
+    """
+    from models import User
+    from repositories.auth import AuthRepository
+    from repositories.users import UserRepository
+
+    db = get_db()  # Mongo — only for the two legacy-read shims below.
     token = None
     if session_token:
         token = session_token
@@ -225,7 +243,7 @@ async def get_current_user(
         )
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    session = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
+    session = await AuthRepository(pg).get_session(token)
     if not session:
         await log_security_event(
             event_type="auth_failed", severity="warning",
@@ -234,45 +252,47 @@ async def get_current_user(
         )
         raise HTTPException(status_code=401, detail="Invalid session")
 
-    expires_at = session["expires_at"]
-    if isinstance(expires_at, str):
-        expires_at = datetime.fromisoformat(expires_at)
+    expires_at = session.expires_at
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
     if expires_at < datetime.now(timezone.utc):
         await log_security_event(
             event_type="auth_failed", severity="info",
-            user_id=session.get("user_id"),
+            user_id=session.user_id,
             action="session_check", outcome="denied",
             details={"reason": "session_expired"},
         )
         raise HTTPException(status_code=401, detail="Session expired")
 
-    user_doc = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
-    if not user_doc:
+    user_dto = await UserRepository(pg).get_user_by_id(session.user_id)
+    if not user_dto:
         await log_security_event(
             event_type="auth_failed", severity="warning",
-            user_id=session["user_id"],
+            user_id=session.user_id,
             action="user_lookup", outcome="denied",
             details={"reason": "user_not_found"},
         )
         raise HTTPException(status_code=401, detail="User not found")
 
-    if not user_doc.get("is_active", True):
+    if not user_dto.is_active:
         await log_security_event(
             event_type="auth_failed", severity="warning",
-            user_id=user_doc.get("user_id"),
-            user_email=user_doc.get("email"),
+            user_id=user_dto.user_id,
+            user_email=user_dto.email,
             action="activation_check", outcome="denied",
-            details={"reason": "account_deactivated", "user_id": user_doc.get("user_id")},
+            details={"reason": "account_deactivated", "user_id": user_dto.user_id},
         )
         raise HTTPException(status_code=403, detail="Account is deactivated")
 
-    # Load permissions from roles collection + per-user overrides
-    role_name = user_doc.get("role", "customer")
+    # Base user fields come from the Postgres DTO; permissions are derived below.
+    user_doc = user_dto.model_dump()
+
+    # --- roles_legacy_read (Mongo; Phase 2b) --------------------------------
+    # Role permissions + per-user overrides. Deleted in 2b when roles migrate.
+    role_name = user_dto.role or "customer"
     role_doc = await db.roles.find_one({"name": role_name}, {"_id": 0, "permissions": 1})
     role_permissions = role_doc.get("permissions", []) if role_doc else []
-    user_extras = user_doc.get("extra_permissions", [])
+    user_extras = user_dto.extra_permissions or []
     permissions = list(set(role_permissions + user_extras))
 
     # ---- Permission closure precomputation ----
@@ -317,11 +337,14 @@ async def get_current_user(
     user = User(**safe_doc)
     object.__setattr__(user, "_perm_closure", perm_closure)
 
-    # ---- AI employee detection ----
+    # ---- AI employee detection (ai_employees_legacy_read; Mongo; Phase 8) ----
     # If this user record is the underlying identity for an AI employee,
     # tag the User instance so middleware/ai_authz can route the request
     # through the AI permission check. Humans get is_ai_employee=False
     # and the dependency is a no-op for them.
+    #
+    # ``ai_employees`` migrates in Phase 8 — this Mongo read is a temporary
+    # legacy-read shim (``ai_employees_legacy_read``), deleted then.
     #
     # We use object.__setattr__ because the User pydantic model declares
     # a fixed schema and v2 BaseModel.__setattr__ rejects unknown attrs.
@@ -619,33 +642,25 @@ class TenantContext:
         )
 
 
-async def get_tenant_context(current_user=None) -> TenantContext:
+async def get_tenant_context(
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+) -> TenantContext:
     """FastAPI dependency: resolve the active tenant for the request.
 
     Usage:
-        from auth_helper import get_current_user, get_tenant_context
+        from auth_helper import get_tenant_context
 
         @router.get("/things")
-        async def list_things(
-            current_user=Depends(get_current_user),
-            tenant=Depends(get_tenant_context),
-        ):
-            things = await db.things.find({"tenant_id": tenant.tenant_id}).to_list(100)
+        async def list_things(tenant=Depends(get_tenant_context)):
             ...
 
-    Raises 401 if there is no authenticated user, 403 if the user is not
-    assigned to a tenant, 404 if the tenant record cannot be found.
-    """
-    # Late-binding to avoid circular imports at module load.
-    from fastapi import Depends as _Depends
+    Raises 403 if the user is not assigned to a tenant, 404 if the tenant record
+    cannot be found, 403 if the tenant is not active.
 
-    # When called directly (not via Depends), `current_user` will be None and
-    # we fall through to resolving from get_current_user. When called via
-    # Depends(get_tenant_context) without a `current_user` parameter the
-    # caller should add `Depends(get_current_user)` explicitly. To keep this
-    # ergonomic, we accept either path.
-    if current_user is None:
-        current_user = await get_current_user()
+    Phase 2a: the tenant read is served by the Postgres tenants repository.
+    """
+    from repositories.tenants import TenantRepository
 
     tenant_id = getattr(current_user, "tenant_id", None)
     if not tenant_id:
@@ -658,12 +673,8 @@ async def get_tenant_context(current_user=None) -> TenantContext:
         )
         raise HTTPException(status_code=403, detail="User is not assigned to a tenant")
 
-    db = get_db()
-    tenant_doc = await db.tenants.find_one(
-        {"tenant_id": tenant_id},
-        {"_id": 0, "tenant_id": 1, "tenant_type": 1, "parent_tenant_id": 1, "status": 1},
-    )
-    if not tenant_doc:
+    tenant = await TenantRepository(pg).get_tenant(tenant_id)
+    if not tenant:
         await log_security_event(
             event_type="tenant_context_failed", severity="warning",
             user_id=getattr(current_user, "user_id", None),
@@ -673,7 +684,7 @@ async def get_tenant_context(current_user=None) -> TenantContext:
         )
         raise HTTPException(status_code=404, detail="Tenant not found")
 
-    if tenant_doc.get("status") != "active":
+    if tenant.status != "active":
         await log_security_event(
             event_type="tenant_context_failed", severity="warning",
             user_id=getattr(current_user, "user_id", None),
@@ -682,13 +693,13 @@ async def get_tenant_context(current_user=None) -> TenantContext:
             details={
                 "reason": "tenant_not_active",
                 "tenant_id": tenant_id,
-                "status": tenant_doc.get("status"),
+                "status": tenant.status,
             },
         )
         raise HTTPException(status_code=403, detail="Tenant is not active")
 
     return TenantContext(
-        tenant_id=tenant_doc["tenant_id"],
-        tenant_type=tenant_doc["tenant_type"],
-        parent_tenant_id=tenant_doc.get("parent_tenant_id"),
+        tenant_id=tenant.tenant_id,
+        tenant_type=tenant.tenant_type,
+        parent_tenant_id=tenant.parent_tenant_id,
     )

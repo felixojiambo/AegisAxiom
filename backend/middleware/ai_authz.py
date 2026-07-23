@@ -77,12 +77,14 @@ async def get_flattened_ai_permissions(
         # admins may grant ad-hoc perms there outside the app_access bundle.
         linked_user_id = employee.get("user_id")
         if linked_user_id:
-            user_doc = await db.users.find_one(
-                {"user_id": linked_user_id},
-                {"_id": 0, "extra_permissions": 1},
-            )
-            if user_doc:
-                for p in user_doc.get("extra_permissions") or []:
+            # extra_permissions live on the Postgres users row.
+            from db.session import get_sessionmaker
+            from repositories.users import UserRepository
+            _sm = get_sessionmaker()
+            async with _sm() as _pg:
+                _u = await UserRepository(_pg).get_user_by_id(linked_user_id)
+            if _u:
+                for p in _u.extra_permissions or []:
                     if isinstance(p, str):
                         flattened.add(p)
 

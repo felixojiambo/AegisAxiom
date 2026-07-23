@@ -252,10 +252,15 @@ async def _action_send_notification(action: dict, context: dict, db) -> None:
     user_ids = []
 
     if target_type == "role":
-        users = await db.users.find(
-            {"role": target_value, "is_active": True}, {"user_id": 1}
-        ).to_list(100)
-        user_ids = [u["user_id"] for u in users]
+        from db.session import get_sessionmaker
+        from repositories.users import UserRepository
+
+        sm = get_sessionmaker()
+        async with sm() as pg:
+            users = await UserRepository(pg).list_users(
+                role=target_value, is_active=True, limit=100
+            )
+        user_ids = [u.user_id for u in users]
 
     elif target_type == "user":
         user_ids = [target_value]

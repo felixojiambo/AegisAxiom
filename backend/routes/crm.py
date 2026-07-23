@@ -6,7 +6,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from models import Account, AccountCreate, AccountUpdate, Deal, DealCreate, DealUpdate, PARTNERSHIP_STATUSES
 from auth_helper import get_current_user, get_account_filter, get_deal_filter, has_perm, verify_ownership
 from services.audit_service import log_action
@@ -80,7 +84,8 @@ async def get_accounts(
     limit: int = 5000, 
     source: str = None,  # Filter by source: "local" or "zoho"
     test_only: Optional[bool] = None,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)
 ):
     db = get_db()
     base_filter = await get_account_filter(current_user)
@@ -117,11 +122,8 @@ async def get_accounts(
         if doc.get("assigned_agent_id") and not doc.get("assigned_agent_name"):
             rep_ids.add(doc["assigned_agent_id"])
     if rep_ids:
-        users = await db.users.find(
-            {"user_id": {"$in": list(rep_ids)}},
-            {"_id": 0, "user_id": 1, "name": 1}
-        ).to_list(len(rep_ids))
-        name_map = {u["user_id"]: u["name"] for u in users}
+        users = await UserRepository(pg).get_users_by_ids(list(rep_ids))
+        name_map = {u.user_id: u.name for u in users}
         for doc in docs:
             if doc.get("assigned_sales_rep_id") and not doc.get("assigned_sales_rep_name"):
                 doc["assigned_sales_rep_name"] = name_map.get(doc["assigned_sales_rep_id"])
@@ -158,7 +160,8 @@ async def create_account(data: AccountCreate, current_user=Depends(get_current_u
 
 
 @router.get("/accounts/{account_id}")
-async def get_account(account_id: str, current_user=Depends(get_current_user)):
+async def get_account(account_id: str, current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)):
     db = get_db()
     rbac = await get_account_filter(current_user)
     q = {"account_id": account_id}
@@ -170,13 +173,13 @@ async def get_account(account_id: str, current_user=Depends(get_current_user)):
 
     # Enrich with sales rep / agent name if missing
     if doc.get("assigned_sales_rep_id") and not doc.get("assigned_sales_rep_name"):
-        rep = await db.users.find_one({"user_id": doc["assigned_sales_rep_id"]}, {"_id": 0, "name": 1})
+        rep = await UserRepository(pg).get_user_by_id(doc["assigned_sales_rep_id"])
         if rep:
-            doc["assigned_sales_rep_name"] = rep["name"]
+            doc["assigned_sales_rep_name"] = rep.name
     if doc.get("assigned_agent_id") and not doc.get("assigned_agent_name"):
-        agent = await db.users.find_one({"user_id": doc["assigned_agent_id"]}, {"_id": 0, "name": 1})
+        agent = await UserRepository(pg).get_user_by_id(doc["assigned_agent_id"])
         if agent:
-            doc["assigned_agent_name"] = agent["name"]
+            doc["assigned_agent_name"] = agent.name
 
     return doc
 
@@ -245,15 +248,16 @@ async def get_deals(skip: int = 0, limit: int = 5000, stage: str = None, current
 
 
 @router.post("/deals")
-async def create_deal(data: DealCreate, current_user=Depends(get_current_user)):
+async def create_deal(data: DealCreate, current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "deals.create"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     db = get_db()
     account = await db.accounts.find_one({"account_id": data.account_id}, {"_id": 0, "name": 1})
     rep_name = None
     if data.assigned_sales_rep_id:
-        rep = await db.users.find_one({"user_id": data.assigned_sales_rep_id}, {"_id": 0, "name": 1})
-        rep_name = rep["name"] if rep else None
+        rep = await UserRepository(pg).get_user_by_id(data.assigned_sales_rep_id)
+        rep_name = rep.name if rep else None
 
     deal_id = f"deal_{uuid.uuid4().hex[:12]}"
     doc = {

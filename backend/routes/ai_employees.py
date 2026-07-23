@@ -11,7 +11,11 @@ import hashlib
 import secrets
 import re
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session, get_sessionmaker
+from repositories.users import UserRepository
 from models import (
     AIEmployeeCreate, AIEmployeeUpdate, AIEmployeeStatusUpdate,
     AIEmployeeWebhookPayload
@@ -119,11 +123,11 @@ async def _ensure_backing_user(
     migration align them later.
     """
     synthetic_email = f"{employee_id}@ai.aegisaxiom.internal"
-    existing = await db.users.find_one(
-        {"email": synthetic_email}, {"_id": 0, "user_id": 1}
-    )
-    if existing and existing.get("user_id"):
-        return existing["user_id"]
+    sm = get_sessionmaker()
+    async with sm() as pg:
+        existing = await UserRepository(pg).get_user_by_email(synthetic_email)
+    if existing and existing.user_id:
+        return existing.user_id
 
     user_id = _gen_ai_user_id()
     now = datetime.now(timezone.utc)
@@ -150,7 +154,9 @@ async def _ensure_backing_user(
         "created_at": now,
         "updated_at": now,
     }
-    await db.users.insert_one(user_doc)
+    async with sm() as pg:
+        await UserRepository(pg).create_user(user_doc)
+        await pg.commit()
     logger.info(
         f"Created backing user {user_id} for AI employee {employee_id} "
         f"in tenant {tenant_id}"
@@ -933,7 +939,7 @@ async def get_ai_employee_access(employee_id: str, current_user=Depends(get_curr
 
 
 @router.put("/ai-employees/{employee_id}/access")
-async def update_ai_employee_access(employee_id: str, data: dict, current_user=Depends(get_current_user)):
+async def update_ai_employee_access(employee_id: str, data: dict, current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     """Update access configuration for an AI employee."""
     if not has_perm(current_user, "ai_employees.manage"):
         raise HTTPException(status_code=403, detail="Permission denied")
@@ -959,8 +965,9 @@ async def update_ai_employee_access(employee_id: str, data: dict, current_user=D
 
     if "allowed_user_ids" in data:
         # Validate user IDs exist
+        users_repo = UserRepository(pg)
         for uid in data["allowed_user_ids"]:
-            user = await db.users.find_one({"user_id": uid}, {"_id": 0, "user_id": 1})
+            user = await users_repo.get_user_by_id(uid)
             if not user:
                 raise HTTPException(status_code=400, detail=f"User not found: {uid}")
         update["allowed_user_ids"] = data["allowed_user_ids"]

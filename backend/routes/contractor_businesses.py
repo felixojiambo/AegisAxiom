@@ -2,7 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Optional
 from datetime import datetime, timezone
 import logging
+from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from auth_helper import get_current_user, has_perm
 from models import (
     ContractorBusiness,
@@ -37,25 +40,22 @@ register_fields("contractor_management", "contractor_resource_type", [
 async def get_contractor_businesses(
     status: Optional[str] = None,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Get all contractor businesses. Requires admin.contractors.view permission."""
     if not has_perm(current_user, "admin.contractors.view"):
         raise HTTPException(status_code=403, detail="Permission denied")
-    
+
     query = {}
     if status:
         query["status"] = status
-    
+
     businesses = await db.contractor_businesses.find(query, {"_id": 0}).sort("business_name", 1).to_list(1000)
-    
-    # Get contractor counts in a single query using aggregation
+
+    # Get contractor counts in a single query
     business_ids = [b["business_id"] for b in businesses]
-    counts = await db.users.aggregate([
-        {"$match": {"contractor_business_id": {"$in": business_ids}, "role": "contractor", "is_active": True}},
-        {"$group": {"_id": "$contractor_business_id", "count": {"$sum": 1}}}
-    ]).to_list(None)
-    count_map = {c["_id"]: c["count"] for c in counts}
+    count_map = await UserRepository(pg).count_contractors_by_business(business_ids)
     for business in businesses:
         business["contractor_count"] = count_map.get(business["business_id"], 0)
     
@@ -66,23 +66,25 @@ async def get_contractor_businesses(
 async def get_contractor_business(
     business_id: str,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Get a specific contractor business by ID."""
     if not has_perm(current_user, "admin.contractors.view"):
         raise HTTPException(status_code=403, detail="Permission denied")
-    
+
     business = await db.contractor_businesses.find_one({"business_id": business_id}, {"_id": 0})
-    
+
     if not business:
         raise HTTPException(status_code=404, detail="Contractor business not found")
-    
+
     # Get contractors under this business
-    contractors = await db.users.find({
-        "contractor_business_id": business_id,
-        "role": "contractor"
-    }, {"_id": 0}).to_list(100)
-    
+    contractors = await UserRepository(pg).list_users(
+        contractor_business_id=business_id,
+        role="contractor",
+        limit=100,
+    )
+
     business["contractors"] = contractors
     
     return business
@@ -179,6 +181,7 @@ async def update_contractor_business(
 async def delete_contractor_business(
     business_id: str,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Soft delete a contractor business. Requires admin.contractors.delete permission."""
@@ -191,11 +194,8 @@ async def delete_contractor_business(
         raise HTTPException(status_code=404, detail="Contractor business not found")
     
     # Policy engine: check deletion guard
-    contractor_count = await db.users.count_documents({
-        "contractor_business_id": business_id,
-        "role": "contractor",
-        "is_active": True
-    })
+    contractor_counts = await UserRepository(pg).count_contractors_by_business([business_id])
+    contractor_count = contractor_counts.get(business_id, 0)
     policy_payload = {"active_contractor_count": contractor_count}
     result = await evaluate_policies(db, "contractor_management", "contractor_business", "on_delete", policy_payload, user_role=current_user.role)
     enforce_policy_result(result)
@@ -216,22 +216,24 @@ async def delete_contractor_business(
 async def get_business_contractors(
     business_id: str,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Get all contractors under a specific business."""
     if not has_perm(current_user, "admin.contractors.view"):
         raise HTTPException(status_code=403, detail="Permission denied")
-    
+
     business = await db.contractor_businesses.find_one({"business_id": business_id})
-    
+
     if not business:
         raise HTTPException(status_code=404, detail="Contractor business not found")
-    
-    contractors = await db.users.find({
-        "contractor_business_id": business_id,
-        "role": "contractor"
-    }, {"_id": 0}).sort("name", 1).to_list(100)
-    
+
+    contractors = await UserRepository(pg).list_users(
+        contractor_business_id=business_id,
+        role="contractor",
+        limit=100,
+    )
+
     return {"items": contractors, "business_name": business.get("business_name")}
 
 
@@ -516,7 +518,8 @@ async def get_payment_activity(
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     status: Optional[str] = None,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Get time entries and AP bills for a contractor business."""
     if not has_perm(current_user, "admin.contractors.view") and not has_perm(current_user, "*"):
@@ -524,13 +527,14 @@ async def get_payment_activity(
 
     db = get_db()
 
-    # Get all users in this business
-    business_users = await db.users.find(
-        {"business_id": business_id},
-        {"_id": 0, "user_id": 1, "name": 1}
-    ).to_list(100)
-    user_ids = [u["user_id"] for u in business_users]
-    user_names = {u["user_id"]: u["name"] for u in business_users}
+    # Get all users in this business. (Migration fix: the Mongo query filtered
+    # on a non-existent `business_id` field — always empty; the canonical link
+    # field is `contractor_business_id`, used here.)
+    business_users = await UserRepository(pg).list_users(
+        contractor_business_id=business_id, limit=100
+    )
+    user_ids = [u.user_id for u in business_users]
+    user_names = {u.user_id: u.name for u in business_users}
 
     # Build time entry filter
     te_filter = {"user_id": {"$in": user_ids}} if user_ids else {"_id": {"$exists": False}}
@@ -619,7 +623,8 @@ async def get_payment_activity(
 @router.get("/contractor-businesses/{business_id}/payment-summary")
 async def get_payment_summary(
     business_id: str,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Get lifetime payment metrics for a contractor business."""
     if not has_perm(current_user, "admin.contractors.view") and not has_perm(current_user, "*"):
@@ -627,12 +632,13 @@ async def get_payment_summary(
 
     db = get_db()
 
-    # Get users in this business
-    business_users = await db.users.find(
-        {"business_id": business_id},
-        {"_id": 0, "user_id": 1}
-    ).to_list(100)
-    user_ids = [u["user_id"] for u in business_users]
+    # Get users in this business. (Migration fix: the Mongo query filtered on a
+    # non-existent `business_id` field — always empty; the canonical link field
+    # is `contractor_business_id`, used here.)
+    business_users = await UserRepository(pg).list_users(
+        contractor_business_id=business_id, limit=100
+    )
+    user_ids = [u.user_id for u in business_users]
 
     # Aggregate time entries
     te_filter = {"user_id": {"$in": user_ids}} if user_ids else {"_id": {"$exists": False}}

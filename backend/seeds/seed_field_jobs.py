@@ -33,9 +33,14 @@ async def seed():
         await db.site_profiles.delete_many({"is_test_data": True})
         print("  Cleared.")
 
-    # Load test users
-    contractors = await db.users.find({"is_test_data": True, "role": "contractor"}, {"_id": 0}).to_list(50)
-    pms = await db.users.find({"is_test_data": True, "role": {"$in": ["director", "sales_rep"]}}, {"_id": 0}).to_list(50)
+    # Load test users (Postgres users repository)
+    from db.session import get_sessionmaker
+    from repositories.users import UserRepository
+    _sm = get_sessionmaker()
+    async with _sm() as _pg:
+        _ur = UserRepository(_pg)
+        contractors = [u.model_dump() for u in await _ur.list_users(is_test_data=True, role="contractor", limit=50)]
+        pms = [u.model_dump() for u in await _ur.list_users(is_test_data=True, role_in=["director", "sales_rep"], limit=50)]
     accounts = await db.accounts.find({"is_test_data": True}, {"_id": 0}).to_list(50)
     contracts = await db.contracts.find({"is_test_data": True, "service_category": "field_services"}, {"_id": 0}).to_list(50)
     job_types = await db.job_types.find({}, {"_id": 0}).to_list(50)

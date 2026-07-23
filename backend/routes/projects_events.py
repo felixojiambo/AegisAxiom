@@ -50,6 +50,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from auth_helper import get_current_user, has_perm
 from database import get_db
+from db.session import get_sessionmaker
+from repositories.auth import AuthRepository
+from repositories.users import UserRepository
 from middleware.tenant_scoping import get_current_tenant_id
 from services.projects_realtime_bus import (
     OVERFLOW_SENTINEL,
@@ -166,12 +169,13 @@ async def _load_user_from_session_token(token: str):
     actual hydration to `_hydrate_user`, so the symbols it imports (User,
     get_cached_implication_graph, resolve_implications) are not needed
     here directly."""
-    db = get_db()
-    session = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
+    sm = get_sessionmaker()
+    async with sm() as pg:
+        session = await AuthRepository(pg).get_session(token)
     if not session:
         raise HTTPException(status_code=401, detail="Invalid session")
 
-    expires_at = session["expires_at"]
+    expires_at = session.expires_at
     if isinstance(expires_at, str):
         expires_at = datetime.fromisoformat(expires_at)
     if expires_at.tzinfo is None:
@@ -179,7 +183,7 @@ async def _load_user_from_session_token(token: str):
     if expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Session expired")
 
-    return await _hydrate_user(session["user_id"])
+    return await _hydrate_user(session.user_id)
 
 
 async def _hydrate_user(user_id: str):
@@ -190,9 +194,12 @@ async def _hydrate_user(user_id: str):
     from services.permission_implications import resolve_implications
 
     db = get_db()
-    user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0})
-    if not user_doc:
+    sm = get_sessionmaker()
+    async with sm() as pg:
+        user_dto = await UserRepository(pg).get_user_by_id(user_id)
+    if not user_dto:
         raise HTTPException(status_code=401, detail="User not found")
+    user_doc = user_dto.model_dump()
 
     if not user_doc.get("is_active", True):
         raise HTTPException(status_code=403, detail="Account is deactivated")
@@ -755,15 +762,25 @@ async def presence_heartbeat(
     )
     rows = await cursor.to_list(length=200)  # 200 = generous; UI shows ~5 avatars
 
-    # Hydrate user names/avatars in one batch (never per-row).
+    # Hydrate user names/avatars in one batch (never per-row). Postgres: the
+    # canonical avatar field is `picture` (exposed here as `avatar_url` to keep
+    # the presence response shape unchanged).
     user_ids = [r["user_id"] for r in rows]
     user_lookup: Dict[str, Dict[str, Any]] = {}
     if user_ids:
-        async for u in db["users"].find(
-            {"user_id": {"$in": user_ids}, "tenant_id": tenant_id},
-            {"_id": 0, "user_id": 1, "name": 1, "email": 1, "avatar_url": 1},
-        ):
-            user_lookup[u["user_id"]] = u
+        from db.session import get_sessionmaker
+        from repositories.users import UserRepository
+        _sm = get_sessionmaker()
+        async with _sm() as _pg:
+            _users = await UserRepository(_pg).get_users_by_ids(user_ids)
+        for u in _users:
+            if u.tenant_id == tenant_id:
+                user_lookup[u.user_id] = {
+                    "user_id": u.user_id,
+                    "name": u.name,
+                    "email": u.email,
+                    "avatar_url": u.picture,
+                }
 
     viewing: List[Dict[str, Any]] = []
     for r in rows:

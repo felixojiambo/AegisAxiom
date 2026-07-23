@@ -459,7 +459,7 @@ async def on_startup():
         # Must run before role/permission seeds because they may scope
         # to tenants in later phases.
         from seeds.seed_tenants import seed_tenants
-        await seed_tenants(db)
+        await seed_tenants()  # Phase 2a: Postgres-backed (opens its own session)
 
         from routes.roles import seed_default_roles
         await seed_default_roles(db)
@@ -548,32 +548,40 @@ async def on_startup():
                 "ADMIN_EMAIL or ADMIN_PASSWORD is still the placeholder REPLACE_ME_BEFORE_DEPLOY"
             )
         if admin_email and admin_password:
-            existing_admin = await db.users.find_one({"role": "admin"}, {"_id": 1})
-            if not existing_admin:
-                import uuid
-                from auth_helper import hash_password
-                from datetime import datetime, timezone
-                from seeds.seed_tenants import SIMPLIMETA_ROOT_TENANT_ID
+            # Phase 2a: admin auto-init runs against the Postgres users
+            # repository (opens its own session — this is startup, not a
+            # request). Behavior preserved: create only when no admin exists.
+            import uuid
+            from auth_helper import hash_password
+            from datetime import datetime, timezone
+            from seeds.seed_tenants import SIMPLIMETA_ROOT_TENANT_ID
+            from db.session import get_sessionmaker
+            from repositories.users import UserRepository
 
-                user_id = f"user_{uuid.uuid4().hex[:12]}"
-                await db.users.insert_one({
-                    "user_id": user_id,
-                    "email": admin_email.lower(),
-                    "name": os.getenv("ADMIN_NAME", "Admin"),
-                    "role": "admin",
-                    "tenant_id": SIMPLIMETA_ROOT_TENANT_ID,
-                    "account_id": None,
-                    "picture": None,
-                    "is_active": True,
-                    "is_email_verified": True,
-                    "password_hash": hash_password(admin_password),
-                    "zoho_contact_id": None,
-                    "is_test_data": False,
-                    "created_at": datetime.now(timezone.utc),
-                })
-                logger.info(f"Auto-initialized admin account: {admin_email}")
-            else:
-                logger.info("Admin account already exists, skipping initialization")
+            sm = get_sessionmaker()
+            async with sm() as pg_session:
+                users_repo = UserRepository(pg_session)
+                if not await users_repo.admin_exists():
+                    user_id = f"user_{uuid.uuid4().hex[:12]}"
+                    await users_repo.create_user({
+                        "user_id": user_id,
+                        "email": admin_email.lower(),
+                        "name": os.getenv("ADMIN_NAME", "Admin"),
+                        "role": "admin",
+                        "tenant_id": SIMPLIMETA_ROOT_TENANT_ID,
+                        "account_id": None,
+                        "picture": None,
+                        "is_active": True,
+                        "is_email_verified": True,
+                        "password_hash": hash_password(admin_password),
+                        "zoho_contact_id": None,
+                        "is_test_data": False,
+                        "created_at": datetime.now(timezone.utc),
+                    })
+                    await pg_session.commit()
+                    logger.info(f"Auto-initialized admin account: {admin_email}")
+                else:
+                    logger.info("Admin account already exists, skipping initialization")
         else:
             logger.warning("ADMIN_EMAIL and ADMIN_PASSWORD not set - admin auto-initialization skipped")
 
@@ -608,12 +616,10 @@ async def on_startup():
         logger.info("Skipping MongoDB startup index creation because SKIP_STARTUP_INDEXES=true")
     else:
         try:
-            await db.users.create_index("email", unique=True)
-            await db.users.create_index("user_id", unique=True)
-            await db.users.create_index("role")
-            await db.user_sessions.create_index("session_token", unique=True)
-            await db.user_sessions.create_index("user_id")
-            await db.user_sessions.create_index("expires_at", expireAfterSeconds=0)
+            # NOTE (Phase 2a): Mongo indexes for the migrated platform-core
+            # identity collections (users, user_sessions, password_reset_tokens,
+            # tenants, oauth_tokens, oauth_states) are removed here — those
+            # tables + indexes now live in Postgres, owned by Alembic (§A7).
             await db.accounts.create_index("account_id", unique=True)
             await db.accounts.create_index("zoho_account_id", sparse=True)
             await db.deals.create_index("deal_id", unique=True)
@@ -637,17 +643,7 @@ async def on_startup():
             await db.chat_sessions.create_index("user_id")
             await db.chat_messages.create_index("session_id")
             await db.roles.create_index("name", unique=True)
-            await db.password_reset_tokens.create_index("token")
-            await db.password_reset_tokens.create_index("email")
-            # Tenants — Phase 1A multi-tenancy
-            await db.tenants.create_index("tenant_id", unique=True)
-            await db.tenants.create_index("slug", unique=True)
-            await db.tenants.create_index("parent_tenant_id", sparse=True)
-            await db.tenants.create_index("tenant_type")
-            await db.tenants.create_index("status")
-            # Users gain tenant scoping
-            await db.users.create_index("tenant_id", sparse=True)
-            await db.users.create_index([("tenant_id", 1), ("email", 1)])
+            # (password_reset_tokens + tenants + users indexes → Postgres/Alembic, Phase 2a)
 
             # AI Employee catalog + entitlements — Phase 1B.1
             #
@@ -709,17 +705,7 @@ async def on_startup():
             await db.ai_employees.create_index("definition_id", sparse=True)
             await db.ai_employees.create_index("assignment_id", sparse=True)
 
-            try:
-                index_info = await db.oauth_tokens.index_information()
-                if "provider_1" in index_info and index_info["provider_1"].get("unique"):
-                    await db.oauth_tokens.drop_index("provider_1")
-            except Exception as e:
-                logger.warning(f"Failed to drop stale provider_1 index: {e}")
-
-            await db.oauth_tokens.create_index([("provider", 1), ("user_id", 1)], unique=True, sparse=True)
-            await db.oauth_tokens.create_index("provider")
-            await db.oauth_states.create_index("state")
-            await db.oauth_states.create_index("created_at", expireAfterSeconds=600)
+            # (oauth_tokens + oauth_states indexes → Postgres/Alembic, Phase 2a)
             await db.audit_logs.create_index([("timestamp", -1)])
             await db.audit_logs.create_index("action")
             await db.audit_logs.create_index("actor_id")
@@ -1025,6 +1011,13 @@ async def on_startup():
         hours=1,
         id="nova_finance_snapshot",
         next_run_time=_now_dt.now(_now_tz.utc),
+    )
+
+    # Platform-core auth TTL sweep (Phase 2a, plan R10): Postgres has no native
+    # TTL, so expired sessions / reset tokens / oauth states are swept here.
+    from services.auth_cleanup import cleanup_expired_auth_state
+    scheduler.add_job(
+        cleanup_expired_auth_state, "interval", minutes=30, id="auth_ttl_cleanup"
     )
 
     scheduler.start()

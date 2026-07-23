@@ -67,8 +67,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from auth_helper import get_current_user, has_perm
 from database import get_db
+from db.session import get_session
+from repositories.tenants import TenantRepository
 from models import (
     AIEmployeeDefinition,
     AIEmployeeDefinitionCreate,
@@ -442,6 +446,7 @@ async def create_assignment(
         tenant_id: str,
         data: TenantAppAssignmentCreate,
         current_user=Depends(get_current_user),
+        pg: AsyncSession = Depends(get_session),
 ):
     """Create an assignment granting a definition to a tenant.
 
@@ -499,10 +504,7 @@ async def create_assignment(
     # Verify the target tenant exists. The compound unique index catches
     # the assignment dupe case; tenant existence is a separate FK we
     # have to enforce in app code since Mongo doesn't do FKs.
-    target_tenant = await db.tenants.find_one(
-        {"tenant_id": tenant_id},
-        {"_id": 0, "tenant_id": 1, "parent_tenant_id": 1},
-    )
+    target_tenant = await TenantRepository(pg).get_tenant(tenant_id)
     if not target_tenant:
         raise HTTPException(status_code=404, detail="Target tenant not found.")
 
@@ -526,7 +528,7 @@ async def create_assignment(
     #      enforced in 1C.4.
     if not is_root_caller:
         caller_tenant_id = getattr(current_user, "tenant_id", None)
-        if target_tenant.get("parent_tenant_id") != caller_tenant_id:
+        if target_tenant.parent_tenant_id != caller_tenant_id:
             raise HTTPException(
                 status_code=403,
                 detail=(
@@ -1139,6 +1141,7 @@ async def delete_tenant_instance(
 async def list_tenant_users(
         tenant_id: str,
         current_user=Depends(get_current_user),
+        pg: AsyncSession = Depends(get_session),
 ):
     """List users belonging to a tenant.
 
@@ -1164,52 +1167,6 @@ async def list_tenant_users(
         raise HTTPException(status_code=403, detail="Permission denied")
     _require_own_tenant_or_root(tenant_id, current_user)
 
-    db = get_db()
-
-    # Projection: pull only what the Users tab needs. Explicitly exclude
-    # password_hash and invite_token so a slip on the frontend can't
-    # leak them. last_login_at is included if present (some user records
-    # may not have it yet — those just don't show one in the UI).
-    projection = {
-        "_id": 0,
-        "user_id": 1,
-        "email": 1,
-        "name": 1,
-        "role": 1,
-        "is_active": 1,
-        "is_email_verified": 1,
-        "created_at": 1,
-        "last_login_at": 1,
-        # password_hash and invite_token DELIBERATELY omitted.
-        # has_password is derived below from existence, not value.
-    }
-    docs = (
-        await db.users.find({"tenant_id": tenant_id}, projection)
-        .sort("created_at", -1)
-        .to_list(1000)
-    )
-
-    # Derive has_password from the raw user records, without exposing
-    # the hash itself. Two queries would be cleaner but slower; instead
-    # we fetch the full doc projection without password_hash, then add
-    # the flag via a second small projection. Practically, fold into a
-    # single query with a $cond pipeline. For clarity and small N, do
-    # it simply: per-user existence check.
-    if docs:
-        # Single batch query for the has_password flag set, scoped to
-        # the tenant we already verified. Returns just user_ids that
-        # have a non-empty password_hash.
-        ids_with_password = set()
-        async for u in db.users.find(
-            {
-                "tenant_id": tenant_id,
-                "user_id": {"$in": [d["user_id"] for d in docs]},
-                "password_hash": {"$nin": [None, ""]},
-            },
-            {"_id": 0, "user_id": 1},
-        ):
-            ids_with_password.add(u["user_id"])
-        for d in docs:
-            d["has_password"] = d["user_id"] in ids_with_password
-
-    return docs
+    # Postgres: the repository derives has_password from the (never-exposed)
+    # password hash and returns the exact projected shape the Users tab needs.
+    return await UserRepository(pg).list_tenant_users_admin(tenant_id)
