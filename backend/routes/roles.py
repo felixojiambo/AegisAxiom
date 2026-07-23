@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone
 import uuid
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from auth_helper import get_current_user, has_perm, require_perm
 from models import RoleCreateRequest, RoleUpdateRequest, RoleCloneRequest
 from services.audit_service import log_action
@@ -1236,7 +1240,7 @@ async def clone_role(role_id: str, data: RoleCloneRequest, current_user=Depends(
 
 
 @router.delete("/{role_id}")
-async def delete_role(role_id: str, current_user=Depends(get_current_user)):
+async def delete_role(role_id: str, current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     await require_perm(current_user, "roles.manage", resource="role", resource_id=role_id, action="delete")
     db = get_db()
     role = await db.roles.find_one({"role_id": role_id}, {"_id": 0})
@@ -1245,7 +1249,7 @@ async def delete_role(role_id: str, current_user=Depends(get_current_user)):
     if role.get("is_default"):
         raise HTTPException(status_code=400, detail="Default roles cannot be deleted")
     # Check if any users have this role
-    users_count = await db.users.count_documents({"role": role["name"]})
+    users_count = await UserRepository(pg).count_users(role=role["name"])
     if users_count > 0:
         raise HTTPException(status_code=400, detail=f"Cannot delete: {users_count} user(s) have this role. Reassign them first.")
     await db.roles.delete_one({"role_id": role_id})

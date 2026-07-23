@@ -2,7 +2,12 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from typing import Optional
 from datetime import datetime, date, timezone
 import logging
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
+from repositories.auth import AuthRepository
 from auth_helper import get_current_user, has_perm
 from services.field_registry import register_fields, register_module_events, register_module_config
 
@@ -178,6 +183,7 @@ async def get_agent_dashboard(
     date_from: Optional[str] = Query(None),          # ISO date string YYYY-MM-DD
     date_to: Optional[str] = Query(None),            # ISO date string YYYY-MM-DD
     current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
 ):
     db = get_db()
 
@@ -188,12 +194,9 @@ async def get_agent_dashboard(
 
     # --- Determine whose dashboard to render ---
     if view_user_id:
-        doc = await db.users.find_one({"user_id": view_user_id}, {"_id": 0, "password_hash": 0})
-        if not doc:
+        target = await UserRepository(pg).get_user_by_id(view_user_id)
+        if not target:
             raise HTTPException(status_code=404, detail="User not found")
-        from models import User
-        doc.setdefault("permissions", [])
-        target = User(**doc)
         target_role  = target.role
         target_email = target.email
         target_account_id = target.account_id
@@ -262,7 +265,7 @@ async def get_agent_dashboard(
         "target_role": target_role,
         "target_email": target_email,
         "view_label": view_label,
-        "zoho_connected": bool(await db.oauth_tokens.find_one({"provider": "zoho"}, {"_id": 0})),
+        "zoho_connected": bool(await AuthRepository(pg).get_oauth_token("zoho")),
         "total_zoho_commission_records": await db.zoho_commissions.count_documents({}),
     }
 
@@ -281,18 +284,17 @@ async def get_dashboard_accounts(current_user=Depends(get_current_user)):
 
 
 @router.get("/agent-dashboard/users-list")
-async def get_dashboard_users(role: str = None, current_user=Depends(get_current_user)):
+async def get_dashboard_users(role: str = None, current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     """Admin/Director: list of agents and/or sales reps (for the 'View As' filter)."""
     if not has_perm(current_user, "users.view"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
-    filt = {"is_active": True}
+    repo = UserRepository(pg)
     if role:
-        filt["role"] = role
+        users = await repo.list_users(role=role, is_active=True, limit=200)
     else:
-        filt["role"] = {"$in": ["agent", "sales_rep"]}
-    users = await db.users.find(
-        filt,
-        {"_id": 0, "user_id": 1, "name": 1, "email": 1, "role": 1}
-    ).sort("name", 1).to_list(200)
-    return users
+        users = await repo.list_users(role_in=["agent", "sales_rep"], is_active=True, limit=200)
+    # Preserve the original projected shape (4 keys per user).
+    return [
+        {"user_id": u.user_id, "name": u.name, "email": u.email, "role": u.role}
+        for u in users
+    ]

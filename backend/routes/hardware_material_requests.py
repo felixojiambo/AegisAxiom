@@ -10,7 +10,10 @@ from datetime import datetime, timezone
 from typing import Optional
 import uuid
 
+from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from auth_helper import get_current_user, has_perm
 from models import (
     HardwareMaterialRequest,
@@ -56,7 +59,7 @@ def _apply_soft_delete_filter(filt: dict) -> dict:
     return {**filt, "deleted_at": None}
 
 
-async def _denormalise_names(db, doc: dict) -> dict:
+async def _denormalise_names(db, pg, doc: dict) -> dict:
     """Attach distributor_name / product_name / opportunity_name / assigned_to_name."""
     if doc.get("distributor_id"):
         dist = await db.distributors.find_one({"distributor_id": doc["distributor_id"]}, {"name": 1, "_id": 0})
@@ -68,12 +71,12 @@ async def _denormalise_names(db, doc: dict) -> dict:
         opp = await db.opportunities.find_one({"opportunity_id": doc["opportunity_id"]}, {"name": 1, "_id": 0})
         doc["opportunity_name"] = opp.get("name") if opp else None
     if doc.get("assigned_to"):
-        user = await db.users.find_one({"user_id": doc["assigned_to"]}, {"name": 1, "_id": 0})
-        doc["assigned_to_name"] = user.get("name") if user else None
+        user = await UserRepository(pg).get_user_by_id(doc["assigned_to"])
+        doc["assigned_to_name"] = user.name if user else None
     return doc
 
 
-async def _validate_refs(db, data) -> None:
+async def _validate_refs(db, pg, data) -> None:
     """Soft-reference checks — 400 for invalid FKs."""
     if data.opportunity_id:
         opp = await db.opportunities.find_one(
@@ -96,7 +99,7 @@ async def _validate_refs(db, data) -> None:
             raise HTTPException(status_code=404, detail="Product not found")
 
     if getattr(data, "assigned_to", None):
-        user = await db.users.find_one({"user_id": data.assigned_to}, {"_id": 1})
+        user = await UserRepository(pg).get_user_by_id(data.assigned_to)
         if not user:
             raise HTTPException(status_code=404, detail="Assignee user not found")
 
@@ -109,6 +112,7 @@ async def list_requests(
     priority: Optional[str] = None,
     limit: int = 50,
     offset: int = 0,
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user),
 ):
     if not has_perm(current_user, "hardware_material_requests.view"):
@@ -181,11 +185,8 @@ async def list_requests(
         )
     } if opportunity_ids else {}
     user_map = {
-        d["user_id"]: d.get("name")
-        async for d in db.users.find(
-            {"user_id": {"$in": list(assignee_ids)}},
-            {"user_id": 1, "name": 1, "_id": 0},
-        )
+        u.user_id: u.name
+        for u in await UserRepository(pg).get_users_by_ids(list(assignee_ids))
     } if assignee_ids else {}
 
     for doc in docs:
@@ -204,6 +205,7 @@ async def list_requests(
 @router.get("/hardware-material-requests/{request_id}")
 async def get_request(
     request_id: str,
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user),
 ):
     if not has_perm(current_user, "hardware_material_requests.view"):
@@ -216,13 +218,14 @@ async def get_request(
     if not doc:
         raise HTTPException(status_code=404, detail="Request not found")
 
-    await _denormalise_names(db, doc)
+    await _denormalise_names(db, pg, doc)
     return doc
 
 
 @router.post("/hardware-material-requests")
 async def create_request(
     data: HardwareMaterialRequestCreate,
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user),
 ):
     if not has_perm(current_user, "hardware_material_requests.create"):
@@ -250,7 +253,7 @@ async def create_request(
         raise HTTPException(status_code=400, detail="Quantity must be >= 1")
 
     db = get_db()
-    await _validate_refs(db, data)
+    await _validate_refs(db, pg, data)
 
     request_id = f"hmr_{uuid.uuid4().hex[:12]}"
     now = datetime.now(timezone.utc)
@@ -280,7 +283,7 @@ async def create_request(
     # Emit against the clean DB doc — downstream subscribers should not see
     # denormalized join fields (distributor_name etc.) in the event payload.
     event_record = dict(doc)
-    await _denormalise_names(db, doc)
+    await _denormalise_names(db, pg, doc)
 
     await emit_event(
         "hardware_material_requests", "created",
@@ -296,6 +299,7 @@ async def create_request(
 async def update_request(
     request_id: str,
     data: HardwareMaterialRequestUpdate,
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user),
 ):
     if not has_perm(current_user, "hardware_material_requests.edit"):
@@ -343,7 +347,7 @@ async def update_request(
         if not prod:
             raise HTTPException(status_code=404, detail="Product not found")
     if data.assigned_to:
-        user = await db.users.find_one({"user_id": data.assigned_to}, {"_id": 1})
+        user = await UserRepository(pg).get_user_by_id(data.assigned_to)
         if not user:
             raise HTTPException(status_code=404, detail="Assignee user not found")
 
@@ -360,7 +364,7 @@ async def update_request(
     )
 
     updated = await db.hardware_material_requests.find_one({"request_id": request_id}, {"_id": 0})
-    await _denormalise_names(db, updated)
+    await _denormalise_names(db, pg, updated)
 
     await emit_event(
         "hardware_material_requests", "updated",

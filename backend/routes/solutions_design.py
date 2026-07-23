@@ -6,7 +6,10 @@ LOB-Based Architecture: Each opportunity LOB gets its own SOW task.
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List
 from datetime import datetime, timezone
+from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from auth_helper import get_current_user, has_perm
 from middleware.ai_authz import require_ai_permission
 from models import (
@@ -490,6 +493,7 @@ async def create_or_update_sow(
     lob: str,
     data: SOWCreate,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Create or update SOW for a specific LOB."""
@@ -529,12 +533,9 @@ async def create_or_update_sow(
 
         # Update assigned_to_name if assigned_to changed
         if "assigned_to" in update_data and update_data["assigned_to"]:
-            assigned_user = await db.users.find_one(
-                {"user_id": update_data["assigned_to"]},
-                {"_id": 0, "name": 1}
-            )
+            assigned_user = await UserRepository(pg).get_user_by_id(update_data["assigned_to"])
             if assigned_user:
-                update_data["assigned_to_name"] = assigned_user.get("name")
+                update_data["assigned_to_name"] = assigned_user.name
         
         await db.opportunity_sows.update_one(
             {"opportunity_id": opportunity_id, "line_of_business": lob},
@@ -556,12 +557,9 @@ async def create_or_update_sow(
         # Get assigned_to_name if assigned_to provided
         assigned_to_name = None
         if data.assigned_to:
-            assigned_user = await db.users.find_one(
-                {"user_id": data.assigned_to},
-                {"_id": 0, "name": 1}
-            )
+            assigned_user = await UserRepository(pg).get_user_by_id(data.assigned_to)
             if assigned_user:
-                assigned_to_name = assigned_user.get("name")
+                assigned_to_name = assigned_user.name
 
         dumped = data.model_dump()
         dumped["sow_product_items"] = _preserve_procurement_lifecycle(
@@ -600,6 +598,7 @@ async def assign_sow_task(
     lob: str,
     assigned_to: str,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Assign a SOW task to a sales_ops user."""
@@ -607,35 +606,33 @@ async def assign_sow_task(
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
     # Verify user exists and is sales_ops
-    user = await db.users.find_one(
-        {"user_id": assigned_to, "role": "sales_ops"},
-        {"_id": 0, "name": 1}
-    )
-    if not user:
+    user = await UserRepository(pg).get_user_by_id(assigned_to)
+    if not user or user.role != "sales_ops":
         raise HTTPException(status_code=404, detail="Sales ops user not found")
-    
+
     # Update SOW assignment
     result = await db.opportunity_sows.update_one(
         {"opportunity_id": opportunity_id, "line_of_business": lob},
         {"$set": {
             "assigned_to": assigned_to,
-            "assigned_to_name": user.get("name"),
+            "assigned_to_name": user.name,
             "updated_at": datetime.now(timezone.utc)
         }}
     )
-    
+
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="SOW task not found")
-    
+
     logger.info(f"SOW {opportunity_id}/{lob} assigned to {assigned_to} by {current_user.email}")
-    
-    return {"message": "SOW task assigned successfully", "assigned_to_name": user.get("name")}
+
+    return {"message": "SOW task assigned successfully", "assigned_to_name": user.name}
 
 
 @router.get("/available-resources")
 async def get_available_resources(
     resource_type_id: Optional[str] = None,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """
@@ -645,37 +642,8 @@ async def get_available_resources(
     if not has_perm(current_user, "sales_ops.solutions_design.view"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    # Build filter for contractors with resource type assignments
-    pipeline = [
-        # Match active contractor users
-        {"$match": {
-            "role": "contractor",
-            "is_active": True
-        }},
-        # Unwind resource_type_assignments array
-        {"$unwind": {
-            "path": "$resource_type_assignments",
-            "preserveNullAndEmptyArrays": False
-        }},
-        # Filter by resource type if provided
-        *([{"$match": {"resource_type_assignments.resource_type_id": resource_type_id}}] if resource_type_id else []),
-        # Filter only active assignments
-        {"$match": {"resource_type_assignments.is_active": True}},
-        # Project needed fields
-        {"$project": {
-            "_id": 0,
-            "user_id": 1,
-            "name": 1,
-            "email": 1,
-            "contractor_business_id": 1,
-            "resource_type_id": "$resource_type_assignments.resource_type_id",
-            "resource_type_name": "$resource_type_assignments.resource_type_name",
-            "cost_rate": "$resource_type_assignments.cost_rate"
-        }}
-    ]
-    
-    resources = await db.users.aggregate(pipeline).to_list(500)
-    
+    resources = await UserRepository(pg).list_resource_pool(resource_type_id=resource_type_id)
+
     # Enrich with contractor business names
     for res in resources:
         if res.get("contractor_business_id"):
@@ -751,18 +719,19 @@ async def get_materials_catalog(
 
 @router.get("/sales-ops-users")
 async def get_sales_ops_users(
-    db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Get list of sales_ops users for SOW assignment."""
     if not has_perm(current_user, "sales_ops.solutions_design.view"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    users = await db.users.find(
-        {"role": "sales_ops", "is_active": True},
-        {"_id": 0, "user_id": 1, "name": 1, "email": 1}
-    ).to_list(100)
-    
+    user_records = await UserRepository(pg).list_users(role="sales_ops", is_active=True, limit=100)
+    users = [
+        {"user_id": u.user_id, "name": u.name, "email": u.email}
+        for u in user_records
+    ]
+
     return {"items": users}
 
 
@@ -954,6 +923,7 @@ async def assign_sow(
     sow_id: str,
     assigned_to: str,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """
@@ -964,27 +934,27 @@ async def assign_sow(
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
     # Fetch the user to get their name
-    user = await db.users.find_one({"user_id": assigned_to}, {"_id": 0, "name": 1})
+    user = await UserRepository(pg).get_user_by_id(assigned_to)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     # Update SOW
     result = await db.opportunity_sows.update_one(
         {"sow_id": sow_id, "opportunity_id": opportunity_id},
         {"$set": {
             "assigned_to": assigned_to,
-            "assigned_to_name": user.get("name"),
+            "assigned_to_name": user.name,
             "updated_at": datetime.now(timezone.utc),
             "last_edited_by": current_user.user_id
         }}
     )
-    
+
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="SOW not found")
-    
-    logger.info(f"SOW {sow_id} assigned to {user.get('name')} by {current_user.email}")
-    
-    return {"message": "SOW assigned successfully", "assigned_to": assigned_to, "assigned_to_name": user.get("name")}
+
+    logger.info(f"SOW {sow_id} assigned to {user.name} by {current_user.email}")
+
+    return {"message": "SOW assigned successfully", "assigned_to": assigned_to, "assigned_to_name": user.name}
 
 
 @router.patch("/opportunities/{opportunity_id}/sows/{sow_id}/status")

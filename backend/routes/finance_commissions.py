@@ -23,7 +23,11 @@ from typing import Any, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from auth_helper import get_current_user, has_perm
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from middleware.ai_authz import require_ai_permission
 from middleware.tenant_scoping import get_current_tenant_id, require_root_tenant
 from services.field_registry import (
@@ -650,22 +654,21 @@ async def list_zoho_commissions(
     dependencies=[Depends(require_ai_permission("finance.commissions.view"))],
 )
 async def commissions_users_summary(current_user=Depends(get_current_user),
-    tenant_id: str = Depends(get_current_tenant_id)):
+    tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session)):
     """List of sales-eligible users (sales_rep, agent, director) for filter dropdowns.
 
     Returns user_id, name, email, role sorted by name ascending.
     Capped at 500 users.
     """
     _require_commissions_view(current_user)
-    db = get_db()
     # Phase 1E.3c — Finance is SimpliMeta-internal only.
     require_root_tenant(tenant_id)
-    users = (
-        await db.users.find(
-            {"role": {"$in": ["sales_rep", "agent", "director"]}},
-            {"_id": 0, "user_id": 1, "name": 1, "email": 1, "role": 1},
-        )
-        .sort("name", 1)
-        .to_list(500)
+    users = await UserRepository(pg).list_users(
+        role_in=["sales_rep", "agent", "director"], limit=500
     )
-    return users
+    # Preserve the projected response shape (4 keys per user).
+    return [
+        {"user_id": u.user_id, "name": u.name, "email": u.email, "role": u.role}
+        for u in users
+    ]

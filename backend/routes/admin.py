@@ -7,7 +7,12 @@ import logging
 
 from pymongo.errors import DuplicateKeyError
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
+from repositories.tenants import TenantRepository
 
 logger = logging.getLogger(__name__)
 
@@ -44,10 +49,9 @@ register_fields("admin", "user", [
 # ---- USER MANAGEMENT ----
 
 @router.get("/users")
-async def get_users(current_user=Depends(get_current_user)):
+async def get_users(current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "users.view"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
     # Phase 1A: tenant-scope the user list. Users only see other users in
     # the same tenant. SimpliMeta root admins also only see SimpliMeta
     # users by default — cross-tenant visibility for root admins is a
@@ -55,10 +59,7 @@ async def get_users(current_user=Depends(get_current_user)):
     tenant_id = getattr(current_user, "tenant_id", None)
     if not tenant_id:
         raise HTTPException(status_code=403, detail="User is not assigned to a tenant")
-    users = await db.users.find(
-        {"tenant_id": tenant_id},
-        {"_id": 0, "password_hash": 0},
-    ).to_list(500)
+    users = await UserRepository(pg).list_users(tenant_id=tenant_id, limit=500)
     return users
 
 
@@ -75,6 +76,7 @@ async def list_contract_approval_access(
     page: int = Query(1, ge=1, description="1-indexed page number"),
     page_size: int = Query(50, description="25 | 50 | 100"),
     current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Paginated read of who can approve contracts in this tenant
     and why (role grant, direct override, both, or neither).
@@ -96,10 +98,10 @@ async def list_contract_approval_access(
         raise HTTPException(status_code=403, detail="User is not assigned to a tenant")
 
     db = get_db()
-    users = await db.users.find(
-        {"tenant_id": tenant_id},
-        {"_id": 0, "password_hash": 0},
-    ).to_list(5000)
+    user_dtos = await UserRepository(pg).list_users(tenant_id=tenant_id, limit=5000)
+    # resolve_approval_access is a pure helper operating on plain dicts
+    # (it does `isinstance(user, dict)` guards), so serialize the DTOs.
+    users = [u.model_dump() for u in user_dtos]
     # Roles are tenant-shared (system + custom). The roles collection
     # has no tenant_id field — `routes/roles.list_roles` returns the
     # full set. Mirror that here so role permission lookup works
@@ -118,7 +120,8 @@ async def list_contract_approval_access(
 
 @router.post("/users")
 @limiter.limit("10/hour")
-async def create_user_direct(data: dict, request: Request, current_user=Depends(get_current_user)):
+async def create_user_direct(data: dict, request: Request, current_user=Depends(get_current_user),
+                             pg: AsyncSession = Depends(get_session)):
     """
     Create a user directly (used by Contractor Management to create contractor
     user accounts linked to a contractor business). Sends an invite email so
@@ -158,7 +161,7 @@ async def create_user_direct(data: dict, request: Request, current_user=Depends(
             raise HTTPException(status_code=400, detail="Contractor business not found")
         contractor_business_name = biz.get("business_name")
 
-    if await db.users.find_one({"email": email}, {"_id": 0}):
+    if await UserRepository(pg).get_user_by_email(email):
         raise HTTPException(status_code=400, detail="Email already exists")
 
     user_id = f"user_{uuid.uuid4().hex[:12]}"
@@ -202,16 +205,17 @@ async def create_user_direct(data: dict, request: Request, current_user=Depends(
         "is_test_data": bool(data.get("is_test_data", False)),
         "created_at": datetime.now(timezone.utc),
     }
-    if resource_type_assignments:
-        user_doc["resource_type_assignments"] = resource_type_assignments
-
     # Phase 1A multi-tenancy: stamp tenant_id from the inviter's tenant.
     user_doc["tenant_id"] = (
             getattr(current_user, "tenant_id", None) or SIMPLIMETA_ROOT_TENANT_ID
     )
 
+    # resource_type_assignments become child rows — pass via the repo's
+    # `assignments` kwarg rather than embedding them in the user doc.
     try:
-        await db.users.insert_one(user_doc)
+        await UserRepository(pg).create_user(
+            user_doc, assignments=resource_type_assignments or None
+        )
     except DuplicateKeyError:
         raise HTTPException(status_code=400, detail="Email already exists")
 
@@ -236,7 +240,8 @@ async def create_user_direct(data: dict, request: Request, current_user=Depends(
 
 @router.post("/invite")
 @limiter.limit("10/hour")
-async def invite_user(data: UserInvite, request: Request, current_user=Depends(get_current_user)):
+async def invite_user(data: UserInvite, request: Request, current_user=Depends(get_current_user),
+                      pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "users.invite"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
@@ -249,7 +254,7 @@ async def invite_user(data: UserInvite, request: Request, current_user=Depends(g
             detail=f"Invalid role. Must be one of: {', '.join(sorted(valid_roles))}"
         )
 
-    if await db.users.find_one({"email": data.email.lower()}, {"_id": 0}):
+    if await UserRepository(pg).get_user_by_email(data.email.lower()):
         raise HTTPException(status_code=400, detail="Email already exists")
 
     user_id = f"user_{uuid.uuid4().hex[:12]}"
@@ -282,9 +287,6 @@ async def invite_user(data: UserInvite, request: Request, current_user=Depends(g
         "invite_token": invite_token,
         "created_at": datetime.now(timezone.utc),
     }
-    if resource_type_assignments:
-        user_doc["resource_type_assignments"] = resource_type_assignments
-
     # Phase 1A multi-tenancy: stamp tenant_id from the inviter's tenant.
     # Phase 1D.8: if the caller explicitly targets a different tenant
     # via `target_tenant_id`, honor it — but only for root admins, and
@@ -301,13 +303,10 @@ async def invite_user(data: UserInvite, request: Request, current_user=Depends(g
                 status_code=403,
                 detail="You can only invite users into your own tenant.",
             )
-        target = await db.tenants.find_one(
-            {"tenant_id": data.target_tenant_id},
-            {"_id": 0, "tenant_id": 1, "status": 1, "name": 1},
-        )
+        target = await TenantRepository(pg).get_tenant(data.target_tenant_id)
         if not target:
             raise HTTPException(status_code=404, detail="Target tenant not found.")
-        if target.get("status") == "archived":
+        if target.status == "archived":
             raise HTTPException(
                 status_code=400,
                 detail="Cannot invite users into an archived tenant.",
@@ -316,7 +315,9 @@ async def invite_user(data: UserInvite, request: Request, current_user=Depends(g
     else:
         user_doc["tenant_id"] = caller_tenant_id
 
-    await db.users.insert_one(user_doc)
+    await UserRepository(pg).create_user(
+        user_doc, assignments=resource_type_assignments or None
+    )
     frontend_url = get_frontend_url(request)
     invite_link = f"{frontend_url}/accept-invite?token={invite_token}"
     try:
@@ -331,7 +332,8 @@ async def invite_user(data: UserInvite, request: Request, current_user=Depends(g
 
 
 @router.put("/users/{user_id}")
-async def update_user(user_id: str, data: UserUpdateRequest, current_user=Depends(get_current_user)):
+async def update_user(user_id: str, data: UserUpdateRequest, current_user=Depends(get_current_user),
+                      pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "users.edit"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
@@ -369,12 +371,12 @@ async def update_user(user_id: str, data: UserUpdateRequest, current_user=Depend
 
     # PROCUREMENT APPROVAL LOGIC: For contractors with resource_type_assignments
     if "resource_type_assignments" in update_data:
-        user = await db.users.find_one({"user_id": user_id}, {"_id": 0, "role": 1, "contractor_business_id": 1})
+        user = await UserRepository(pg).get_user_by_id(user_id)
 
-        if user and user.get("role") == "contractor" and user.get("contractor_business_id"):
+        if user and user.role == "contractor" and user.contractor_business_id:
             # Get contractor business to compare rates
             business = await db.contractor_businesses.find_one(
-                {"business_id": user["contractor_business_id"]},
+                {"business_id": user.contractor_business_id},
                 {"_id": 0, "resource_types_offered": 1}
             )
 
@@ -430,71 +432,73 @@ async def update_user(user_id: str, data: UserUpdateRequest, current_user=Depend
                 # Replace assignments with processed ones
                 update_data["resource_type_assignments"] = processed_assignments
 
-    await db.users.update_one({"user_id": user_id}, {"$set": update_data})
+    updated = await UserRepository(pg).update_user(user_id, update_data)
     await log_action("user_update", current_user.user_id, current_user.email, "user", user_id, {"changes": update_data})
-    return await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
+    return updated
 
 
 @router.delete("/users/{user_id}")
-async def delete_user(user_id: str, current_user=Depends(get_current_user)):
+async def delete_user(user_id: str, current_user=Depends(get_current_user),
+                      pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "users.delete"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     if user_id == current_user.user_id:
         raise HTTPException(status_code=400, detail="Cannot delete your own account")
     db = get_db()
-    target = await db.users.find_one({"user_id": user_id}, {"_id": 0, "email": 1})
-    await db.users.delete_one({"user_id": user_id})
-    await db.user_sessions.delete_many({"user_id": user_id})
+    users = UserRepository(pg)
+    target = await users.get_user_by_id(user_id)
+    await users.delete_user(user_id)
+    # user_sessions rows cascade-delete with the user (FK ON DELETE CASCADE,
+    # Phase 2a) — no separate session purge needed.
     await log_action("user_delete", current_user.user_id, current_user.email, "user", user_id,
-                     {"deleted_email": target.get("email") if target else "unknown"})
+                     {"deleted_email": target.email if target else "unknown"})
     return {"message": "User deleted"}
 
 
 @router.post("/users/{user_id}/reset-ai-budget")
-async def reset_ai_budget(user_id: str, current_user=Depends(get_current_user)):
+async def reset_ai_budget(user_id: str, current_user=Depends(get_current_user),
+                          pg: AsyncSession = Depends(get_session)):
     """Reset a user's daily AI token budget without deleting usage history."""
     if not has_perm(current_user, "ai_usage.manage"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    db = get_db()
-    target = await db.users.find_one({"user_id": user_id}, {"_id": 0, "name": 1, "email": 1})
+    users = UserRepository(pg)
+    target = await users.get_user_by_id(user_id)
     if not target:
         raise HTTPException(status_code=404, detail="User not found")
 
     now = datetime.now(timezone.utc)
-    await db.users.update_one(
-        {"user_id": user_id},
-        {"$set": {"budget_reset_at": now}},
-    )
+    await users.update_user(user_id, {"budget_reset_at": now})
     await log_action("ai_budget_reset", current_user.user_id, current_user.email, "user", user_id, {
-        "target_name": target.get("name", ""),
+        "target_name": target.name or "",
         "reset_at": now.isoformat(),
     })
-    return {"message": f"AI budget reset for {target.get('name', user_id)}", "reset_at": now.isoformat()}
+    return {"message": f"AI budget reset for {target.name or user_id}", "reset_at": now.isoformat()}
 
 
 @router.post("/resend-invite/{user_id}")
-async def resend_invite(user_id: str, request: Request, current_user=Depends(get_current_user)):
+async def resend_invite(user_id: str, request: Request, current_user=Depends(get_current_user),
+                        pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "users.invite"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
-    user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0})
-    if not user_doc:
+    users = UserRepository(pg)
+    user = await users.get_user_by_id(user_id)
+    if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if user_doc.get("is_active"):
+    if user.is_active:
         raise HTTPException(status_code=400, detail="User has already accepted their invite")
 
-    new_token = create_invite_token(user_doc["email"], user_id)
-    await db.users.update_one({"user_id": user_id}, {"$set": {"invite_token": new_token}})
+    new_token = create_invite_token(user.email, user_id)
+    await users.update_user(user_id, {"invite_token": new_token})
     frontend_url = get_frontend_url(request)
     invite_link = f"{frontend_url}/accept-invite?token={new_token}"
     try:
         from services.email_service import send_invite_email
-        await send_invite_email(user_doc["email"], user_doc["name"], invite_link, user_doc["role"], current_user.name)
+        await send_invite_email(user.email, user.name, invite_link, user.role, current_user.name)
     except Exception as e:
         import logging
         logging.getLogger(__name__).warning(f"Email failed: {e}")
-    return {"message": f"Invite resent to {user_doc['email']}", "invite_link": invite_link}
+    return {"message": f"Invite resent to {user.email}", "invite_link": invite_link}
 
 
 # ---- PARTNER APPLICATIONS ----
@@ -509,7 +513,8 @@ async def get_partner_apps(current_user=Depends(get_current_user)):
 
 
 @router.put("/partner-applications/{app_id}/approve")
-async def approve_partner(app_id: str, request: Request, current_user=Depends(get_current_user)):
+async def approve_partner(app_id: str, request: Request, current_user=Depends(get_current_user),
+                          pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "partner_apps.approve"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     db = get_db()
@@ -521,7 +526,7 @@ async def approve_partner(app_id: str, request: Request, current_user=Depends(ge
     invite_token = create_invite_token(app["email"], user_id)
     account_id = f"acc_{uuid.uuid4().hex[:12]}"
 
-    await db.users.insert_one(
+    await UserRepository(pg).create_user(
         {
             "user_id": user_id,
             "email": app["email"].lower(),
@@ -541,7 +546,7 @@ async def approve_partner(app_id: str, request: Request, current_user=Depends(ge
             "created_at": datetime.now(timezone.utc),
         }
     )
-    await db.users.insert_one(
+    await UserRepository(pg).create_user(
         {
             "user_id": user_id,
             "email": app["email"].lower(),
@@ -596,13 +601,13 @@ async def reject_partner(app_id: str, data: PartnerRejectRequest, current_user=D
 # ---- DASHBOARD STATS ----
 
 @router.get("/stats")
-async def get_stats(current_user=Depends(get_current_user)):
+async def get_stats(current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "users.view"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     db = get_db()
     total_accounts = await db.accounts.count_documents({})
     total_deals = await db.deals.count_documents({})
-    total_users = await db.users.count_documents({})
+    total_users = await UserRepository(pg).count_users()
     pending_apps = await db.partner_applications.count_documents({"status": "pending"})
 
     comms = await db.commissions.find({},

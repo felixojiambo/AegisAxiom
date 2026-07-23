@@ -59,29 +59,37 @@ class ZohoService:
         }
 
     async def _get_token(self, db) -> str:
-        doc = await db.oauth_tokens.find_one({"provider": "zoho"}, {"_id": 0})
-        if not doc:
-            raise Exception("Zoho not connected")
-        exp = doc.get("expires_at")
-        if isinstance(exp, str):
-            exp = datetime.fromisoformat(exp)
-        if exp and exp.tzinfo is None:
-            exp = exp.replace(tzinfo=timezone.utc)
-        if exp and exp < datetime.now(timezone.utc) + timedelta(minutes=5):
-            async with httpx.AsyncClient() as client:
-                resp = await client.post(
-                    f"{ZOHO_ACCOUNTS_URL}/oauth/v2/token",
-                    data={"grant_type": "refresh_token", "client_id": ZOHO_CLIENT_ID,
-                          "client_secret": ZOHO_CLIENT_SECRET, "refresh_token": doc["refresh_token"]},
+        # Phase 2a: oauth_tokens live in Postgres. `db` (Mongo) is unused here
+        # now but kept in the signature for caller compatibility.
+        from db.session import get_sessionmaker
+        from repositories.auth import AuthRepository
+
+        sm = get_sessionmaker()
+        async with sm() as pg:
+            ar = AuthRepository(pg)
+            tok = await ar.get_oauth_token("zoho")
+            if not tok:
+                raise Exception("Zoho not connected")
+            exp = tok.expires_at
+            if exp and exp.tzinfo is None:
+                exp = exp.replace(tzinfo=timezone.utc)
+            if exp and exp < datetime.now(timezone.utc) + timedelta(minutes=5):
+                async with httpx.AsyncClient() as client:
+                    resp = await client.post(
+                        f"{ZOHO_ACCOUNTS_URL}/oauth/v2/token",
+                        data={"grant_type": "refresh_token", "client_id": ZOHO_CLIENT_ID,
+                              "client_secret": ZOHO_CLIENT_SECRET, "refresh_token": tok.refresh_token},
+                    )
+                    new = resp.json()
+                new_exp = datetime.now(timezone.utc) + timedelta(seconds=new.get("expires_in", 3600))
+                await ar.upsert_oauth_token(
+                    token_id="zoho", provider="zoho",
+                    access_token=new["access_token"], refresh_token=tok.refresh_token,
+                    expires_at=new_exp, scope=tok.scope,
                 )
-                new = resp.json()
-            new_exp = datetime.now(timezone.utc) + timedelta(seconds=new.get("expires_in", 3600))
-            await db.oauth_tokens.update_one(
-                {"provider": "zoho"},
-                {"$set": {"access_token": new["access_token"], "expires_at": new_exp}},
-            )
-            return new["access_token"]
-        return doc["access_token"]
+                await pg.commit()
+                return new["access_token"]
+            return tok.access_token
 
     async def _fetch_all_pages(self, db, module: str, fields: str, max_pages: int = 100) -> list:
         """Robust paginated fetch from any Zoho CRM module.
@@ -115,11 +123,13 @@ class ZohoService:
                         if resp.status_code == 401:
                             # Token expired mid-session, force refresh
                             logger.warning(f"[{module}] Page {page}: 401 Unauthorized — refreshing token (attempt {attempt})")
-                            # Invalidate cached token by resetting expiry
-                            await db.oauth_tokens.update_one(
-                                {"provider": "zoho"},
-                                {"$set": {"expires_at": datetime.now(timezone.utc) - timedelta(hours=1)}}
-                            )
+                            # Invalidate cached token by resetting expiry (Postgres)
+                            from db.session import get_sessionmaker
+                            from repositories.auth import AuthRepository
+                            _sm = get_sessionmaker()
+                            async with _sm() as _pg:
+                                await AuthRepository(_pg).expire_oauth_token("zoho")
+                                await _pg.commit()
                             token = await self._get_token(db)
                             continue  # retry this page
 

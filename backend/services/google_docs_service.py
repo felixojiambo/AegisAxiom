@@ -176,66 +176,70 @@ def _get_credentials():
 
 
 async def _get_user_credentials(db, user_id: str) -> Credentials:
-    """Load user's Google OAuth token from DB, auto-refreshing if expired."""
-    token_doc = await db.oauth_tokens.find_one(
-        {"provider": "google", "user_id": user_id}, {"_id": 0}
-    )
-    if not token_doc or not token_doc.get("access_token"):
-        raise FileNotFoundError(
-            "Google Docs is not connected. Please sign out and sign back in with Google."
-        )
+    """Load user's Google OAuth token from Postgres, auto-refreshing if expired.
 
-    expires_at = token_doc.get("expires_at")
-    if isinstance(expires_at, str):
-        expires_at = datetime.fromisoformat(expires_at)
-    if expires_at and expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    Phase 2a: oauth_tokens live in Postgres. `db` (Mongo) is unused here now but
+    kept in the signature for caller compatibility.
+    """
+    from db.session import get_sessionmaker
+    from repositories.auth import AuthRepository
 
-    access_token = token_doc["access_token"]
-
-    if expires_at and expires_at < datetime.now(timezone.utc) + timedelta(minutes=5):
-        refresh_token = token_doc.get("refresh_token")
-        if not refresh_token:
+    sm = get_sessionmaker()
+    async with sm() as pg:
+        ar = AuthRepository(pg)
+        tok = await ar.get_oauth_token("google", user_id=user_id)
+        if not tok or not tok.access_token:
             raise FileNotFoundError(
-                "Google session expired. Please sign out and sign back in with Google."
+                "Google Docs is not connected. Please sign out and sign back in with Google."
             )
 
-        client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
-        client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
+        expires_at = tok.expires_at
+        if expires_at and expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
 
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                "https://oauth2.googleapis.com/token",
-                data={
-                    "client_id": client_id,
-                    "client_secret": client_secret,
-                    "refresh_token": refresh_token,
-                    "grant_type": "refresh_token",
-                },
-                timeout=10.0,
-            )
-            if resp.status_code != 200:
+        access_token = tok.access_token
+
+        if expires_at and expires_at < datetime.now(timezone.utc) + timedelta(minutes=5):
+            refresh_token = tok.refresh_token
+            if not refresh_token:
                 raise FileNotFoundError(
-                    "Failed to refresh Google token. Please sign out and sign back in."
+                    "Google session expired. Please sign out and sign back in with Google."
                 )
-            new_tokens = resp.json()
 
-        access_token = new_tokens["access_token"]
-        new_expires = datetime.now(timezone.utc) + timedelta(
-            seconds=new_tokens.get("expires_in", 3600)
-        )
+            client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+            client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
 
-        await db.oauth_tokens.update_one(
-            {"provider": "google", "user_id": user_id},
-            {"$set": {
-                "access_token": access_token,
-                "expires_at": new_expires,
-                "updated_at": datetime.now(timezone.utc),
-            }},
-        )
-        logger.info(f"Refreshed Google token for user {user_id}")
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    "https://oauth2.googleapis.com/token",
+                    data={
+                        "client_id": client_id,
+                        "client_secret": client_secret,
+                        "refresh_token": refresh_token,
+                        "grant_type": "refresh_token",
+                    },
+                    timeout=10.0,
+                )
+                if resp.status_code != 200:
+                    raise FileNotFoundError(
+                        "Failed to refresh Google token. Please sign out and sign back in."
+                    )
+                new_tokens = resp.json()
 
-    return Credentials(token=access_token)
+            access_token = new_tokens["access_token"]
+            new_expires = datetime.now(timezone.utc) + timedelta(
+                seconds=new_tokens.get("expires_in", 3600)
+            )
+
+            await ar.upsert_oauth_token(
+                token_id=f"google_{user_id}", provider="google", user_id=user_id,
+                access_token=access_token, refresh_token=refresh_token,
+                expires_at=new_expires, scope=tok.scope,
+            )
+            await pg.commit()
+            logger.info(f"Refreshed Google token for user {user_id}")
+
+        return Credentials(token=access_token)
 
 
 def _strip_markdown(text: str) -> str:
@@ -523,7 +527,12 @@ async def create_sow_google_doc(
 
     branding = None
     if db is not None:
-        branding = await db.org_branding.find_one({"org_id": "default"}, {"_id": 0})
+        from db.session import get_sessionmaker
+        from repositories.org_branding import BrandingRepository
+        _sm = get_sessionmaker()
+        async with _sm() as _pg:
+            _b = await BrandingRepository(_pg).get_branding("default")
+        branding = _b.model_dump() if _b else None
 
     creds = _get_credentials()
     docs_service = build("docs", "v1", credentials=creds)
@@ -658,14 +667,20 @@ async def create_sow_google_doc_user(
     # url for the caller.
     logger.info("Created SOW from template (user OAuth path) user=%s", user_id)
 
-    # Fetch org branding
-    branding = await db.org_branding.find_one({"org_id": "default"}, {"_id": 0})
+    # Fetch org branding + author name (Postgres)
+    from db.session import get_sessionmaker
+    from repositories.org_branding import BrandingRepository
+    from repositories.users import UserRepository
+    _sm = get_sessionmaker()
+    async with _sm() as _pg:
+        _b = await BrandingRepository(_pg).get_branding("default")
+        _user = await UserRepository(_pg).get_user_by_id(user_id)
+    branding = _b.model_dump() if _b else None
 
-    # Get author name from user record
-    user_doc = await db.users.find_one({"user_id": user_id}, {"first_name": 1, "last_name": 1})
     author_name = sow.get("assigned_to_name", "")
-    if not author_name and user_doc:
-        author_name = f"{user_doc.get('first_name', '')} {user_doc.get('last_name', '')}".strip()
+    if not author_name and _user:
+        # Canonical schema has a single `name` field (no first/last split).
+        author_name = (_user.name or "").strip()
 
     # Replace placeholders
     doc_requests = _build_replacements(sow, opportunity, assumptions_risks, branding, author_name)

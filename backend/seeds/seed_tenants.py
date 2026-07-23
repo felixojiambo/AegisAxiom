@@ -1,23 +1,21 @@
-"""Seed the SimpliMeta root tenant + backfill existing users.
+"""Seed the SimpliMeta root tenant + backfill existing users (Phase 2a: Postgres).
 
 Idempotent: safe to run on every server startup.
 
 On first run:
   * Creates the SimpliMeta root tenant if it doesn't exist.
-  * Stamps every user document that has no `tenant_id` with the SimpliMeta
-    root tenant_id so legacy users continue to function.
+  * Stamps every user row that has no `tenant_id` with the SimpliMeta root
+    tenant_id so legacy users continue to function.
 
 On subsequent runs:
   * No-ops if the root tenant exists and all users have a tenant_id.
 
 The SimpliMeta root tenant_id is intentionally STABLE across environments
-(`ten_simplimeta_root`) rather than randomly generated, so:
-  1. Code that special-cases the root (admin tooling, cross-tenant analytics)
-     can reference it by a constant rather than a config lookup.
-  2. Migrations and backfills are deterministic across dev/staging/prod.
+(`ten_simplimeta_root`) rather than randomly generated.
 
-Phase 1A only — Phase 1B introduces partner/account seeding for demo data
-in seed_demo_tenants.py.
+Phase 2a: rewritten from Mongo to the Postgres tenants/users repositories. The
+entry point ``seed_tenants()`` opens its own session (it runs at startup, not in
+a request) and commits.
 """
 from __future__ import annotations
 
@@ -33,70 +31,72 @@ SIMPLIMETA_ROOT_SLUG = "simplimeta"
 SIMPLIMETA_ROOT_NAME = "SimpliMeta"
 
 
-async def seed_root_tenant(db) -> dict:
-    """Ensure the SimpliMeta root tenant exists. Returns the tenant doc."""
-    existing = await db.tenants.find_one(
-        {"tenant_id": SIMPLIMETA_ROOT_TENANT_ID}, {"_id": 0}
-    )
-    if existing:
-        # If somehow the existing doc has the wrong type or status, normalise it.
-        # (Defensive — should never happen in practice.)
-        if existing.get("tenant_type") != "root" or existing.get("status") != "active":
-            await db.tenants.update_one(
-                {"tenant_id": SIMPLIMETA_ROOT_TENANT_ID},
-                {
-                    "$set": {
-                        "tenant_type": "root",
-                        "status": "active",
-                        "parent_tenant_id": None,
-                        "updated_at": datetime.now(timezone.utc),
-                    }
-                },
-            )
-            logger.warning(
-                "Normalised SimpliMeta root tenant doc — type/status/parent were drifted."
-            )
-            existing = await db.tenants.find_one(
-                {"tenant_id": SIMPLIMETA_ROOT_TENANT_ID}, {"_id": 0}
-            )
-        return existing
+def _root_tenant_model():
+    from models import Tenant
 
     now = datetime.now(timezone.utc)
-    doc = {
-        "tenant_id": SIMPLIMETA_ROOT_TENANT_ID,
-        "name": SIMPLIMETA_ROOT_NAME,
-        "slug": SIMPLIMETA_ROOT_SLUG,
-        "tenant_type": "root",
-        "parent_tenant_id": None,
-        "status": "active",
-        "created_at": now,
-        "updated_at": now,
-        "created_by": "system_seed",
-    }
-    await db.tenants.insert_one(doc)
-    logger.info("Seeded SimpliMeta root tenant: %s", SIMPLIMETA_ROOT_TENANT_ID)
-    doc.pop("_id", None)
-    return doc
-
-
-async def backfill_users_to_root(db) -> int:
-    """Stamp every user without a tenant_id with the SimpliMeta root tenant id.
-
-    Returns the number of users updated. Idempotent.
-    """
-    result = await db.users.update_many(
-        {"$or": [{"tenant_id": {"$exists": False}}, {"tenant_id": None}]},
-        {"$set": {"tenant_id": SIMPLIMETA_ROOT_TENANT_ID}},
+    return Tenant(
+        tenant_id=SIMPLIMETA_ROOT_TENANT_ID,
+        name=SIMPLIMETA_ROOT_NAME,
+        slug=SIMPLIMETA_ROOT_SLUG,
+        tenant_type="root",
+        parent_tenant_id=None,
+        status="active",
+        created_at=now,
+        updated_at=now,
+        created_by="system_seed",
     )
-    if result.modified_count:
-        logger.info(
-            "Backfilled tenant_id=SimpliMeta on %d existing users.",
-            result.modified_count,
+
+
+async def seed_tenants() -> None:
+    """Top-level seed entry point. Called from server startup.
+
+    Opens a Postgres session, ensures the root tenant, backfills users missing a
+    tenant_id, and commits.
+    """
+    from db.session import get_sessionmaker
+    from repositories.tenants import TenantRepository
+    from repositories.users import UserRepository
+
+    sm = get_sessionmaker()
+    async with sm() as session:
+        tenant = await TenantRepository(session).upsert_root_tenant(_root_tenant_model())
+        backfilled = await UserRepository(session).update_tenant_id_where_missing(
+            SIMPLIMETA_ROOT_TENANT_ID
         )
-    return result.modified_count
+        await session.commit()
+
+    logger.info("Ensured SimpliMeta root tenant: %s", tenant.tenant_id)
+    if backfilled:
+        logger.info("Backfilled tenant_id=SimpliMeta on %d existing users.", backfilled)
 
 
-async def seed_tenants(db) -> None:
-    """Top-level seed entry point. Called from server startup."""
-    await seed_root_tenant(db)
-    await backfill_users_to_root(db)
+# ---- Backward-compat wrappers (Postgres-backed) -------------------------------
+# The one-off `scripts/backfill_user_tenant_id.py` imports these names. They now
+# run against Postgres and ignore any passed (Mongo) `db` argument. Not used by
+# any live request path.
+
+async def seed_root_tenant(db=None) -> dict:
+    from db.session import get_sessionmaker
+    from repositories.tenants import TenantRepository
+
+    sm = get_sessionmaker()
+    async with sm() as session:
+        tenant = await TenantRepository(session).upsert_root_tenant(_root_tenant_model())
+        await session.commit()
+    return tenant.model_dump()
+
+
+async def backfill_users_to_root(db=None) -> int:
+    from db.session import get_sessionmaker
+    from repositories.users import UserRepository
+
+    sm = get_sessionmaker()
+    async with sm() as session:
+        n = await UserRepository(session).update_tenant_id_where_missing(
+            SIMPLIMETA_ROOT_TENANT_ID
+        )
+        await session.commit()
+    if n:
+        logger.info("Backfilled tenant_id=SimpliMeta on %d existing users.", n)
+    return n

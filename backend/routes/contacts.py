@@ -9,7 +9,11 @@ import uuid
 import logging
 import re
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from models import Contact, ContactCreate, ContactUpdate
 from auth_helper import get_current_user, has_perm
 from seeds.seed_tenants import SIMPLIMETA_ROOT_TENANT_ID
@@ -67,7 +71,8 @@ async def get_contacts(
     is_active: bool = None,
     test_only: bool = False,
     search: str = None,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)
 ):
     """Get all contacts with optional filters."""
     db = get_db()
@@ -117,11 +122,8 @@ async def get_contacts(
         if doc.get("assigned_sales_rep_id") and not doc.get("assigned_sales_rep_name"):
             rep_ids.add(doc["assigned_sales_rep_id"])
     if rep_ids:
-        users = await db.users.find(
-            {"user_id": {"$in": list(rep_ids)}},
-            {"_id": 0, "user_id": 1, "name": 1}
-        ).to_list(len(rep_ids))
-        name_map = {u["user_id"]: u["name"] for u in users}
+        users = await UserRepository(pg).get_users_by_ids(list(rep_ids))
+        name_map = {u.user_id: u.name for u in users}
         for doc in docs:
             if doc.get("assigned_sales_rep_id") and not doc.get("assigned_sales_rep_name"):
                 doc["assigned_sales_rep_name"] = name_map.get(doc["assigned_sales_rep_id"])
@@ -130,11 +132,12 @@ async def get_contacts(
 
 
 @router.post("/contacts")
-async def create_contact(data: ContactCreate, current_user=Depends(get_current_user)):
+async def create_contact(data: ContactCreate, current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)):
     """Create a new contact."""
     if not has_perm(current_user, "contacts.create"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    
+
     db = get_db()
     
     # Validate account exists
@@ -193,12 +196,9 @@ async def create_contact(data: ContactCreate, current_user=Depends(get_current_u
 
     # Always resolve sales rep name server-side from ID
     if doc.get("assigned_sales_rep_id"):
-        rep_user = await db.users.find_one(
-            {"user_id": doc["assigned_sales_rep_id"]},
-            {"_id": 0, "name": 1}
-        )
+        rep_user = await UserRepository(pg).get_user_by_id(doc["assigned_sales_rep_id"])
         if rep_user:
-            doc["assigned_sales_rep_name"] = rep_user["name"]
+            doc["assigned_sales_rep_name"] = rep_user.name
     
     # If this is set as primary, unset any existing primary contact for this account
     if data.is_primary:
@@ -216,16 +216,18 @@ async def create_contact(data: ContactCreate, current_user=Depends(get_current_u
 
 
 @router.get("/contacts/sales-reps")
-async def get_sales_reps_for_contacts(current_user=Depends(get_current_user)):
+async def get_sales_reps_for_contacts(current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)):
     """Get users eligible to be assigned as sales rep on contacts."""
     if not has_perm(current_user, "contacts.create") and not has_perm(current_user, "contacts.edit.own") and not has_perm(current_user, "contacts.edit.all"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
-    users = await db.users.find(
-        {"is_active": True, "role": {"$in": ["admin", "director", "sales_rep"]}},
-        {"_id": 0, "user_id": 1, "name": 1, "role": 1}
-    ).sort("name", 1).to_list(200)
-    return users
+    user_objs = await UserRepository(pg).list_users(
+        is_active=True, role_in=["admin", "director", "sales_rep"], limit=200
+    )
+    return [
+        {"user_id": u.user_id, "name": u.name, "role": u.role}
+        for u in user_objs
+    ]
 
 
 @router.get("/contacts/{contact_id}")
@@ -257,7 +259,8 @@ async def get_contact(contact_id: str, current_user=Depends(get_current_user)):
 async def update_contact(
     contact_id: str,
     data: ContactUpdate,
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)
 ):
     """Update a contact."""
     db = get_db()
@@ -324,11 +327,8 @@ async def update_contact(
             update_data["assigned_sales_rep_name"] = None
         else:
             # Always resolve name server-side from ID
-            rep_user = await db.users.find_one(
-                {"user_id": data.assigned_sales_rep_id},
-                {"_id": 0, "name": 1}
-            )
-            update_data["assigned_sales_rep_name"] = rep_user["name"] if rep_user else None
+            rep_user = await UserRepository(pg).get_user_by_id(data.assigned_sales_rep_id)
+            update_data["assigned_sales_rep_name"] = rep_user.name if rep_user else None
 
     # Handle primary contact flag
     if data.is_primary is not None:
@@ -390,7 +390,8 @@ async def create_user_from_contact(
     contact_id: str,
     password: str,
     role: str = "customer",
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)
 ):
     """
     Promote a contact to a user account (give them login capability).
@@ -398,7 +399,7 @@ async def create_user_from_contact(
     """
     if not has_perm(current_user, "users.manage"):
         raise HTTPException(status_code=403, detail="Only admins can create user accounts")
-    
+
     db = get_db()
     
     contact = await db.contacts.find_one({"contact_id": contact_id}, {"_id": 0})
@@ -414,7 +415,7 @@ async def create_user_from_contact(
         raise HTTPException(status_code=400, detail="Contact must have an email to create a user account")
     
     # Check if user with this email already exists
-    existing_user = await db.users.find_one({"email": contact["email"]}, {"_id": 0})
+    existing_user = await UserRepository(pg).get_user_by_email(contact["email"])
     if existing_user:
         raise HTTPException(status_code=400, detail="A user with this email already exists")
     
@@ -447,8 +448,8 @@ async def create_user_from_contact(
         "created_at": now
     }
 
-    await db.users.insert_one(user_doc)
-    
+    await UserRepository(pg).create_user(user_doc)
+
     # Link user to contact
     await db.contacts.update_one(
         {"contact_id": contact_id},

@@ -33,6 +33,26 @@ The migration is phased: at any moment some domains are on Postgres and some are
 - **Local/hermetic path (fallback):** `testcontainers` spins an ephemeral `pgvector/pgvector:pg16` container automatically. If neither `TEST_DATABASE_URL` nor Docker is available, the PG fixtures **skip** (they never fail), so the existing `mongomock-motor` suite is unaffected.
 - **Parallel CI:** for `pytest -n` (xdist), give each worker its own database (schema-per-worker or database-per-worker keyed on `PYTEST_XDIST_WORKER`) so migrations and rollbacks don't collide. Phase 0 ships single-worker; wire schema-per-worker when the suite grows enough to need it.
 
-## Scaffolding
+## Phase 2a additions — the pattern every later domain copies mechanically
 
-`repositories/_scaffolding/` holds a throwaway hello-world (`HelloRow` model + `HelloRepository` + `_scaffolding_hello` table via migration `0002`) that proves the engine → session → Alembic → repository → test loop end to end. It is **not a real domain**, FKs to nothing, and is **deleted in Phase 2** along with its migration and the scaffolding import in `alembic/env.py`.
+These were resolved while landing the first real domain (platform-core identity). They are now rules, not suggestions. Full derivation: `.claude/plans/phase2a-census.md`.
+
+1. **ORM models live in `backend/db/models/<domain>.py`** — one module per domain, mirroring `repositories/`. Every row class inherits `db.base:Base` and is named **`<Concept>Row`** (e.g. `UserRow`, `TenantRow`) to stay visibly distinct from the same-named Pydantic DTO. `db/models/__init__.py` imports each module so a single `import db.models` registers the whole schema on `Base.metadata`; `alembic/env.py` imports `db.models` (this replaced the Phase-0 scaffolding import).
+
+2. **Convert ORM ⇄ Pydantic at the boundary with `Model.model_validate(row, from_attributes=True)`.** Repositories return the **existing** Pydantic models (`User`, `Tenant`, `OrganizationBranding`, `OAuthToken`) so callers receive unchanged shapes. Where no Pydantic model existed in the Mongo era (sessions, reset tokens, oauth state), define a small local DTO in the repository module (e.g. `SessionRecord`).
+
+3. **Secret material never rides on a returned DTO.** `password_hash`/`invite_token` are columns on `UserRow` but not on the `User` model — `model_validate` drops them naturally. Credential checks use a **separate secret-returning method** (`get_password_hash_by_email`, `get_auth_record_by_email` → `(User, hash)`); the `User` DTO handed to every other caller carries no secret.
+
+4. **Derived fields are not stored.** `permissions`/`effective_permissions` are request-time derivations (roles + `extra_permissions` + implication closure), computed in the auth path — the repo leaves them at model defaults. **Opaque string-list fields** read/written whole and never filtered by interior (`extra_permissions`, `ai_usage_viewable_users`) → **JSONB column, never a child table.**
+
+5. **Single-use CAS = `UPDATE/DELETE … WHERE … AND <expected-state> RETURNING`** (plan §A6), executed as one statement — never read-then-write. The row is the concurrency unit; the losing concurrent writer gets no row back. Reference implementations: `AuthRepository.consume_reset_token` (`… WHERE token AND used=false RETURNING`) and `consume_oauth_state` (`DELETE … WHERE state AND provider RETURNING`).
+
+6. **Multi-write clusters** (user + child assignments, invite-accept) add all rows and `flush()` inside the caller's request transaction (the `get_session` dependency commits once) — atomic without an explicit `begin()`. Use an explicit `async with session.begin():` only when the cluster spans repositories or must commit independently of the request.
+
+7. **TTL (no native Postgres TTL, plan R10):** `expires_at`/`created_at` columns carry expiry; correctness-sensitive reads filter on them (`get_active_session`); a scheduled `cleanup_expired_*` sweep (gated by `DISABLE_BACKGROUND_JOBS`) removes stale rows.
+
+8. **`*_legacy_read` shims** (plan §A2) read UNMIGRATED domains only, are narrow + read-only, and **must** carry an inline annotation naming the phase that deletes them. A repository never reads another **migrated** domain's tables directly — it calls that domain's repository.
+
+## Scaffolding (removed in Phase 2a)
+
+The Phase-0 throwaway hello-world (`repositories/_scaffolding/`, migration `0002`, the scaffolding test, and the `alembic/env.py` import) proved the rails end to end and was **deleted in Phase 2a** once the first real domain landed. Migration `0004_drop_scaffolding_hello` drops its table (downgrade recreates it by hand for a clean round-trip).

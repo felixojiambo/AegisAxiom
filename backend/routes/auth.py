@@ -7,10 +7,12 @@ import httpx
 import os
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
 from database import get_db
+from db.session import get_session
 from models import User, UserCreate, UserLogin, PasswordReset, ForgotPasswordRequest, ResetPasswordRequest, GoogleCodeRequest, GoogleInviteCodeRequest, AdminSetupRequest
 from services.audit_service import log_action
 from services.security_logger import log_security_event
@@ -23,33 +25,31 @@ from auth_helper import (
     verify_invite_token,
     get_frontend_url,
 )
+from repositories.users import UserRepository
+from repositories.auth import AuthRepository
 from seeds.seed_tenants import SIMPLIMETA_ROOT_TENANT_ID
 from rate_limiter import limiter
 
 router = APIRouter()
 
 
-async def _build_user_with_permissions(doc: dict) -> User:
-    """Build a User object with permissions loaded from the role.
-    This must be used by ALL auth endpoints that return user data.
+async def _build_user_with_permissions(user: User) -> User:
+    """Return a copy of ``user`` with role permissions + closure filled in.
 
-    Also resolves and serializes the `effective_permissions` closure
-    so login/register/profile-update responses carry the closure-aware
-    permission list the frontend uses for UI gating. Backend route
-    guards never trust this field — they recompute via has_perm() per
-    request.
+    Used by ALL auth endpoints that return user data so login / register /
+    invite-accept / profile-update responses carry the same closure-aware
+    permission list ``/api/auth/me`` returns. Backend route guards never trust
+    ``effective_permissions`` from the wire — they recompute via has_perm().
+
+    Phase 2a: the base user comes from Postgres (the repository ``User`` DTO);
+    the role lookup remains Mongo (``roles_legacy_read``, deleted in 2b).
     """
-    # Deferred imports to avoid circular dependency at module load:
-    # auth_helper imports from this module's siblings via FastAPI dep
-    # wiring, and routes/__init__.py is imported by auth_helper indirectly
-    # through server.py — pulling these symbols at function-call time
-    # keeps the import graph acyclic.
     from auth_helper import get_cached_implication_graph
     from services.permission_implications import resolve_implications
 
-    db = get_db()
-    user_dict = {k: v for k, v in doc.items() if k not in ["password_hash", "invite_token"]}
-    role_name = doc.get("role")
+    db = get_db()  # roles_legacy_read (Mongo; Phase 2b)
+    user_dict = user.model_dump()
+    role_name = user.role
     if role_name:
         role_doc = await db.roles.find_one({"name": role_name}, {"_id": 0})
         if role_doc:
@@ -59,12 +59,10 @@ async def _build_user_with_permissions(doc: dict) -> User:
     else:
         user_dict["permissions"] = user_dict.get("permissions") or []
 
-    # Resolve effective_permissions for the wire payload. The closure
-    # input must union role permissions with per-user extra_permissions,
-    # matching auth_helper.get_current_user — otherwise /login and
-    # /api/auth/me return divergent effective_permissions for users with
-    # extras. Convention-only fallback if the registry graph fetch fails
-    # so login can never be blocked by an implication-graph hiccup.
+    # Resolve effective_permissions for the wire payload. The closure input must
+    # union role permissions with per-user extra_permissions, matching
+    # auth_helper.get_current_user. Convention-only fallback if the registry
+    # graph fetch fails so login can never be blocked by a graph hiccup.
     try:
         registry_graph = await get_cached_implication_graph()
     except Exception:
@@ -80,20 +78,16 @@ async def _build_user_with_permissions(doc: dict) -> User:
     user_dict["effective_permissions"] = sorted(closure)
 
     return User(**user_dict)
+
+
 SESSION_EXPIRY_DAYS = 7
 
 
-async def _create_session(db, user_id: str, response: Response) -> str:
+async def _create_session(auth_repo: AuthRepository, user_id: str, response: Response) -> str:
+    """Create a Postgres-backed session row and set the session cookie."""
     token = create_session_token()
     expires_at = datetime.now(timezone.utc) + timedelta(days=SESSION_EXPIRY_DAYS)
-    await db.user_sessions.insert_one(
-        {
-            "session_token": token,
-            "user_id": user_id,
-            "expires_at": expires_at,
-            "created_at": datetime.now(timezone.utc),
-        }
-    )
+    await auth_repo.create_session(user_id, token, expires_at)
     response.set_cookie(
         key="session_token",
         value=token,
@@ -108,17 +102,22 @@ async def _create_session(db, user_id: str, response: Response) -> str:
 
 @router.post("/register")
 @limiter.limit("5/minute")
-async def register(data: UserCreate, request: Request, response: Response):
-    db = get_db()
-    
+async def register(
+    data: UserCreate,
+    request: Request,
+    response: Response,
+    pg: AsyncSession = Depends(get_session),
+):
+    users = UserRepository(pg)
+
     # SECURITY FIX C-2: Only allow 'customer' role for self-registration
     ALLOWED_REGISTRATION_ROLES = ["customer"]
     if data.role not in ALLOWED_REGISTRATION_ROLES:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail=f"Invalid role. Only {', '.join(ALLOWED_REGISTRATION_ROLES)} registration is allowed."
         )
-    
+
     # SECURITY FIX M-3: Enforce password complexity requirements
     password = data.password
     if len(password) < 8:
@@ -129,20 +128,19 @@ async def register(data: UserCreate, request: Request, response: Response):
         raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter")
     if not any(c.isdigit() for c in password):
         raise HTTPException(status_code=400, detail="Password must contain at least one number")
-    
-    existing = await db.users.find_one({"email": data.email.lower()}, {"_id": 0})
+
+    existing = await users.get_user_by_email(data.email.lower())
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     user_id = f"user_{uuid.uuid4().hex[:12]}"
-    doc = {
+    created = await users.create_user({
         "user_id": user_id,
         "email": data.email.lower(),
         "name": data.name,
         "role": data.role,
         # Phase 1A multi-tenancy: public self-registration lands in the
-        # SimpliMeta root tenant. Phase 1B introduces invite-based tenant
-        # attribution so partner/account tenants can self-register users.
+        # SimpliMeta root tenant.
         "tenant_id": SIMPLIMETA_ROOT_TENANT_ID,
         "account_id": None,
         "picture": None,
@@ -151,44 +149,48 @@ async def register(data: UserCreate, request: Request, response: Response):
         "password_hash": hash_password(data.password),
         "zoho_contact_id": None,
         "created_at": datetime.now(timezone.utc),
-    }
-    await db.users.insert_one(doc)
-    token = await _create_session(db, user_id, response)
-    user = await _build_user_with_permissions(doc)
+    })
+    token = await _create_session(AuthRepository(pg), user_id, response)
+    user = await _build_user_with_permissions(created)
     return {"user": user, "token": token}
 
 
 @router.post("/login")
 @limiter.limit("10/minute")
-async def login(data: UserLogin, request: Request, response: Response):
-    db = get_db()
-    doc = await db.users.find_one({"email": data.email.lower()}, {"_id": 0})
-    if not doc:
+async def login(
+    data: UserLogin,
+    request: Request,
+    response: Response,
+    pg: AsyncSession = Depends(get_session),
+):
+    users = UserRepository(pg)
+    record = await users.get_auth_record_by_email(data.email.lower())
+    if record is None:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    if not doc.get("is_active", True):
+    user_dto, password_hash = record
+    if not user_dto.is_active:
         await log_security_event(
             event_type="auth_failed", severity="warning",
-            user_id=doc.get("user_id"), user_email=doc.get("email"),
+            user_id=user_dto.user_id, user_email=user_dto.email,
             action="login", outcome="denied",
             details={"reason": "account_deactivated", "email": data.email},
         )
         raise HTTPException(status_code=403, detail="Account is deactivated")
-    ph = doc.get("password_hash")
-    if not ph:
+    if not password_hash:
         raise HTTPException(status_code=401, detail="This account uses Google Sign-In")
-    if not verify_password(data.password, ph):
+    if not verify_password(data.password, password_hash):
         await log_security_event(
             event_type="auth_failed", severity="warning",
-            user_id=doc.get("user_id"), user_email=doc.get("email"),
+            user_id=user_dto.user_id, user_email=user_dto.email,
             action="login", outcome="denied",
             details={"reason": "invalid_password", "email": data.email},
         )
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    token = await _create_session(db, doc["user_id"], response)
-    await log_action("login", doc["user_id"], doc["email"], "auth")
-    
-    user = await _build_user_with_permissions(doc)
+    token = await _create_session(AuthRepository(pg), user_dto.user_id, response)
+    await log_action("login", user_dto.user_id, user_dto.email, "auth")
+
+    user = await _build_user_with_permissions(user_dto)
     return {"user": user, "token": token}
 
 
@@ -198,21 +200,23 @@ async def get_me(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/logout")
-async def logout(response: Response, current_user: User = Depends(get_current_user)):
-    # SECURITY FIX C-10: Improved session security
-    # Delete all sessions for this user (prevents token reuse)
-    db = get_db()
-    await db.user_sessions.delete_many({"user_id": current_user.user_id})
-    
+async def logout(
+    response: Response,
+    current_user: User = Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+):
+    # SECURITY FIX C-10: Delete all sessions for this user (prevents token reuse)
+    await AuthRepository(pg).delete_sessions_for_user(current_user.user_id)
+
     # Securely delete the cookie with all security attributes
     response.delete_cookie(
-        "session_token", 
-        path="/", 
-        secure=True, 
+        "session_token",
+        path="/",
+        secure=True,
         httponly=True,
         samesite="lax"
     )
-    
+
     return {"message": "Logged out"}
 
 
@@ -267,37 +271,31 @@ async def _exchange_google_code(code: str) -> dict:
     }
 
 
-async def _store_google_tokens(db, user_id: str, auth_data: dict):
-    """Store or update user's Google OAuth tokens for Docs/Drive access."""
+async def _store_google_tokens(auth_repo: AuthRepository, user_id: str, auth_data: dict):
+    """Store or update the user's Google OAuth tokens for Docs/Drive access."""
     now = datetime.now(timezone.utc)
     expires_at = now + timedelta(seconds=auth_data.get("expires_in", 3600))
-
-    set_fields = {
-        "provider": "google",
-        "user_id": user_id,
-        "access_token": auth_data["access_token"],
-        "expires_at": expires_at,
-        "scope": auth_data.get("scope", ""),
-        "updated_at": now,
-    }
-    # Only overwrite refresh_token if a new one was provided
-    # (Google only sends refresh_token on first consent or re-consent)
-    if auth_data.get("refresh_token"):
-        set_fields["refresh_token"] = auth_data["refresh_token"]
-
-    await db.oauth_tokens.update_one(
-        {"provider": "google", "user_id": user_id},
-        {
-            "$set": set_fields,
-            "$setOnInsert": {"token_id": f"google_{user_id}", "created_at": now},
-        },
-        upsert=True,
+    # upsert_oauth_token overwrites refresh_token only when a new one is given
+    # (Google sends it only on first consent) — pass None to preserve existing.
+    await auth_repo.upsert_oauth_token(
+        token_id=f"google_{user_id}",
+        provider="google",
+        user_id=user_id,
+        access_token=auth_data["access_token"],
+        refresh_token=auth_data.get("refresh_token"),
+        expires_at=expires_at,
+        scope=auth_data.get("scope", ""),
     )
 
 
 @router.post("/google/session")
 @limiter.limit("20/minute")
-async def google_session(data: GoogleCodeRequest, request: Request, response: Response):
+async def google_session(
+    data: GoogleCodeRequest,
+    request: Request,
+    response: Response,
+    pg: AsyncSession = Depends(get_session),
+):
     try:
         auth_data = await _exchange_google_code(data.code)
     except HTTPException:
@@ -309,35 +307,38 @@ async def google_session(data: GoogleCodeRequest, request: Request, response: Re
     name = auth_data["name"]
     picture = auth_data["picture"]
 
-    db = get_db()
-    doc = await db.users.find_one({"email": email}, {"_id": 0})
-    if not doc:
+    users = UserRepository(pg)
+    user_dto = await users.get_user_by_email(email)
+    if not user_dto:
         # SECURITY: Do not auto-create accounts. Only pre-invited users can sign in.
         raise HTTPException(
             status_code=403,
             detail="No account found for this email. Please contact your administrator to receive an invitation."
         )
 
-    if not doc.get("is_active", True):
+    if not user_dto.is_active:
         raise HTTPException(status_code=403, detail="Account is deactivated")
 
-    await db.users.update_one({"email": email}, {"$set": {"picture": picture, "name": name}})
-    doc["picture"] = picture
-    doc["name"] = name
+    user_dto = await users.update_user(user_dto.user_id, {"picture": picture, "name": name})
 
     # Store Google OAuth tokens for Docs/Drive access
     if auth_data.get("access_token"):
-        await _store_google_tokens(db, doc["user_id"], auth_data)
+        await _store_google_tokens(AuthRepository(pg), user_dto.user_id, auth_data)
 
-    token = await _create_session(db, doc["user_id"], response)
-    await log_action("login_google", doc["user_id"], doc["email"], "auth")
-    user = await _build_user_with_permissions(doc)
+    token = await _create_session(AuthRepository(pg), user_dto.user_id, response)
+    await log_action("login_google", user_dto.user_id, user_dto.email, "auth")
+    user = await _build_user_with_permissions(user_dto)
     return {"user": user, "token": token}
 
 
 @router.post("/accept-invite-google")
 @limiter.limit("10/minute")
-async def accept_invite_google(data: GoogleInviteCodeRequest, request: Request, response: Response):
+async def accept_invite_google(
+    data: GoogleInviteCodeRequest,
+    request: Request,
+    response: Response,
+    pg: AsyncSession = Depends(get_session),
+):
     """Accept an invitation using Google SSO instead of setting a password."""
     payload = verify_invite_token(data.invite_token)
 
@@ -353,21 +354,23 @@ async def accept_invite_google(data: GoogleInviteCodeRequest, request: Request, 
     google_name = auth_data["name"]
     google_picture = auth_data["picture"]
 
+    users = UserRepository(pg)
+    auth_repo = AuthRepository(pg)
+
     # Verify the invited user exists
-    db = get_db()
-    doc = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
-    if not doc:
+    user_dto = await users.get_user_by_id(payload["sub"])
+    if not user_dto:
         raise HTTPException(status_code=404, detail="User not found")
 
     # SECURITY: Google email must match the invited email
-    if google_email != doc["email"].lower():
+    if google_email != user_dto.email.lower():
         await log_security_event(
             event_type="auth_failed", severity="critical",
-            user_id=doc.get("user_id"), user_email=doc.get("email"),
+            user_id=user_dto.user_id, user_email=user_dto.email,
             action="accept_invite_google", outcome="denied",
             details={
                 "reason": "oauth_email_mismatch",
-                "invited_email": doc["email"],
+                "invited_email": user_dto.email,
                 "google_email": google_email,
             },
         )
@@ -376,41 +379,44 @@ async def accept_invite_google(data: GoogleInviteCodeRequest, request: Request, 
             detail="The Google account used does not match the invitation email. Please sign in with the correct Google account."
         )
 
-    # Activate the account via SSO (no password needed)
-    await db.users.update_one(
-        {"user_id": payload["sub"]},
+    # Activate the account via SSO (no password needed); clear the invite token.
+    updated = await users.update_user(
+        payload["sub"],
         {
-            "$set": {
-                "is_active": True,
-                "is_email_verified": True,
-                "name": google_name or doc.get("name", ""),
-                "picture": google_picture,
-            },
-            "$unset": {"invite_token": ""}
+            "is_active": True,
+            "is_email_verified": True,
+            "name": google_name or user_dto.name or "",
+            "picture": google_picture,
+            "invite_token": None,
         },
     )
 
     # Store Google OAuth tokens for Docs/Drive access
     if auth_data.get("access_token"):
-        await _store_google_tokens(db, payload["sub"], auth_data)
+        await _store_google_tokens(auth_repo, payload["sub"], auth_data)
 
     # Wipe any pre-existing sessions
-    await db.user_sessions.delete_many({"user_id": payload["sub"]})
-    token = await _create_session(db, payload["sub"], response)
-    await log_action("invite_accepted_google", payload["sub"], doc["email"], "auth")
+    await auth_repo.delete_sessions_for_user(payload["sub"])
+    token = await _create_session(auth_repo, payload["sub"], response)
+    await log_action("invite_accepted_google", payload["sub"], updated.email, "auth")
 
-    updated_doc = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
-    user = await _build_user_with_permissions(updated_doc)
+    user = await _build_user_with_permissions(updated)
     return {"user": user, "token": token}
 
 
 @router.post("/accept-invite")
 @limiter.limit("5/minute")
-async def accept_invite(data: PasswordReset, request: Request, response: Response):
+async def accept_invite(
+    data: PasswordReset,
+    request: Request,
+    response: Response,
+    pg: AsyncSession = Depends(get_session),
+):
     payload = verify_invite_token(data.token)
-    db = get_db()
-    doc = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
-    if not doc:
+    users = UserRepository(pg)
+    auth_repo = AuthRepository(pg)
+    user_dto = await users.get_user_by_id(payload["sub"])
+    if not user_dto:
         raise HTTPException(status_code=404, detail="User not found")
 
     # SECURITY FIX M-3: Enforce password complexity requirements
@@ -425,62 +431,63 @@ async def accept_invite(data: PasswordReset, request: Request, response: Respons
         raise HTTPException(status_code=400, detail="Password must contain at least one number")
 
     # SECURITY FIX H-8: Remove invite token after successful acceptance
-    await db.users.update_one(
-        {"user_id": payload["sub"]},
+    updated = await users.update_user(
+        payload["sub"],
         {
-            "$set": {
-                "password_hash": hash_password(data.new_password),
-                "is_active": True,
-                "is_email_verified": True
-            },
-            "$unset": {"invite_token": ""}  # Remove the invite token from database
+            "password_hash": hash_password(data.new_password),
+            "is_active": True,
+            "is_email_verified": True,
+            "invite_token": None,
         },
     )
     # FIX CRITICAL-3: Wipe any pre-existing sessions when accepting an invite
-    await db.user_sessions.delete_many({"user_id": payload["sub"]})
-    token = await _create_session(db, payload["sub"], response)
-    updated_doc = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0})
-    user = await _build_user_with_permissions(updated_doc)
+    await auth_repo.delete_sessions_for_user(payload["sub"])
+    token = await _create_session(auth_repo, payload["sub"], response)
+    user = await _build_user_with_permissions(updated)
     return {"user": user, "token": token}
 
 
 @router.post("/validate-invite")
 @limiter.limit("5/minute")
-async def validate_invite(data: PasswordReset, request: Request):
+async def validate_invite(
+    data: PasswordReset,
+    request: Request,
+    pg: AsyncSession = Depends(get_session),
+):
     payload = verify_invite_token(data.token)
-    db = get_db()
-    doc = await db.users.find_one({"user_id": payload["sub"]}, {"_id": 0, "email": 1, "name": 1, "role": 1})
-    if not doc:
+    user_dto = await UserRepository(pg).get_user_by_id(payload["sub"])
+    if not user_dto:
         raise HTTPException(status_code=404, detail="Invite not found")
-    email = doc["email"]
+    email = user_dto.email
     masked = email[0] + "***@" + email.split("@")[-1] if "@" in email else "***"
-    return {"valid": True, "email": masked, "name": doc["name"], "role": doc.get("role")}
+    return {"valid": True, "email": masked, "name": user_dto.name, "role": user_dto.role}
 
 
 @router.post("/forgot-password")
 @limiter.limit("5/minute")
-async def forgot_password(data: ForgotPasswordRequest, request: Request):
-    db = get_db()
-    doc = await db.users.find_one({"email": data.email.lower()}, {"_id": 0})
+async def forgot_password(
+    data: ForgotPasswordRequest,
+    request: Request,
+    pg: AsyncSession = Depends(get_session),
+):
+    users = UserRepository(pg)
+    email = data.email.lower()
+    user_dto = await users.get_user_by_email(email)
+    password_hash = await users.get_password_hash_by_email(email)
     # Always return 200 to avoid user enumeration
-    if not doc or not doc.get("password_hash"):
+    if not user_dto or not password_hash:
         return {"message": "If that email is registered, a reset link has been sent."}
 
     reset_token = str(uuid.uuid4().hex)
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-    await db.password_reset_tokens.update_one(
-        {"email": data.email.lower()},
-        {"$set": {"token": reset_token, "expires_at": expires_at, "used": False, "created_at": datetime.now(timezone.utc)}},
-        upsert=True,
-    )
+    await AuthRepository(pg).upsert_reset_token(email, reset_token, expires_at)
 
     frontend_url = get_frontend_url(request)
     reset_link = f"{frontend_url}/reset-password?token={reset_token}"
     try:
         from services.email_service import send_password_reset_email
-        await send_password_reset_email(data.email.lower(), doc.get("name", "User"), reset_link)
+        await send_password_reset_email(email, user_dto.name or "User", reset_link)
     except Exception as e:
-        import logging
         logging.getLogger(__name__).warning(f"Password reset email failed (non-blocking): {e}")
 
     return {"message": "If that email is registered, a reset link has been sent."}
@@ -488,20 +495,27 @@ async def forgot_password(data: ForgotPasswordRequest, request: Request):
 
 @router.post("/reset-password")
 @limiter.limit("10/minute")
-async def reset_password(data: ResetPasswordRequest, request: Request, response: Response):
-    db = get_db()
-    record = await db.password_reset_tokens.find_one({"token": data.token}, {"_id": 0})
+async def reset_password(
+    data: ResetPasswordRequest,
+    request: Request,
+    response: Response,
+    pg: AsyncSession = Depends(get_session),
+):
+    users = UserRepository(pg)
+    auth_repo = AuthRepository(pg)
+
+    record = await auth_repo.get_reset_token(data.token)
     if not record:
         raise HTTPException(status_code=400, detail="Invalid or expired reset link.")
-    if record.get("used"):
+    if record.used:
         raise HTTPException(status_code=400, detail="This reset link has already been used.")
-    expires_at = record.get("expires_at")
+    expires_at = record.expires_at
     if expires_at:
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=timezone.utc)
         if datetime.now(timezone.utc) > expires_at:
             raise HTTPException(status_code=400, detail="This reset link has expired. Please request a new one.")
-    
+
     # SECURITY FIX M-3: Enforce password complexity requirements
     password = data.new_password
     if len(password) < 8:
@@ -512,44 +526,48 @@ async def reset_password(data: ResetPasswordRequest, request: Request, response:
         raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter")
     if not any(c.isdigit() for c in password):
         raise HTTPException(status_code=400, detail="Password must contain at least one number")
-    
-    # SECURITY FIX H-7: Mark token as used immediately after validation, before password update
-    # This prevents reuse if the password update fails or there's a race condition
-    await db.password_reset_tokens.update_one({"token": data.token}, {"$set": {"used": True, "used_at": datetime.now(timezone.utc)}})
 
-    email = record["email"]
-    doc = await db.users.find_one({"email": email}, {"_id": 0})
-    if not doc:
+    # SECURITY FIX H-7: single-use CAS — mark used iff currently unused. A lost
+    # race (concurrent consumer already used it) returns None → treated as used.
+    consumed = await auth_repo.consume_reset_token(data.token)
+    if consumed is None:
+        raise HTTPException(status_code=400, detail="This reset link has already been used.")
+
+    email = consumed.email
+    user_dto = await users.get_user_by_email(email)
+    if not user_dto:
         raise HTTPException(status_code=404, detail="User not found.")
 
     # Now update password (token already marked as used)
-    await db.users.update_one({"email": email}, {"$set": {"password_hash": hash_password(data.new_password)}})
+    await users.set_password_by_email(email, hash_password(data.new_password))
 
     # FIX CRITICAL-3: Invalidate ALL existing sessions after password reset.
-    # If an attacker had hijacked a session, they lose access the moment the victim resets.
-    await db.user_sessions.delete_many({"user_id": doc["user_id"]})
+    await auth_repo.delete_sessions_for_user(user_dto.user_id)
 
-    token = await _create_session(db, doc["user_id"], response)
-    await log_action("password_reset", doc["user_id"], email, "auth")
+    token = await _create_session(auth_repo, user_dto.user_id, response)
+    await log_action("password_reset", user_dto.user_id, email, "auth")
     await log_security_event(
         event_type="password_reset", severity="warning",
-        user_id=doc["user_id"], user_email=email,
-        resource="user", resource_id=doc["user_id"],
+        user_id=user_dto.user_id, user_email=email,
+        resource="user", resource_id=user_dto.user_id,
         action="password_reset", outcome="success",
     )
-    user = await _build_user_with_permissions(doc)
+    user = await _build_user_with_permissions(user_dto)
     return {"user": user, "token": token, "message": "Password reset successful."}
 
 
 @router.post("/setup-admin")
 @limiter.limit("5/hour")
-async def setup_admin(data: AdminSetupRequest, request: Request):
+async def setup_admin(
+    data: AdminSetupRequest,
+    request: Request,
+    pg: AsyncSession = Depends(get_session),
+):
     """Create first admin - only works when no admin exists"""
-    db = get_db()
-    existing = await db.users.find_one({"role": "admin"}, {"_id": 0})
-    if existing:
+    users = UserRepository(pg)
+    if await users.admin_exists():
         raise HTTPException(status_code=400, detail="Admin already exists")
-    
+
     password = data.password
     if len(password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters long")
@@ -561,43 +579,39 @@ async def setup_admin(data: AdminSetupRequest, request: Request):
         raise HTTPException(status_code=400, detail="Password must contain at least one number")
 
     user_id = f"user_{uuid.uuid4().hex[:12]}"
-    await db.users.insert_one(
-        {
-            "user_id": user_id,
-            "email": data.email.lower(),
-            "name": data.name,
-            "role": "admin",
-            # Phase 1A multi-tenancy: first-admin bootstrap creates the
-            # admin in the SimpliMeta root tenant by definition.
-            "tenant_id": SIMPLIMETA_ROOT_TENANT_ID,
-            "account_id": None,
-            "picture": None,
-            "is_active": True,
-            "is_email_verified": True,
-            "password_hash": hash_password(password),
-            "zoho_contact_id": None,
-            "created_at": datetime.now(timezone.utc),
-        }
-    )
+    await users.create_user({
+        "user_id": user_id,
+        "email": data.email.lower(),
+        "name": data.name,
+        "role": "admin",
+        # Phase 1A multi-tenancy: first-admin bootstrap creates the admin in
+        # the SimpliMeta root tenant by definition.
+        "tenant_id": SIMPLIMETA_ROOT_TENANT_ID,
+        "account_id": None,
+        "picture": None,
+        "is_active": True,
+        "is_email_verified": True,
+        "password_hash": hash_password(password),
+        "zoho_contact_id": None,
+        "created_at": datetime.now(timezone.utc),
+    })
     return {"message": "Admin created successfully", "user_id": user_id}
 
 
 @router.post("/request-password-change")
 @limiter.limit("3/hour")
-async def request_password_change(request: Request, current_user: User = Depends(get_current_user)):
+async def request_password_change(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+):
     """
     Authenticated user requests a password set/change email.
     Works for both SSO users (who never set a password) and password users.
     """
-    db = get_db()
-
     reset_token = str(uuid.uuid4().hex)
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
-    await db.password_reset_tokens.update_one(
-        {"email": current_user.email.lower()},
-        {"$set": {"token": reset_token, "expires_at": expires_at, "used": False, "created_at": datetime.now(timezone.utc)}},
-        upsert=True,
-    )
+    await AuthRepository(pg).upsert_reset_token(current_user.email.lower(), reset_token, expires_at)
 
     frontend_url = get_frontend_url(request)
     reset_link = f"{frontend_url}/reset-password?token={reset_token}"
@@ -605,7 +619,6 @@ async def request_password_change(request: Request, current_user: User = Depends
         from services.email_service import send_password_change_email
         await send_password_change_email(current_user.email.lower(), current_user.name, reset_link)
     except Exception as e:
-        import logging
         logging.getLogger(__name__).warning(f"Password change email failed (non-blocking): {e}")
 
     await log_action("password_change_requested", current_user.user_id, current_user.email, "auth")
