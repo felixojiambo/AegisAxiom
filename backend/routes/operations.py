@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone
 import uuid
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from models import FieldJob, FieldJobCreate, FieldJobUpdate
 from auth_helper import get_current_user, get_job_filter, has_perm
 
@@ -23,15 +27,16 @@ async def get_jobs(skip: int = 0, limit: int = 100, current_user=Depends(get_cur
 
 
 @router.post("/jobs")
-async def create_job(data: FieldJobCreate, current_user=Depends(get_current_user)):
+async def create_job(data: FieldJobCreate, current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "field_jobs.create"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     db = get_db()
     account = await db.accounts.find_one({"account_id": data.account_id}, {"_id": 0, "name": 1, "assigned_sales_rep_id": 1})
     tech_name = None
     if data.assigned_tech_id:
-        tech = await db.users.find_one({"user_id": data.assigned_tech_id}, {"_id": 0, "name": 1})
-        tech_name = tech["name"] if tech else None
+        tech = await UserRepository(pg).get_user_by_id(data.assigned_tech_id)
+        tech_name = tech.name if tech else None
 
     job_id = f"job_{uuid.uuid4().hex[:12]}"
     doc = {

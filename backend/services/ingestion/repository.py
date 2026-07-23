@@ -194,11 +194,14 @@ async def log_stage(
         actor_email = "system@aegisaxiom.internal"
         if performed_by:
             try:
-                user_doc = await db.users.find_one(
-                    {"user_id": performed_by}, {"_id": 0, "email": 1}
-                )
-                if user_doc and user_doc.get("email"):
-                    actor_email = user_doc["email"]
+                from db.session import get_sessionmaker
+                from repositories.users import UserRepository
+
+                sm = get_sessionmaker()
+                async with sm() as pg:
+                    user = await UserRepository(pg).get_user_by_id(performed_by)
+                if user and user.email:
+                    actor_email = user.email
             except Exception as lookup_err:
                 logger.warning(
                     f"audit_logs actor_email lookup failed for {performed_by}: {lookup_err}"

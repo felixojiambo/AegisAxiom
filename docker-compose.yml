@@ -31,6 +31,29 @@ services:
       retries: 5
       start_period: 10s
 
+  # PostgreSQL re-platform (Phase 0): parallel-run datastore. Mongo + chromadb
+  # remain the LIVE stores this phase — postgres is added alongside, nothing is
+  # removed. pgvector image ships the `vector` extension; the baseline Alembic
+  # migration also enables `pg_trgm`. See postgres-migration-plan.md §A10.
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: aegisaxiom-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=aegis
+      - POSTGRES_PASSWORD=aegis
+      - POSTGRES_DB=aegis
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   backend:
     build:
       context: ./backend
@@ -46,6 +69,12 @@ services:
       - /app/backend/services/bpmn/node_helpers/node_modules
     env_file:
       - ./backend/.env
+    environment:
+      # Async SQLAlchemy engine target. Read lazily — the app does NOT connect to
+      # Postgres at boot in Phase 0 (Mongo is still the live store), so postgres
+      # is intentionally NOT in depends_on below: the backend boots even if
+      # Postgres is down. See db/session.py.
+      - DATABASE_URL=postgresql+asyncpg://aegis:aegis@postgres:5432/aegis
     depends_on:
       mongo:
         condition: service_healthy
@@ -97,3 +126,4 @@ volumes:
   mongo_data:
   backend_uploads:
   chroma_data:
+  pg_data:

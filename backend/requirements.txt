@@ -135,3 +135,16 @@ websockets==16.0
 wrapt==2.1.2
 yarl==1.23.0
 zipp==3.23.0
+
+# === PostgreSQL re-platform (Phase 0 — rails only) ===
+# These coexist with motor/pymongo/mongomock-motor during the phased parallel
+# run. Do NOT remove the Mongo drivers here — they leave in Phase 11 once every
+# domain has cut over. See .claude/plans/postgres-migration-plan.md §A1.
+SQLAlchemy[asyncio]==2.0.51
+asyncpg==0.31.0
+alembic==1.18.5
+pgvector==0.5.0
+# Test-only: hermetic ephemeral Postgres for the pytest fixture (§A11). The PG
+# fixtures skip cleanly when neither TEST_DATABASE_URL nor Docker is available,
+# so the existing mongomock-motor suite is unaffected if this import is absent.
+testcontainers==4.14.2

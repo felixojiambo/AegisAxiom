@@ -1,0 +1,19 @@
+Alembic migrations for the AegisAxiom PostgreSQL re-platform.
+
+Async environment (asyncpg). The database URL is read from the DATABASE_URL
+environment variable — it is NOT stored in alembic.ini.
+
+Run from the backend/ directory:
+
+    export DATABASE_URL=postgresql+asyncpg://aegis:aegis@localhost:5432/aegis
+    alembic upgrade head       # apply all migrations
+    alembic downgrade base     # roll everything back
+    alembic revision -m "..."  # scaffold a new (hand-edited) migration
+
+Migration ordering (Phase 0):
+    0001_baseline            — required server extensions (pg_trgm, vector). No tables.
+    0002_scaffolding_hello   — throwaway proof-of-rails table. Deleted in Phase 2.
+
+Real domain tables begin in Phase 2 (platform core). See
+.claude/plans/postgres-migration-plan.md §A7 for how the 229 legacy
+create_index calls migrate here and the server.py startup index block is retired.

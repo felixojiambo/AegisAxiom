@@ -370,12 +370,17 @@ async def check_budget(
     # the Nova override, so an admin can't accidentally burn the org
     # quota by setting a very high Nova daily budget.
     if daily_budget > 0:
-        user_doc = await db.users.find_one({"user_id": user_id}, {"_id": 0, "role": 1, "budget_reset_at": 1})
-        user_role = (user_doc or {}).get("role", "")
+        from db.session import get_sessionmaker
+        from repositories.users import UserRepository
+
+        sm = get_sessionmaker()
+        async with sm() as pg:
+            budget_fields = await UserRepository(pg).get_user_budget_fields(user_id)
+        user_role = budget_fields[0] if budget_fields else ""
         budget = ADMIN_DAILY_TOKEN_BUDGET if user_role == "admin" else daily_budget
 
         # If an admin reset this user's budget, only count usage after the reset
-        budget_reset_at = (user_doc or {}).get("budget_reset_at")
+        budget_reset_at = budget_fields[1] if budget_fields else None
         if budget_reset_at and budget_reset_at.tzinfo is None:
             budget_reset_at = budget_reset_at.replace(tzinfo=timezone.utc)
         usage_since = max(day_ago, budget_reset_at) if budget_reset_at else day_ago

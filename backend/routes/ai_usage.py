@@ -4,7 +4,11 @@ from fastapi import APIRouter, HTTPException, Depends, Query
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from auth_helper import get_current_user, has_perm
 from services.field_registry import register_fields, register_module_events, register_module_config
 
@@ -235,6 +239,7 @@ async def get_usage_by_user(
     date_from: Optional[str] = Query(None),
     date_to: Optional[str] = Query(None),
     current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Per-user breakdown with names (admin/managed only)."""
     user_filter = _get_user_filter(current_user)
@@ -311,24 +316,21 @@ async def get_usage_by_user(
     # rows logged before user_email/user_name were snapshotted.
     user_ids = [uid for uid in users_map.keys() if uid]
     if user_ids:
-        user_docs = await db.users.find(
-            {"user_id": {"$in": user_ids}},
-            {"_id": 0, "user_id": 1, "name": 1, "email": 1},
-        ).to_list(500)
-        name_map = {u["user_id"]: u for u in user_docs}
+        user_docs = await UserRepository(pg).get_users_by_ids(user_ids)
+        name_map = {u.user_id: u for u in user_docs}
     else:
         name_map = {}
 
     result = []
     for uid, data in users_map.items():
-        info = name_map.get(uid, {}) if uid else {}
+        info = name_map.get(uid) if uid else None
         # Display-name fallback chain — see comment near _resolve_display_identity
         # for the ordering rationale.
         display_name, display_email, name_is_email_fallback = _resolve_display_identity(
             row_name=data.pop("row_user_name", None),
             row_email=data.pop("row_user_email", None),
-            live_name=info.get("name"),
-            live_email=info.get("email"),
+            live_name=info.name if info else None,
+            live_email=info.email if info else None,
             user_id=uid,
         )
         data["user_name"] = display_name

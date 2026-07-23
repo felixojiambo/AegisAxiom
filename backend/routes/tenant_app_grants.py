@@ -61,6 +61,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from auth_helper import get_current_user, has_perm
 from database import get_db
+from db.session import get_sessionmaker
+from repositories.tenants import TenantRepository
 from models import (
     TenantAppGrant,
     TenantAppGrantCreate,
@@ -159,11 +161,10 @@ async def _load_grant_or_404(db, tenant_id: str, grant_id: str) -> dict:
     return doc
 
 
-async def _load_tenant_or_404(db, tenant_id: str) -> dict:
-    doc = await db.tenants.find_one(
-        {"tenant_id": tenant_id},
-        {"_id": 0, "tenant_id": 1, "tenant_type": 1, "parent_tenant_id": 1, "status": 1},
-    )
+async def _load_tenant_or_404(db, tenant_id: str):
+    sm = get_sessionmaker()
+    async with sm() as pg:
+        doc = await TenantRepository(pg).get_tenant(tenant_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Target tenant not found.")
     return doc
@@ -283,7 +284,7 @@ async def create_app_grant(
 
     db = get_db()
     target_tenant = await _load_tenant_or_404(db, tenant_id)
-    if target_tenant.get("tenant_type") == "root":
+    if target_tenant.tenant_type == "root":
         raise HTTPException(
             status_code=400,
             detail="The root tenant cannot be granted apps.",

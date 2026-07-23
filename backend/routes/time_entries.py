@@ -6,7 +6,11 @@ import uuid
 import logging
 import math
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from auth_helper import get_current_user, has_perm
 from services.audit_service import log_action
 from services.policy_engine import evaluate_policies
@@ -244,7 +248,8 @@ async def get_time_entries(
 
 
 @router.post("/time-entries")
-async def create_time_entry(data: dict, current_user=Depends(get_current_user)):
+async def create_time_entry(data: dict, current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session)):
     db = get_db()
 
     # Parse hours (decimal) OR derive from start_time/end_time. Snap
@@ -311,10 +316,10 @@ async def create_time_entry(data: dict, current_user=Depends(get_current_user)):
             raise HTTPException(status_code=403, detail="You don't have permission to create time entries for other users")
         
         # Fetch target user details
-        target_user = await db.users.find_one({"user_id": target_user_id}, {"_id": 0, "name": 1})
+        target_user = await UserRepository(pg).get_user_by_id(target_user_id)
         if not target_user:
             raise HTTPException(status_code=404, detail=f"User {target_user_id} not found")
-        target_user_name = target_user.get("name", "Unknown")
+        target_user_name = target_user.name if target_user.name is not None else "Unknown"
         
         # Use target user for entry
         entry_user_id = target_user_id

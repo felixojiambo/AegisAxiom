@@ -46,9 +46,12 @@ import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from auth_helper import get_current_user
 from database import get_db
+from db.session import get_session
+from repositories.tenants import TenantRepository
 from seeds.seed_tenants import SIMPLIMETA_ROOT_TENANT_ID
 
 logger = logging.getLogger(__name__)
@@ -56,7 +59,10 @@ router = APIRouter()
 
 
 @router.get("/tenant/sidebar-config")
-async def get_tenant_sidebar_config(current_user=Depends(get_current_user)) -> dict[str, Any]:
+async def get_tenant_sidebar_config(
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
     """Return the dynamic sidebar payload for the caller's tenant.
 
     Response shape:
@@ -96,11 +102,8 @@ async def get_tenant_sidebar_config(current_user=Depends(get_current_user)) -> d
         }
 
     # Tenant name — small lookup, fine to do unconditionally.
-    tenant_doc = await db.tenants.find_one(
-        {"tenant_id": tenant_id},
-        {"_id": 0, "name": 1},
-    )
-    tenant_name = (tenant_doc or {}).get("name")
+    tenant_doc = await TenantRepository(pg).get_tenant(tenant_id)
+    tenant_name = tenant_doc.name if tenant_doc else None
 
     # Active grants for this tenant. We don't need a fancy aggregation;
     # the grant rows are small (<100 per tenant in realistic scenarios),

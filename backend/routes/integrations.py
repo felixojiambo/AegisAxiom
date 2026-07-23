@@ -7,17 +7,19 @@ import uuid
 import secrets
 import logging
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.auth import AuthRepository
 from auth_helper import get_current_user, has_perm, get_frontend_url
-from models import OAuthCodeRequest, QBOCallbackRequest
+from models import OAuthCodeRequest
 from services.zoho_service import ZohoService
-from services.qbo_service import QBOService
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 zoho = ZohoService()
-qbo = QBOService()
 
 
 def _callback_base(request: Request) -> str:
@@ -52,21 +54,18 @@ def _callback_base(request: Request) -> str:
 
 
 @router.get("/status")
-async def get_status(current_user=Depends(get_current_user)):
+async def get_status(current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     # SECURITY FIX H-5: Use has_perm() instead of hardcoded role check
     if not has_perm(current_user, "integrations.manage"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
-    zoho_tok = await db.oauth_tokens.find_one({"provider": "zoho"}, {"_id": 0})
-    qbo_tok = await db.oauth_tokens.find_one({"provider": "qbo"}, {"_id": 0})
+    zoho_tok = await AuthRepository(pg).get_oauth_token("zoho")
     return {
-        "zoho": {"connected": bool(zoho_tok and zoho_tok.get("access_token")), "expires_at": str(zoho_tok.get("expires_at")) if zoho_tok else None},
-        "qbo": {"connected": bool(qbo_tok and qbo_tok.get("access_token")), "expires_at": str(qbo_tok.get("expires_at")) if qbo_tok else None, "realm_id": qbo_tok.get("realm_id") if qbo_tok else None},
+        "zoho": {"connected": bool(zoho_tok and zoho_tok.access_token), "expires_at": str(zoho_tok.expires_at) if zoho_tok else None},
     }
 
 
 @router.get("/zoho/auth-url")
-async def zoho_auth_url(request: Request, current_user=Depends(get_current_user)):
+async def zoho_auth_url(request: Request, current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "integrations.manage"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     # Use ZOHO_REDIRECT_URI env var if set (must match Zoho API console), else derive from request
@@ -74,20 +73,15 @@ async def zoho_auth_url(request: Request, current_user=Depends(get_current_user)
     redirect_uri = env_redirect if env_redirect else f"{_callback_base(request)}/api/integrations/zoho/callback"
     logger.info(f"Zoho auth URL requested: redirect_uri={redirect_uri}")
     state = secrets.token_urlsafe(32)
-    db = get_db()
-    await db.oauth_states.insert_one({
-        "state": state,
-        "provider": "zoho",
-        "user_id": current_user.user_id,
-        "redirect_uri": redirect_uri,
-        "created_at": datetime.now(timezone.utc),
-    })
+    await AuthRepository(pg).create_oauth_state(
+        state, "zoho", user_id=current_user.user_id, redirect_uri=redirect_uri
+    )
     return {"url": zoho.get_auth_url(redirect_uri=redirect_uri, state=state)}
 
 
 # ---- Zoho OAuth GET callback (Zoho redirects here after user authorizes) ----
 @router.get("/zoho/callback")
-async def zoho_oauth_callback(request: Request, code: str = None, error: str = None, state: str = None):
+async def zoho_oauth_callback(request: Request, code: str = None, error: str = None, state: str = None, pg: AsyncSession = Depends(get_session)):
     """Handles the GET redirect from Zoho after OAuth authorization."""
     frontend_url = get_frontend_url(request)
     logger.info(f"Zoho OAuth callback: frontend_url={frontend_url}, has_code={bool(code)}, has_state={bool(state)}")
@@ -95,23 +89,23 @@ async def zoho_oauth_callback(request: Request, code: str = None, error: str = N
         logger.warning(f"Zoho callback error: {error or 'no_code'}")
         return RedirectResponse(url=f"{frontend_url}/admin/integrations?zoho=error&msg={error or 'no_code'}")
     # Validate CSRF state and retrieve the stored redirect_uri
-    db = get_db()
+    auth_repo = AuthRepository(pg)
     stored_redirect_uri = None
     if state:
-        state_doc = await db.oauth_states.find_one_and_delete({"state": state, "provider": "zoho"})
+        state_doc = await auth_repo.consume_oauth_state(state, "zoho")
         if not state_doc:
             logger.warning("Zoho callback: invalid or expired state parameter")
             return RedirectResponse(url=f"{frontend_url}/admin/integrations?zoho=error&msg=invalid_state")
-        stored_redirect_uri = state_doc.get("redirect_uri")
+        stored_redirect_uri = state_doc.redirect_uri
     # Use the exact redirect_uri from auth URL generation (guarantees match)
     redirect_uri = stored_redirect_uri or f"{_callback_base(request)}/api/integrations/zoho/callback"
     logger.info(f"Zoho token exchange: redirect_uri={redirect_uri}")
     try:
         result = await zoho.exchange_code(code, redirect_uri=redirect_uri)
-        await db.oauth_tokens.update_one(
-            {"provider": "zoho"},
-            {"$set": {**result, "provider": "zoho", "updated_at": datetime.now(timezone.utc)}},
-            upsert=True,
+        await auth_repo.upsert_oauth_token(
+            token_id=result.get("token_id", "zoho"), provider="zoho",
+            access_token=result["access_token"], refresh_token=result.get("refresh_token"),
+            expires_at=result.get("expires_at"), scope=result.get("scope"),
         )
         logger.info(f"Zoho connected: access_token={'yes' if result.get('access_token') else 'NO'}, refresh_token={'yes' if result.get('refresh_token') else 'NO'}")
         return RedirectResponse(url=f"{frontend_url}/admin/integrations?zoho=connected")
@@ -122,61 +116,27 @@ async def zoho_oauth_callback(request: Request, code: str = None, error: str = N
 
 
 @router.post("/zoho/callback")
-async def zoho_callback_post(request: Request, data: OAuthCodeRequest, current_user=Depends(get_current_user)):
+async def zoho_callback_post(request: Request, data: OAuthCodeRequest, current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     """Manual code exchange (for testing)."""
     if not has_perm(current_user, "integrations.manage"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     redirect_uri = f"{_callback_base(request)}/api/integrations/zoho/callback"
     result = await zoho.exchange_code(data.code, redirect_uri=redirect_uri)
-    db = get_db()
-    await db.oauth_tokens.update_one(
-        {"provider": "zoho"},
-        {"$set": {**result, "provider": "zoho", "updated_at": datetime.now(timezone.utc)}},
-        upsert=True,
+    await AuthRepository(pg).upsert_oauth_token(
+        token_id=result.get("token_id", "zoho"), provider="zoho",
+        access_token=result["access_token"], refresh_token=result.get("refresh_token"),
+        expires_at=result.get("expires_at"), scope=result.get("scope"),
     )
     return {"message": "Zoho connected successfully"}
 
 
 @router.delete("/zoho/disconnect")
-async def zoho_disconnect(current_user=Depends(get_current_user)):
+async def zoho_disconnect(current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     # SECURITY FIX H-5: Use has_perm() instead of hardcoded role check
     if not has_perm(current_user, "integrations.manage"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    await get_db().oauth_tokens.delete_one({"provider": "zoho"})
+    await AuthRepository(pg).delete_oauth_token("zoho")
     return {"message": "Zoho disconnected"}
-
-
-@router.get("/qbo/auth-url")
-async def qbo_auth_url(request: Request, current_user=Depends(get_current_user)):
-    if not has_perm(current_user, "integrations.manage"):
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    env_redirect = os.environ.get("QBO_REDIRECT_URI", "").strip()
-    redirect_uri = env_redirect if env_redirect else f"{_callback_base(request)}/api/integrations/qbo/callback"
-    return {"url": qbo.get_auth_url(redirect_uri=redirect_uri)}
-
-
-@router.post("/qbo/callback")
-async def qbo_callback(request: Request, data: QBOCallbackRequest, current_user=Depends(get_current_user)):
-    if not has_perm(current_user, "integrations.manage"):
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    redirect_uri = f"{_callback_base(request)}/api/integrations/qbo/callback"
-    result = await qbo.exchange_code(data.code, data.realm_id, redirect_uri=redirect_uri)
-    db = get_db()
-    await db.oauth_tokens.update_one(
-        {"provider": "qbo"},
-        {"$set": {**result, "provider": "qbo", "updated_at": datetime.now(timezone.utc)}},
-        upsert=True,
-    )
-    return {"message": "QuickBooks Online connected successfully"}
-
-
-@router.delete("/qbo/disconnect")
-async def qbo_disconnect(current_user=Depends(get_current_user)):
-    # SECURITY FIX H-5: Use has_perm() instead of hardcoded role check
-    if not has_perm(current_user, "integrations.manage"):
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    await get_db().oauth_tokens.delete_one({"provider": "qbo"})
-    return {"message": "QuickBooks Online disconnected"}
 
 
 @router.get("/webhook-logs")
@@ -259,16 +219,6 @@ async def sync_zoho_full(current_user=Depends(get_current_user)):
     return {"message": "Full sync complete", "results": results}
 
 
-@router.post("/sync/qbo")
-async def sync_qbo(current_user=Depends(get_current_user)):
-    # SECURITY FIX H-5: Use has_perm() instead of hardcoded role check
-    if not has_perm(current_user, "integrations.manage"):
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
-    synced = await qbo.sync_payment_status(db)
-    return {"message": f"Updated {synced} invoice statuses from QuickBooks"}
-
-
 # ---- PUBLIC WEBHOOK RECEIVERS ----
 
 def verify_webhook_signature(payload: bytes, signature: str, secret: str) -> bool:
@@ -308,30 +258,5 @@ async def zoho_crm_webhook(request: Request):
         processed, error = False, str(e)
     await db.webhook_logs.insert_one(
         {"log_id": log_id, "source": "zoho_crm", "event_type": payload.get("operation", "unknown"), "payload": payload, "processed": processed, "error": error, "created_at": datetime.now(timezone.utc)}
-    )
-    return {"status": "received"}
-
-
-@router.post("/webhooks/qbo")
-async def qbo_webhook(request: Request):
-    # SECURITY FIX C-5: Add webhook signature verification
-    signature = request.headers.get("intuit-signature", "")
-    secret = os.getenv("QBO_WEBHOOK_SECRET", "")
-    
-    body = await request.body()
-    
-    if not verify_webhook_signature(body, signature, secret):
-        raise HTTPException(status_code=401, detail="Invalid webhook signature")
-    
-    db = get_db()
-    payload = await request.json()
-    log_id = f"log_{uuid.uuid4().hex[:12]}"
-    processed, error = True, None
-    try:
-        await qbo.process_webhook(payload, db)
-    except Exception as e:
-        processed, error = False, str(e)
-    await db.webhook_logs.insert_one(
-        {"log_id": log_id, "source": "qbo", "event_type": "payment_update", "payload": payload, "processed": processed, "error": error, "created_at": datetime.now(timezone.utc)}
     )
     return {"status": "received"}

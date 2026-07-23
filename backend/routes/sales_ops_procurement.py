@@ -6,7 +6,10 @@ Also handles contractor grievances and surveys
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
 from typing import Any, List, Optional
 from datetime import datetime, timezone, timedelta
+from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from auth_helper import get_current_user, has_perm
 from middleware.ai_authz import require_ai_permission
 from services.policy_engine import evaluate_policies
@@ -128,19 +131,14 @@ async def get_contractor_businesses_for_sales_ops(
 )
 async def get_contractor_users(
     business_id: str,
-    db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Get all contractor users (people) working for a contractor business."""
     if not has_perm(current_user, "sales_ops.procurement.view"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    # Fetch users with contractor_business_id matching
-    users = await db.users.find(
-        {"contractor_business_id": business_id, "role": "contractor"},
-        {"_id": 0, "user_id": 1, "name": 1, "email": 1, "resource_type_assignments": 1}
-    ).to_list(100)
-    
+    users = await UserRepository(pg).list_contractor_users_with_assignments(business_id)
     return {"items": users}
 
 
@@ -982,6 +980,7 @@ async def update_notification_details(
     notification_id: str,
     data: dict,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """
@@ -1002,11 +1001,8 @@ async def update_notification_details(
         
         # Get assigned user name
         if data["assigned_to"]:
-            assigned_user = await db.users.find_one(
-                {"user_id": data["assigned_to"]},
-                {"_id": 0, "name": 1}
-            )
-            update_fields["assigned_to_name"] = assigned_user.get("name") if assigned_user else None
+            assigned_user = await UserRepository(pg).get_user_by_id(data["assigned_to"])
+            update_fields["assigned_to_name"] = assigned_user.name if assigned_user else None
         else:
             update_fields["assigned_to_name"] = None
     
@@ -1149,6 +1145,7 @@ async def update_grievance_status(
 async def send_contractor_survey(
     data: ContractorSurveyCreate,
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """Create and send a contractor rating survey (generates public link)."""
@@ -1163,11 +1160,8 @@ async def send_contractor_survey(
     if not business:
         raise HTTPException(status_code=404, detail="Contractor business not found")
     
-    contractor_user = await db.users.find_one(
-        {"user_id": data.contractor_user_id, "role": "contractor"},
-        {"_id": 0}
-    )
-    if not contractor_user:
+    contractor_user = await UserRepository(pg).get_user_by_id(data.contractor_user_id)
+    if not contractor_user or contractor_user.role != "contractor":
         raise HTTPException(status_code=404, detail="Contractor user not found")
     
     # Generate unique public token
@@ -1383,6 +1377,7 @@ async def submit_public_survey(
 )
 async def get_pending_contractor_rate_exceptions(
     db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """
@@ -1392,16 +1387,8 @@ async def get_pending_contractor_rate_exceptions(
     if not has_perm(current_user, "sales_ops.procurement.view"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    # Find all contractor users with pending resource type assignments
-    contractors = await db.users.find(
-        {
-            "role": "contractor",
-            "resource_type_assignments": {
-                "$elemMatch": {"approval_status": "pending"}
-            }
-        },
-        {"_id": 0, "user_id": 1, "name": 1, "email": 1, "contractor_business_id": 1, "resource_type_assignments": 1}
-    ).to_list(500)
+    # Find all contractor users with pending resource type assignments (Postgres)
+    contractors = await UserRepository(pg).list_contractors_with_pending_assignments()
     
     # Build response with business context
     pending_rates = []
@@ -1446,7 +1433,7 @@ async def approve_contractor_rate_exception(
     user_id: str,
     resource_type_id: str,
     data: dict,
-    db=Depends(get_db),
+    pg: AsyncSession = Depends(get_session),
     current_user=Depends(get_current_user)
 ):
     """
@@ -1456,67 +1443,58 @@ async def approve_contractor_rate_exception(
     """
     if not has_perm(current_user, "sales_ops.procurement.approve_rates"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    
+
     action = data.get("action")  # "approve" or "reject"
-    
+
     if action not in ["approve", "reject"]:
         raise HTTPException(status_code=400, detail="Action must be 'approve' or 'reject'")
-    
-    # Get user
-    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+
+    repo = UserRepository(pg)
+    user = await repo.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # Find the specific resource type assignment
-    assignments = user.get("resource_type_assignments", [])
-    assignment_index = None
-    
-    for i, a in enumerate(assignments):
-        if a.get("resource_type_id") == resource_type_id:
-            assignment_index = i
-            break
-    
-    if assignment_index is None:
+
+    assignment = await repo.get_resource_assignment(user_id, resource_type_id)
+    if assignment is None:
         raise HTTPException(status_code=404, detail="Resource type assignment not found")
-    
-    # Update approval status
+
+    # Build the field updates for the assignment child row.
     if action == "approve":
-        assignments[assignment_index]["approval_status"] = "approved"
-        assignments[assignment_index]["approved_by"] = current_user.user_id
-        assignments[assignment_index]["approved_by_name"] = current_user.name
-        assignments[assignment_index]["approved_date"] = datetime.now(timezone.utc)
-        assignments[assignment_index]["rejection_reason"] = None
-        
+        updates = {
+            "approval_status": "approved",
+            "approved_by": current_user.user_id,
+            "approved_by_name": current_user.name,
+            "approved_date": datetime.now(timezone.utc),
+            "rejection_reason": None,
+        }
         message = "Rate exception approved"
     else:
         # Reject: revert to business rate or mark as rejected
-        business_rate = assignments[assignment_index].get("contractor_business_rate")
+        business_rate = assignment.get("contractor_business_rate")
         rejection_reason = data.get("rejection_reason", "Rate exceeds business approved rate")
-        
+
         if business_rate:
-            # Revert to business rate
-            assignments[assignment_index]["cost_rate"] = business_rate
-            assignments[assignment_index]["approval_status"] = "approved"
-            assignments[assignment_index]["approved_by"] = current_user.user_id
-            assignments[assignment_index]["approved_by_name"] = current_user.name
-            assignments[assignment_index]["approved_date"] = datetime.now(timezone.utc)
-            assignments[assignment_index]["rejection_reason"] = f"Reverted to business rate: {rejection_reason}"
+            updates = {
+                "cost_rate": business_rate,
+                "approval_status": "approved",
+                "approved_by": current_user.user_id,
+                "approved_by_name": current_user.name,
+                "approved_date": datetime.now(timezone.utc),
+                "rejection_reason": f"Reverted to business rate: {rejection_reason}",
+            }
             message = f"Rate rejected - Reverted to business rate ${business_rate}/hr"
         else:
-            # Mark as rejected
-            assignments[assignment_index]["approval_status"] = "rejected"
-            assignments[assignment_index]["rejection_reason"] = rejection_reason
+            updates = {
+                "approval_status": "rejected",
+                "rejection_reason": rejection_reason,
+            }
             message = "Rate exception rejected"
-    
-    # Update user
-    await db.users.update_one(
-        {"user_id": user_id},
-        {"$set": {"resource_type_assignments": assignments}}
-    )
+
+    updated = await repo.update_resource_assignment(user_id, resource_type_id, updates)
 
     logger.info(f"Contractor rate {action}d: {user_id} - {resource_type_id}")
 
-    return {"message": message, "assignment": assignments[assignment_index]}
+    return {"message": message, "assignment": updated}
 
 
 # ---------------------------------------------------------------------------

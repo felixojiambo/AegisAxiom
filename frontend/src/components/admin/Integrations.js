@@ -78,7 +78,7 @@ function IntegrationCard({ name, icon, status, onConnect, onDisconnect, onSync, 
 }
 
 export default function Integrations() {
-  const [status, setStatus] = useState({ zoho: {}, qbo: {} });
+  const [status, setStatus] = useState({ zoho: {} });
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
@@ -97,11 +97,6 @@ export default function Integrations() {
       toast.error(
         `Zoho connection failed: ${decodeURIComponent(searchParams.get('msg') || 'Unknown error')}`,
       );
-      setSearchParams({});
-    }
-    const qboParam = searchParams.get('qbo');
-    if (qboParam === 'connected') {
-      toast.success('QuickBooks Online connected successfully!');
       setSearchParams({});
     }
   }, []);
@@ -145,33 +140,6 @@ export default function Integrations() {
     }
     setLoading(false);
   };
-  const connectQBO = async () => {
-    const res = await api.get(`${API}/api/integrations/qbo/auth-url`);
-    if (res.ok) {
-      const { url } = await res.json();
-      if (url.startsWith('#')) {
-        toast.error(
-          'QuickBooks credentials not configured. Please add QBO_CLIENT_ID and QBO_CLIENT_SECRET to your backend .env file.',
-        );
-        return;
-      }
-      window.location.href = url;
-    }
-  };
-  const disconnectQBO = async () => {
-    const res = await api.delete(`${API}/api/integrations/qbo/disconnect`);
-    if (res.ok) {
-      toast.success('QuickBooks disconnected');
-      loadStatus();
-    }
-  };
-  const syncQBO = async () => {
-    const res = await api.post(`${API}/api/integrations/sync/qbo`, {});
-    if (res.ok) {
-      const d = await res.json();
-      toast.success(d.message);
-    }
-  };
   return (
     <div data-testid="integrations-page">
       {/* Page header */}
@@ -181,7 +149,7 @@ export default function Integrations() {
           Integrations
         </h1>
         <p className="text-aegisaxiom-text-muted text-sm mt-1">
-          Connect AEGISAXIOM to your Zoho and QuickBooks environments.
+          Connect AEGISAXIOM to your Zoho environment.
         </p>
       </div>
 
@@ -212,15 +180,6 @@ export default function Integrations() {
           onConnect={connectZoho}
           onDisconnect={disconnectZoho}
           onSync={syncZoho}
-        />
-        <IntegrationCard
-          name="QuickBooks Online"
-          icon="🟩"
-          description="Create invoices, sync payment status, manage customers"
-          status={status.qbo}
-          onConnect={connectQBO}
-          onDisconnect={disconnectQBO}
-          onSync={syncQBO}
         />
         <div className="glass-card p-5 sm:p-6 opacity-60">
           <div className="flex items-start gap-3 mb-3">
@@ -265,7 +224,7 @@ export default function Integrations() {
           OAuth Redirect URIs
         </h3>
         <p className="text-aegisaxiom-text-muted text-xs mb-4 leading-relaxed">
-          Register these callback URLs in your Zoho / QuickBooks API console under{' '}
+          Register these callback URLs in your Zoho API console under{' '}
           <strong className="text-aegisaxiom-text-secondary">Authorized Redirect URIs</strong>:
         </p>
         <div className="mb-6">
@@ -273,10 +232,6 @@ export default function Integrations() {
             {
               label: 'Zoho CRM — Redirect URI',
               url: `${window.location.origin}/api/integrations/zoho/callback`,
-            },
-            {
-              label: 'QuickBooks Online — Redirect URI',
-              url: `${window.location.origin}/api/integrations/qbo/callback`,
             },
           ].map((w) => (
             <UrlRow key={w.label} label={w.label} url={w.url} />
@@ -290,12 +245,11 @@ export default function Integrations() {
           Webhook Endpoints
         </h3>
         <p className="text-aegisaxiom-text-muted text-xs mb-4 leading-relaxed">
-          Configure these URLs in your Zoho/QuickBooks settings to enable real-time sync:
+          Configure these URLs in your Zoho settings to enable real-time sync:
         </p>
         <div>
           {[
             { label: 'Zoho', url: `${API}/api/integrations/webhooks/zoho/crm` },
-            { label: 'QuickBooks Online', url: `${API}/api/integrations/webhooks/qbo` },
           ].map((w) => (
             <UrlRow key={w.label} label={w.label} url={w.url} />
           ))}

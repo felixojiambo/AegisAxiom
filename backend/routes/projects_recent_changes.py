@@ -61,6 +61,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from auth_helper import get_current_user, has_perm
 from database import get_db
+from db.session import get_sessionmaker
+from repositories.users import UserRepository
 from middleware.tenant_scoping import get_current_tenant_id
 
 
@@ -610,11 +612,14 @@ async def fetch_recent_changes(
         # Phase 1E.3c — tenant-scoped user name lookup. A cross-tenant
         # actor whose audit row somehow leaked through would render with
         # the raw user_id rather than a name.
-        async for u in db.users.find(
-            {"user_id": {"$in": list(actor_ids)}, "tenant_id": effective_tenant_id},
-            {"_id": 0, "user_id": 1, "name": 1, "email": 1},
-        ):
-            user_names[u["user_id"]] = u.get("name") or u.get("email") or u["user_id"]
+        sm = get_sessionmaker()
+        async with sm() as pg:
+            matched_users = await UserRepository(pg).list_users(
+                user_ids=list(actor_ids),
+                tenant_id=effective_tenant_id,
+            )
+        for u in matched_users:
+            user_names[u.user_id] = u.name or u.email or u.user_id
 
     project_names: Dict[str, str] = {}
     if project_ids:

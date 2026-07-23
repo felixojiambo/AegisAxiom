@@ -31,6 +31,29 @@ services:
       retries: 5
       start_period: 10s
 
+  # Isolated ingestion-stack Postgres (Phase 0). Fully separate instance from the
+  # primary stack — distinct container, port (5433), and volume — mirroring the
+  # mongo/chroma isolation already here (audit §5e). Separate empty database; no
+  # data crosses stacks.
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: aegisaxiom-ingestion-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=aegis
+      - POSTGRES_PASSWORD=aegis
+      - POSTGRES_DB=aegis_ingestion
+    volumes:
+      - ingestion_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegis_ingestion"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   backend:
     build:
       context: ./backend
@@ -46,6 +69,10 @@ services:
       - /app/backend/services/bpmn/node_helpers/node_modules
     env_file:
       - ./backend/.env.ingestion
+    environment:
+      # Points at the isolated ingestion Postgres. Lazy — not a boot dependency
+      # (postgres intentionally omitted from depends_on). See db/session.py.
+      - DATABASE_URL=postgresql+asyncpg://aegis:aegis@postgres:5432/aegis_ingestion
     depends_on:
       mongo:
         condition: service_healthy
@@ -87,3 +114,4 @@ volumes:
   ingestion_mongo_data:
   ingestion_backend_uploads:
   ingestion_chroma_data:
+  ingestion_pg_data:

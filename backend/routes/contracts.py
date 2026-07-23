@@ -6,7 +6,11 @@ import re
 import uuid
 import logging
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from auth_helper import get_current_user, get_contract_filter, has_perm, verify_ownership
 from middleware.ai_authz import require_ai_permission
 from services.audit_service import log_action
@@ -1929,6 +1933,7 @@ async def grant_contract_approver_override(
     contract_id: str,
     data: dict,
     current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Grant or reactivate a per-contract approver override.
     Body: { "user_id": str, "note"?: str }.
@@ -1957,13 +1962,11 @@ async def grant_contract_approver_override(
 
     # Cross-tenant override prevention: target user must belong to
     # the same tenant as the contract.
-    target_user = await db.users.find_one(
-        {"user_id": user_id}, {"_id": 0, "tenant_id": 1, "user_id": 1}
-    )
+    target_user = await UserRepository(pg).get_user_by_id(user_id)
     if not target_user:
         raise HTTPException(status_code=404, detail=f"User {user_id} not found")
     if getattr(current_user, "tenant_id", None):
-        target_tenant = target_user.get("tenant_id")
+        target_tenant = target_user.tenant_id
         if target_tenant and target_tenant != current_user.tenant_id:
             # 404 not 403 — tenant existence is not leaked.
             raise HTTPException(status_code=404, detail=f"User {user_id} not found")

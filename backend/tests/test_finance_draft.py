@@ -350,7 +350,7 @@ class TestSyncDraft:
         assert resp.status_code == 200
         data = resp.json()
         assert data["sync_status"] == "Synced"
-        assert data["qbo_id"].startswith("QBO-")
+        assert data["qbo_id"].startswith("SYNC-")
         assert data["error"] is None
 
     def test_sync_already_synced_409(self):

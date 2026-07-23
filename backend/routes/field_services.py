@@ -9,7 +9,10 @@ import uuid
 import logging
 
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from models import (
     FieldJob, FieldJobCreate, FieldJobUpdate,
     AccountOperatingHours, DayHours, SchedulingRules
@@ -307,10 +310,11 @@ async def get_calendar_data(
 
 
 @router.post("/field-services/jobs")
-async def create_field_job(data: FieldJobCreate, current_user=Depends(get_current_user)):
+async def create_field_job(data: FieldJobCreate, pg: AsyncSession = Depends(get_session), current_user=Depends(get_current_user)):
     if not has_perm(current_user, "field_jobs.create"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     db = get_db()
+    users = UserRepository(pg)
 
     # Lookup account
     account = await db.accounts.find_one({"account_id": data.account_id}, {"_id": 0, "name": 1, "assigned_sales_rep_id": 1})
@@ -320,14 +324,14 @@ async def create_field_job(data: FieldJobCreate, current_user=Depends(get_curren
     # Lookup tech name
     tech_name = None
     if data.assigned_tech_id:
-        tech = await db.users.find_one({"user_id": data.assigned_tech_id}, {"_id": 0, "name": 1})
-        tech_name = tech["name"] if tech else None
+        tech = await users.get_user_by_id(data.assigned_tech_id)
+        tech_name = tech.name if tech else None
 
     # Lookup PM name
     pm_name = None
     if data.assigned_pm_id:
-        pm = await db.users.find_one({"user_id": data.assigned_pm_id}, {"_id": 0, "name": 1})
-        pm_name = pm["name"] if pm else None
+        pm = await users.get_user_by_id(data.assigned_pm_id)
+        pm_name = pm.name if pm else None
 
     # Deal name
     deal_name = None
@@ -441,12 +445,13 @@ async def get_field_job(job_id: str, current_user=Depends(get_current_user)):
 
 
 @router.put("/field-services/jobs/{job_id}")
-async def update_field_job(job_id: str, data: FieldJobUpdate, background_tasks: BackgroundTasks, current_user=Depends(get_current_user)):
+async def update_field_job(job_id: str, data: FieldJobUpdate, background_tasks: BackgroundTasks, pg: AsyncSession = Depends(get_session), current_user=Depends(get_current_user)):
     has_edit_all = has_perm(current_user, "field_jobs.edit.all") or has_perm(current_user, "field_jobs.edit")
     has_edit_own = has_perm(current_user, "field_jobs.edit.own")
     if not has_edit_all and not has_edit_own:
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     db = get_db()
+    users = UserRepository(pg)
 
     existing = await db.field_jobs.find_one({"job_id": job_id}, {"_id": 0})
     if not existing:
@@ -469,12 +474,12 @@ async def update_field_job(job_id: str, data: FieldJobUpdate, background_tasks: 
 
     # Lookup names if IDs changed
     if "assigned_tech_id" in update_data:
-        tech = await db.users.find_one({"user_id": update_data["assigned_tech_id"]}, {"_id": 0, "name": 1})
-        update_data["assigned_tech_name"] = tech["name"] if tech else None
+        tech = await users.get_user_by_id(update_data["assigned_tech_id"])
+        update_data["assigned_tech_name"] = tech.name if tech else None
 
     if "assigned_pm_id" in update_data:
-        pm = await db.users.find_one({"user_id": update_data["assigned_pm_id"]}, {"_id": 0, "name": 1})
-        update_data["assigned_pm_name"] = pm["name"] if pm else None
+        pm = await users.get_user_by_id(update_data["assigned_pm_id"])
+        update_data["assigned_pm_name"] = pm.name if pm else None
 
     # Validate schedule via policy engine if date/time changed and not overridden
     if not update_data.get("schedule_override") and ("scheduled_date" in update_data or "scheduled_start" in update_data or "scheduled_end" in update_data):
@@ -554,16 +559,16 @@ async def update_field_job(job_id: str, data: FieldJobUpdate, background_tasks: 
         if new_status == "confirmed":
             tech_id = merged.get("assigned_tech_id")
             if tech_id and await is_notification_enabled("on_confirmed_contractor"):
-                tech = await db.users.find_one({"user_id": tech_id}, {"_id": 0, "email": 1, "name": 1})
-                if tech and tech.get("email"):
+                tech = await users.get_user_by_id(tech_id)
+                if tech and tech.email:
                     pm_info = {}
                     if merged.get("assigned_pm_id"):
-                        pm_user = await db.users.find_one({"user_id": merged["assigned_pm_id"]}, {"_id": 0, "name": 1, "email": 1})
+                        pm_user = await users.get_user_by_id(merged["assigned_pm_id"])
                         if pm_user:
-                            pm_info = {"pm_name": pm_user.get("name", ""), "pm_email": pm_user.get("email", "")}
+                            pm_info = {"pm_name": pm_user.name or "", "pm_email": pm_user.email or ""}
                     background_tasks.add_task(
                         send_contractor_job_confirmed,
-                        to=tech["email"], contractor_name=tech.get("name", ""),
+                        to=tech.email, contractor_name=tech.name or "",
                         job_name=merged.get("name", ""), account_name=merged.get("account_name", ""),
                         scheduled_date=merged.get("scheduled_date", ""),
                         scheduled_start=merged.get("scheduled_start", ""),
@@ -573,9 +578,9 @@ async def update_field_job(job_id: str, data: FieldJobUpdate, background_tasks: 
                     await log_job_activity(
                         job_id=job_id, activity_type="email_sent",
                         title="Confirmation email sent to contractor",
-                        detail=f"To: {tech['email']} ({tech.get('name', '')})",
+                        detail=f"To: {tech.email} ({tech.name or ''})",
                         user_id="system", user_name="System",
-                        metadata={"to": tech["email"], "recipient_type": "contractor", "notification_key": "on_confirmed_contractor"}
+                        metadata={"to": tech.email, "recipient_type": "contractor", "notification_key": "on_confirmed_contractor"}
                     )
 
             if merged.get("customer_contact_email") and await is_notification_enabled("on_confirmed_customer"):
@@ -660,7 +665,7 @@ async def delete_field_job(job_id: str, current_user=Depends(get_current_user)):
 # ---- PM LIST (for PM filter dropdown) ----
 
 @router.get("/field-services/pms")
-async def list_pms(current_user=Depends(get_current_user)):
+async def list_pms(pg: AsyncSession = Depends(get_session), current_user=Depends(get_current_user)):
     """Get list of users who are assigned as PMs on any field job."""
     db = get_db()
     # Get distinct PM IDs from jobs
@@ -673,10 +678,13 @@ async def list_pms(current_user=Depends(get_current_user)):
 
     # Also get all users who could be PMs (admin, director, sales_rep roles)
     pm_roles = ["admin", "director", "sales_rep"]
-    all_pms = await db.users.find(
-        {"role": {"$in": pm_roles}, "is_active": {"$ne": False}},
-        {"_id": 0, "user_id": 1, "name": 1, "role": 1}
-    ).to_list(100)
+    all_pms_users = await UserRepository(pg).list_users(
+        role_in=pm_roles, is_active=True, limit=100
+    )
+    all_pms = [
+        {"user_id": u.user_id, "name": u.name, "role": u.role}
+        for u in all_pms_users
+    ]
 
     return {"assigned_pms": pms, "available_pms": all_pms}
 
@@ -684,13 +692,26 @@ async def list_pms(current_user=Depends(get_current_user)):
 # ---- CONTRACTORS LIST (for tech assignment) ----
 
 @router.get("/field-services/contractors")
-async def list_contractors(current_user=Depends(get_current_user)):
+async def list_contractors(
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+):
     """Get list of available contractors for assignment."""
-    db = get_db()
-    contractors = await db.users.find(
-        {"role": "contractor", "is_active": {"$ne": False}},
-        {"_id": 0, "user_id": 1, "name": 1, "email": 1, "cost_rate": 1, "contractor_business_id": 1}
-    ).sort("name", 1).to_list(200)
+    users = await UserRepository(pg).list_users(
+        role="contractor", is_active=True, limit=200
+    )
+    # `cost_rate` is not a canonical User field (per-resource-type rates live on
+    # the assignments child); preserve the response key as None.
+    contractors = [
+        {
+            "user_id": u.user_id,
+            "name": u.name,
+            "email": u.email,
+            "cost_rate": None,
+            "contractor_business_id": u.contractor_business_id,
+        }
+        for u in users
+    ]
     return {"items": contractors}
 
 

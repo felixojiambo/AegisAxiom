@@ -104,45 +104,57 @@ class TenantScopingMiddleware(BaseHTTPMiddleware):
             if path.startswith(prefix):
                 return await call_next(request)
 
-        # Resolve the user without raising. If the request has no
-        # valid auth, we let it through — the route handler's own
-        # `Depends(get_current_user)` will return the 401 cleanly,
-        # with the existing error shape clients already handle. The
-        # middleware deliberately does NOT raise auth errors; that's
-        # not its job.
-        user = await _try_resolve_user(request)
-        if user is None:
-            return await call_next(request)
+        # Phase 2a: user/session resolution and tenant lookup move to Postgres.
+        # We open a short-lived PG session for the middleware's OWN reads only
+        # and close it before ``call_next`` — the route handlers own their own
+        # ``get_session`` for the downstream request. ``deny`` collects an
+        # optional early 4xx; if it stays None the request proceeds.
+        from db.session import get_sessionmaker
+        from repositories.tenants import TenantRepository
 
-        # Set the request-scoped tenant context. The dependency below
-        # reads from here. Default is the user's own tenant_id, which
-        # is correct for the vast majority of requests; we override
-        # below if the user is root and used the X-Override header.
-        request.state.tenant_id = user.get("tenant_id")
-        request.state.user_id = user.get("user_id")
-        request.state.is_root_override = False
+        deny: Optional[JSONResponse] = None
+        sm = get_sessionmaker()
+        async with sm() as pg:
+            # Resolve the user without raising. If the request has no valid
+            # auth, we let it through — the route handler's own
+            # `Depends(get_current_user)` returns the 401 cleanly. The
+            # middleware deliberately does NOT raise auth errors.
+            user = await _try_resolve_user(request, pg)
+            if user is not None:
+                # Set the request-scoped tenant context (default: the caller's
+                # own tenant_id; overridden below for root + X-Override).
+                request.state.tenant_id = user.get("tenant_id")
+                request.state.user_id = user.get("user_id")
+                request.state.is_root_override = False
 
-        # Is this path owned by an ingested app? If not, request flows
-        # through the existing permission gates unchanged.
-        db = get_db()
-        owning_app = await _find_owning_app(db, path)
-        if owning_app is None:
-            return await call_next(request)
+                # Is this path owned by an ingested app? (app_registry_legacy_read)
+                db = get_db()
+                owning_app = await _find_owning_app(db, path)
+                if owning_app is not None:
+                    deny = await self._enforce_scoped_app(
+                        request, path, user, owning_app, db, TenantRepository(pg)
+                    )
 
-        # ── From here on we know this is a scoped-app request ──
+        if deny is not None:
+            return deny
+        return await call_next(request)
 
+    async def _enforce_scoped_app(
+        self, request, path, user, owning_app, db, tenants_repo
+    ) -> Optional[JSONResponse]:
+        """Enforce app-grant access for a scoped-app request.
+
+        Returns a ``JSONResponse`` to deny, or None to proceed. Mutates
+        ``request.state`` for the root-override case. ``db`` is Mongo (the
+        ``tenant_app_grants`` grant check remains a legacy read until Phase 8).
+        """
         user_tenant_id = user.get("tenant_id")
         is_root = user_tenant_id == SIMPLIMETA_ROOT_TENANT_ID
         override_header = request.headers.get("X-Override-Tenant-Id")
 
         if is_root:
-            # Root admin path — either no override (sees own scope) or
-            # explicit override to inspect a partner's data.
             if override_header:
-                target = await db.tenants.find_one(
-                    {"tenant_id": override_header},
-                    {"_id": 0, "tenant_id": 1, "name": 1},
-                )
+                target = await tenants_repo.get_tenant(override_header)
                 if not target:
                     return JSONResponse(
                         status_code=400,
@@ -153,10 +165,8 @@ class TenantScopingMiddleware(BaseHTTPMiddleware):
                             )
                         },
                     )
-                # Audit the override use. This is the single most
-                # privileged routing action we offer — a root admin
-                # impersonating a tenant's data context — so every
-                # use gets logged with full context.
+                # Audit the override use — the single most privileged routing
+                # action we offer (a root admin impersonating a tenant context).
                 await log_security_event(
                     event_type="tenant_override_used",
                     severity="info",
@@ -171,20 +181,17 @@ class TenantScopingMiddleware(BaseHTTPMiddleware):
                         "method": request.method,
                         "app_id": owning_app.get("app_id"),
                         "app_slug": owning_app.get("slug"),
-                        "target_tenant_name": target.get("name"),
+                        "target_tenant_name": target.name,
                     },
                 )
                 request.state.tenant_id = override_header
                 request.state.is_root_override = True
-            # Root users always pass — no grant check needed (root
-            # owns the catalog and can see everything by definition).
-            return await call_next(request)
+            # Root users always pass — root owns the catalog.
+            return None
 
         # ── Non-root user on a scoped path ──
 
-        # The override header is root-only. A non-root user sending
-        # it is either confused or hostile; either way we deny with a
-        # warning-level audit entry.
+        # The override header is root-only. A non-root user sending it is denied.
         if override_header:
             await log_security_event(
                 event_type="tenant_override_denied",
@@ -207,9 +214,6 @@ class TenantScopingMiddleware(BaseHTTPMiddleware):
             )
 
         if not user_tenant_id:
-            # Defensive — user record without tenant_id at all.
-            # Shouldn't happen post-1A, but cheaper to handle than
-            # debug later.
             return JSONResponse(
                 status_code=403,
                 content={
@@ -217,10 +221,10 @@ class TenantScopingMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-        # The actual grant check. One indexed lookup on (tenant_id,
-        # app_id, status). Per Option A from the 1E.3 design we don't
-        # cache this — revoking a grant takes effect on the very next
-        # request, no TTL.
+        # The actual grant check (tenant_app_grants_legacy_read; Mongo; Phase 8).
+        # tenant_app_grants migrates with the app-registry/ingestion domain —
+        # this Mongo read is a temporary shim, deleted then. One indexed lookup
+        # on (tenant_id, app_id, status); uncached so revocation is immediate.
         grant = await db.tenant_app_grants.find_one(
             {
                 "tenant_id": user_tenant_id,
@@ -244,26 +248,28 @@ class TenantScopingMiddleware(BaseHTTPMiddleware):
                 },
             )
 
-        # Grant exists. Request proceeds with request.state.tenant_id
-        # already pointing at the caller's own tenant_id (set above).
-        return await call_next(request)
+        # Grant exists — proceed with request.state.tenant_id already set.
+        return None
 
 
 # ─── Internal helpers ───────────────────────────────────────────────
 
 
-async def _try_resolve_user(request: Request) -> Optional[dict]:
+async def _try_resolve_user(request: Request, pg) -> Optional[dict]:
     """Resolve the user from the request without raising on auth failure.
 
-    Mirrors `auth_helper.get_current_user`'s extraction logic but
-    returns None on any failure (no token, invalid session, expired,
-    deactivated user). The middleware does not raise auth errors —
-    those are owned by the route handlers' own `Depends(get_current_user)`.
+    Phase 2a: session + user reads come from Postgres (repositories, using the
+    ``pg`` session threaded in by ``dispatch``). Returns the user as a **dict**
+    (``User.model_dump()``) to preserve the caller's ``.get(...)`` contract, or
+    None on any failure (no token, invalid/expired session, deactivated user).
+    The middleware does not raise auth errors — those are owned by the route
+    handlers' own ``Depends(get_current_user)``.
     """
-    db = get_db()
+    from repositories.auth import AuthRepository
+    from repositories.users import UserRepository
 
-    # Token: cookie first (browser sessions), then Bearer header (API
-    # callers). Identical precedence to `get_current_user`.
+    # Token: cookie first (browser sessions), then Bearer header (API callers).
+    # Identical precedence to `get_current_user`.
     token = request.cookies.get("session_token")
     if not token:
         auth_header = request.headers.get("authorization") or request.headers.get(
@@ -275,38 +281,33 @@ async def _try_resolve_user(request: Request) -> Optional[dict]:
     if not token:
         return None
 
-    session = await db.user_sessions.find_one(
-        {"session_token": token}, {"_id": 0}
-    )
+    session = await AuthRepository(pg).get_session(token)
     if not session:
         return None
 
-    expires_at = session.get("expires_at")
+    expires_at = session.expires_at
     if expires_at is None:
         return None
-    if isinstance(expires_at, str):
-        try:
-            expires_at = datetime.fromisoformat(expires_at)
-        except ValueError:
-            return None
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
     if expires_at < datetime.now(timezone.utc):
         return None
 
-    user_doc = await db.users.find_one(
-        {"user_id": session["user_id"]}, {"_id": 0}
-    )
-    if not user_doc:
+    user = await UserRepository(pg).get_user_by_id(session.user_id)
+    if not user:
         return None
-    if not user_doc.get("is_active", True):
+    if not user.is_active:
         return None
 
-    return user_doc
+    return user.model_dump()
 
 
 async def _find_owning_app(db, path: str) -> Optional[dict]:
     """Find the app (if any) whose route_prefixes claim this path.
+
+    ``app_registry_legacy_read`` (Mongo; Phase 8): ``app_registry`` migrates with
+    the ingestion domain — this read is a temporary legacy-read shim, deleted then.
+
 
     Longest-prefix-wins to handle nested-app cases cleanly — if app A
     declares `/api/foo` and app B declares `/api/foo/bar`, a request

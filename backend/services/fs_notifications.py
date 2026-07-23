@@ -200,11 +200,16 @@ async def run_day_before_reminders():
     for job in jobs:
         # Contractor reminder
         if job.get("assigned_tech_id"):
-            tech = await db.users.find_one({"user_id": job["assigned_tech_id"]}, {"_id": 0, "email": 1, "name": 1})
-            if tech and tech.get("email"):
+            from db.session import get_sessionmaker
+            from repositories.users import UserRepository
+
+            sm = get_sessionmaker()
+            async with sm() as pg:
+                tech = await UserRepository(pg).get_user_by_id(job["assigned_tech_id"])
+            if tech and tech.email:
                 await send_contractor_day_before_reminder(
-                    to=tech["email"],
-                    contractor_name=tech.get("name", ""),
+                    to=tech.email,
+                    contractor_name=tech.name or "",
                     job_name=job.get("name", ""),
                     account_name=job.get("account_name", ""),
                     scheduled_date=job.get("scheduled_date", ""),

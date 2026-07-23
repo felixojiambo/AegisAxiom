@@ -3,7 +3,7 @@
 Index creation runs inside ``@app.on_event("startup")`` against a live
 Mongo connection, so we don't try to execute it here. Instead we
 source-search ``backend/server.py`` for the specific named indexes the
-nova_engine performance audit (2026-05-06) added to make sure a future
+Nova index audit (2026-05-06) added to make sure a future
 edit to that file doesn't silently drop them.
 
 If a future edit refactors the index block (e.g. extracts to a helper
@@ -44,29 +44,11 @@ def index_sources() -> str:
 @pytest.mark.parametrize(
     "collection_attr, index_name, key_spec_fragments",
     [
-        # general_ledger.nova_tx_date_basis: covers tx_date+basis range
-        # scans used by every Nova GL aggregate.
-        (
-            "db.general_ledger",
-            "nova_tx_date_basis",
-            [
-                '("tx_date", 1)',
-                '("basis", 1)',
-            ],
-        ),
-        # general_ledger.nova_account_tx_basis: covers load_mrr_history
-        # account_id-prefix + tx_date range filter.
-        (
-            "db.general_ledger",
-            "nova_account_tx_basis",
-            [
-                '("account_id", 1)',
-                '("tx_date", 1)',
-                '("basis", 1)',
-            ],
-        ),
+        # general_ledger.nova_tx_date_basis / nova_account_tx_basis were removed
+        # in Phase 1 (accounting-integration removal): the general_ledger
+        # collection no longer exists, so those index declarations are gone.
+        #
         # finance_drafts.nova_kind_sync_status: covers
-        # customer_deal_finance._aggregate_revenue and
         # finance_snapshots.compute_finance_snapshot kind+sync_status filter.
         (
             "db.finance_drafts",
@@ -119,7 +101,7 @@ def test_nova_index_declared(
 
 
 def test_nova_indexes_use_background_build() -> None:
-    """All three Nova indexes should pass background=True so a fresh
+    """The surviving Nova index should pass background=True so a fresh
     deployment doesn't block startup while the index builds.
 
     Modern Mongo (4.2+) builds in background by default and the kwarg is
@@ -127,13 +109,10 @@ def test_nova_indexes_use_background_build() -> None:
     portable across server versions.
     """
     sources = _read_all_sources()
-    # Count occurrences of the three names paired with background=True
-    # in the same declaration. Cheap structural check — for each named
-    # index we want both `name="nova_*"` and `background=True` somewhere
-    # in the file.
+    # For the surviving named index we want both `name="nova_*"` and
+    # `background=True` somewhere in the file. (The general_ledger nova
+    # indexes were removed in Phase 1 along with that collection.)
     for index_name in (
-        "nova_tx_date_basis",
-        "nova_account_tx_basis",
         "nova_kind_sync_status",
     ):
         # Find the declaration substring and assert background=True
@@ -144,5 +123,5 @@ def test_nova_indexes_use_background_build() -> None:
         window = sources[max(0, idx - 200) : idx + 200]
         assert "background=True" in window, (
             f"Expected background=True near name=\"{index_name}\" "
-            "declaration; ref nova_engine performance audit 2026-05-06."
+            "declaration; ref Nova index audit 2026-05-06."
         )

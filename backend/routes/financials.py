@@ -3,7 +3,11 @@ from datetime import datetime, timezone
 from pymongo import ReturnDocument
 import uuid
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from database import get_db
+from db.session import get_session
+from repositories.users import UserRepository
 from middleware.tenant_scoping import get_current_tenant_id, require_root_tenant
 from models import (
     Invoice, InvoiceCreate, InvoiceUpdate,
@@ -251,20 +255,21 @@ async def commission_report(current_user=Depends(get_current_user),
 
 @router.post("/commissions")
 async def create_commission(data: CommissionCreate, current_user=Depends(get_current_user),
-    tenant_id: str = Depends(get_current_tenant_id)):
+    tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "commissions.create"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     db = get_db()
     # Phase 1E.3c — Finance is SimpliMeta-internal only.
     require_root_tenant(tenant_id)
     deal = await db.deals.find_one({"deal_id": data.deal_id}, {"_id": 0, "name": 1})
-    user = await db.users.find_one({"user_id": data.user_id}, {"_id": 0, "name": 1})
+    user = await UserRepository(pg).get_user_by_id(data.user_id)
     comm_id = f"comm_{uuid.uuid4().hex[:12]}"
     doc = {
         "commission_id": comm_id,
         **data.model_dump(),
         "deal_name": deal["name"] if deal else None,
-        "user_name": user["name"] if user else None,
+        "user_name": user.name if user else None,
         "amount_paid": 0.0,
         "status": "pending",
         "paid_date": None,
