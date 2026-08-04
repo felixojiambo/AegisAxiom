@@ -18,10 +18,14 @@ from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime, timezone
 
 from database import get_db
+from db.session import get_session
 from models import gen_id
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from auth_helper import get_current_user, has_perm
 from middleware.ai_authz import require_ai_permission
 from middleware.tenant_scoping import get_current_tenant_id
+from repositories.users import UserRepository
 from services.ingestion.route_helpers import crud_envelope
 from services.field_registry import register_fields, register_module_events, register_module_config
 from services.projects_template_engine import (
@@ -665,6 +669,7 @@ async def instantiate_template(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Create a project from a template, with methodology seeding +
     provenance + dependency rewiring.
@@ -697,9 +702,7 @@ async def instantiate_template(
     # FK check on pm_user_id — must be a user in the caller's tenant.
     # Users not belonging to this tenant cannot be assigned as PM, even
     # if their user_id happens to be valid in another tenant.
-    if not await db["users"].find_one(
-        {"user_id": effective_pm, "tenant_id": tenant_id}, {"_id": 1}
-    ):
+    if not await UserRepository(pg).user_exists_in_tenant(effective_pm, tenant_id):
         raise HTTPException(
             status_code=422,
             detail=f"pm_user_id {effective_pm} does not match any user in this tenant",

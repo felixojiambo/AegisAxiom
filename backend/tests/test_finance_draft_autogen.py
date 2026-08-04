@@ -33,6 +33,7 @@ from types import SimpleNamespace
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from fake_user_repo import patched_load_user_map, set_current_user_map
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -127,8 +128,17 @@ def _make_db_with_ar(time_entries, contract=None, existing_draft=None):
     return db
 
 
+@pytest.fixture(autouse=True)
+def _users_on_postgres():
+    """Phase 2a completion: the AP builder prefetches users from Postgres via
+    `_load_user_map`, not `db["users"]`. Serve the docs each test declares."""
+    with patched_load_user_map():
+        yield
+
+
 def _make_db_with_ap(time_entries, users=None, businesses=None, existing_draft=None):
     """Build a MagicMock DB for AP tests."""
+    set_current_user_map(users)
     db = MagicMock()
     db.__getitem__ = MagicMock(side_effect=_make_collection_selector({
         "time_entries": time_entries,
@@ -576,6 +586,10 @@ class TestBuildAPDraftsService:
     """Tests for build_ap_drafts service."""
 
     def _make_ap_db(self, time_entries, user=None, business=None, existing_draft=None):
+        # Phase 2a completion: the builder prefetches users from Postgres, so the
+        # single `user` doc these tests declare is published to the prefetch fake
+        # as well as to the (now unused) Mongo users collection below.
+        set_current_user_map([user] if user else [])
         db = MagicMock()
 
         te_coll = MagicMock()

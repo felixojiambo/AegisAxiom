@@ -108,17 +108,23 @@ class _FakeProjects:
         return SimpleNamespace(modified_count=1)
 
 
-class _FakeUsers:
+class _FakeUserRepo:
+    """Stands in for `repositories.users.UserRepository`.
+
+    Phase 2a completion: `users` moved to Postgres, so the route's FK checks go
+    through the repository rather than `db["users"]`. These stay pure unit tests
+    of the route's logic — the repository methods themselves are covered against
+    real Postgres in `test_platform_core_projects_users_pg.py`.
+    """
+
     def __init__(self, by_id):
         self._by_id = dict(by_id or {})
 
-    async def find_one(self, query, _projection=None):
-        uid = query.get("user_id")
-        return dict(self._by_id[uid]) if uid in self._by_id else None
+    async def user_exists_in_tenant(self, user_id, _tenant_id):
+        return user_id in self._by_id
 
-    async def count_documents(self, query):
-        ids = query.get("user_id", {}).get("$in", [])
-        return sum(1 for i in ids if i in self._by_id)
+    async def count_users_in_tenant(self, user_ids, _tenant_id):
+        return sum(1 for i in set(user_ids) if i in self._by_id)
 
 
 def _setup(monkeypatch, *, project, users):
@@ -127,10 +133,7 @@ def _setup(monkeypatch, *, project, users):
     class _DB:
         pass
     db = _DB()
-    db._collections = {
-        "projects": projects,
-        "users": _FakeUsers(users),
-    }
+    db._collections = {"projects": projects}
 
     def _get_item(name):
         return db._collections[name]
@@ -138,6 +141,8 @@ def _setup(monkeypatch, *, project, users):
 
     import routes.projects_project as routes_pp
     monkeypatch.setattr(routes_pp, "get_db", lambda: db)
+    repo = _FakeUserRepo(users)
+    monkeypatch.setattr(routes_pp, "UserRepository", lambda _pg: repo)
 
     # crud_envelope wraps the update inside an async-context — stub a
     # minimal no-op so the route runs without the audit / event
@@ -169,7 +174,7 @@ async def test_director_can_reassign_pm(monkeypatch):
     )
     body = ProjectUpdate(pm_id="u_pm_new")
     result = await update_project(
-        project_id="proj_001", payload=body,
+        project_id="proj_001", payload=body, pg=None,
         request=SimpleNamespace(), current_user=_director(),
     )
     assert result["pm_id"] == "u_pm_new"
@@ -212,7 +217,7 @@ async def test_pm_of_project_can_reassign_via_auto_grant(monkeypatch):
     )
     body = ProjectUpdate(pm_id="u_pm_new")
     result = await update_project(
-        project_id="proj_001", payload=body,
+        project_id="proj_001", payload=body, pg=None,
         request=SimpleNamespace(), current_user=_pm_of_project_user(),
     )
     assert result["pm_id"] == "u_pm_new"
@@ -255,7 +260,7 @@ async def test_pm_id_null_clears_assignment(monkeypatch):
     body_dict = body.model_dump(exclude_unset=True)
     assert "pm_id" in body_dict and body_dict["pm_id"] is None
     await update_project(
-        project_id="proj_001", payload=body,
+        project_id="proj_001", payload=body, pg=None,
         request=SimpleNamespace(), current_user=_director(),
     )
     set_doc = projects.updates[0][1]["$set"]

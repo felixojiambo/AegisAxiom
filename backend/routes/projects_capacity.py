@@ -32,10 +32,14 @@ from typing import Any, Dict, List, Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from auth_helper import get_current_user, has_perm
 from database import get_db
+from db.session import get_session
 from middleware.ai_authz import require_ai_permission
 from middleware.tenant_scoping import get_current_tenant_id
+from repositories.users import UserRepository
 from services.field_registry import register_module_events
 from services.ingestion.route_helpers import crud_envelope
 
@@ -51,18 +55,8 @@ register_module_events("projects", "capacity", ["tier_changed"])
 
 _VALID_TIERS = {"main_pm", "overflow_pm", "member_only", "none"}
 
-_PROJECTION = {
-    "_id": 0,
-    "user_id": 1,
-    "name": 1,
-    "email": 1,
-    "role": 1,
-    "pm_capacity_tier": 1,
-    "is_assignable_as_pm": 1,
-    "is_assignable_as_member": 1,
-    "is_active": 1,
-    "picture": 1,
-}
+# The capacity projection now lives in `UserRepository._capacity_card`
+# (Phase 2a completion) — same nine keys, always present, read from Postgres.
 
 
 def _flags_for_tier(tier: str, is_active: bool) -> Dict[str, bool]:
@@ -99,24 +93,16 @@ class CapacityTierUpdate(BaseModel):
 async def list_capacity(
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ) -> List[Dict[str, Any]]:
     """Return every user's current capacity tier (admin tier-control surface)."""
     if not has_perm(current_user, "projects.capacity.manage"):
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    db = get_db()
     # Phase 1E.3c — admin sees only users in their own tenant's capacity
     # matrix. Root admin operating under override sees the target tenant's
     # users, not their own.
-    cursor = db["users"].find({"tenant_id": tenant_id}, _PROJECTION).sort("name", 1)
-    users: List[Dict[str, Any]] = []
-    async for u in cursor:
-        u.setdefault("pm_capacity_tier", None)
-        u.setdefault("is_assignable_as_pm", False)
-        u.setdefault("is_assignable_as_member", True)
-        u.setdefault("is_active", True)
-        users.append(u)
-    return users
+    return await UserRepository(pg).list_capacity_matrix(tenant_id)
 
 
 @router.patch(
@@ -129,19 +115,22 @@ async def update_capacity_tier(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ) -> Dict[str, Any]:
     """Flip a user's `pm_capacity_tier`. Admin-only. Audited via crud_envelope."""
     if not has_perm(current_user, "projects.capacity.manage"):
         raise HTTPException(status_code=403, detail="Permission denied")
 
+    # `db` is still Mongo here — but only for crud_envelope's audit/event
+    # emission (`audit_logs` migrates in Phase 2b). The user row itself is
+    # Postgres.
     db = get_db()
+    users = UserRepository(pg)
 
     # Phase 1E.3c — refuse to flip the tier of a user belonging to a
     # different tenant. A tenant-admin cannot reach across tenants to
     # mutate another tenant's user.
-    before = await db["users"].find_one(
-        {"user_id": user_id, "tenant_id": tenant_id}, _PROJECTION
-    )
+    before = await users.get_capacity_row(user_id, tenant_id)
     if before is None:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -156,12 +145,6 @@ async def update_capacity_tier(
     is_active = bool(before.get("is_active", True))
     flags = _flags_for_tier(new_tier, is_active)
 
-    updates = {
-        "pm_capacity_tier": new_tier,
-        "is_assignable_as_pm": flags["is_assignable_as_pm"],
-        "is_assignable_as_member": flags["is_assignable_as_member"],
-    }
-
     async with crud_envelope(
         module="projects",
         entity="capacity",
@@ -172,13 +155,16 @@ async def update_capacity_tier(
         before=before,
         request=request,
     ) as ctx:
-        await db["users"].update_one(
-            {"user_id": user_id, "tenant_id": tenant_id},
-            {"$set": updates},
+        # Tier and its two derived flags land in one statement, so the picker
+        # can never observe a tier without its flags.
+        updated = await users.set_capacity_tier(
+            user_id,
+            tenant_id,
+            tier=new_tier,
+            is_assignable_as_pm=flags["is_assignable_as_pm"],
+            is_assignable_as_member=flags["is_assignable_as_member"],
         )
-        after = await db["users"].find_one(
-            {"user_id": user_id, "tenant_id": tenant_id}, _PROJECTION
-        )
+        after = await users.get_capacity_row(user_id, tenant_id) if updated else None
         ctx.set_after(after)
 
     if after is None:
