@@ -273,7 +273,7 @@ export default function AuthPage() {
               value={form.email}
               onChange={set}
               className={inputCls}
-              placeholder="you@simplimeta.io"
+              placeholder="you@aegis.io"
               required
               data-testid="email-input"
             />
@@ -385,9 +385,9 @@ export default function AuthPage() {
             client relationships, powered by AI.
           </p>
           {[
-            'RBAC-enforced data security',
-            'Real-time Zoho & QuickBooks sync',
-            'AI-powered commission insights with Claude',
+            'Enforced data security',
+            'Real-time finance sync',
+            'AI-powered insights',
           ].map((item) => (
             <div key={item} className="flex items-center gap-3 mb-3">
               <div className="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-400/40 flex items-center justify-center shrink-0">
