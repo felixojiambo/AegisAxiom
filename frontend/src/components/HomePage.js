@@ -208,7 +208,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-aegisaxiom-text-secondary text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-            AEGISAXIOM is SimpliMeta's AI operations platform — deploy accountable AI employees, replace
+            AEGISAXIOM is AegisAI's AI operations platform — deploy accountable AI employees, replace
             legacy SaaS with custom apps, and govern every workflow in one place.
           </p>
 
