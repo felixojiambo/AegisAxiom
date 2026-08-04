@@ -47,11 +47,15 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Upl
 from fastapi.responses import StreamingResponse
 from pymongo import ReturnDocument
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from auth_helper import get_current_user, has_perm
 from database import get_db
+from db.session import get_session
 from middleware.ai_authz import require_ai_permission
 from middleware.tenant_scoping import get_current_tenant_id
 from models import gen_id
+from repositories.users import UserRepository
 from services.field_registry import register_module_events
 from services.ingestion.route_helpers import crud_envelope
 from services.projects_methodology import validate_task_methodology_fields
@@ -141,6 +145,7 @@ async def export_project_tasks(
     format: str = Query("csv", regex="^(csv)$"),
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     if not has_perm(current_user, "projects.task.view"):
         raise HTTPException(status_code=403, detail="Permission denied")
@@ -168,14 +173,9 @@ async def export_project_tasks(
     # cross-tenant assignee shouldn't surface anyway, but the filter is
     # defensive.
     assignee_ids = sorted({t.get("assignee_id") for t in tasks if t.get("assignee_id")})
-    email_by_user: Dict[str, str] = {}
-    if assignee_ids:
-        async for u in db["users"].find(
-            {"user_id": {"$in": assignee_ids}, "tenant_id": tenant_id},
-            {"_id": 0, "user_id": 1, "email": 1},
-        ):
-            if u.get("user_id"):
-                email_by_user[u["user_id"]] = u.get("email") or ""
+    email_by_user: Dict[str, str] = await UserRepository(pg).get_emails_by_ids(
+        assignee_ids, tenant_id=tenant_id
+    )
 
     buf = io.StringIO()
     writer = csv.writer(buf, lineterminator="\n")
@@ -276,7 +276,10 @@ def _parse_labels(raw: Optional[str]) -> List[str]:
 
 
 async def _resolve_assignee(
-    db: Any, email: Optional[str], cache: Dict[str, Optional[str]], tenant_id: str
+    users: UserRepository,
+    email: Optional[str],
+    cache: Dict[str, Optional[str]],
+    tenant_id: str,
 ) -> Optional[str]:
     if not email:
         return None
@@ -286,10 +289,7 @@ async def _resolve_assignee(
     if e in cache:
         return cache[e]
     # Phase 1E.3c — tenant-scoped lookup. Cross-tenant emails won't resolve.
-    user = await db["users"].find_one(
-        {"email": e, "tenant_id": tenant_id}, {"_id": 0, "user_id": 1}
-    )
-    user_id = user.get("user_id") if user else None
+    user_id = await users.get_user_id_by_email_in_tenant(e, tenant_id)
     cache[e] = user_id
     return user_id
 
@@ -307,10 +307,12 @@ async def import_project_tasks(
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     if not has_perm(current_user, "projects.task.create"):
         raise HTTPException(status_code=403, detail="Permission denied")
     db = get_db()
+    users = UserRepository(pg)
 
     # Phase 1E.3c — block cross-tenant import. A user impersonating another
     # tenant can't dump a CSV into the wrong tenant's project.
@@ -378,6 +380,7 @@ async def import_project_tasks(
         try:
             doc = await _build_task_doc_from_row(
                 db=db,
+                users=users,
                 project=project,
                 project_type=project_type,
                 raw=raw,
@@ -442,6 +445,7 @@ async def import_project_tasks(
 async def _build_task_doc_from_row(
     *,
     db: Any,
+    users: UserRepository,
     project: Dict[str, Any],
     project_type: str,
     raw: Dict[str, str],
@@ -475,7 +479,7 @@ async def _build_task_doc_from_row(
     labels = _parse_labels(raw.get("labels"))
     assignee_email = (raw.get("assignee_email") or "").strip()
     assignee_id = (
-        await _resolve_assignee(db, assignee_email, email_cache, tenant_id)
+        await _resolve_assignee(users, assignee_email, email_cache, tenant_id)
         if assignee_email
         else None
     )

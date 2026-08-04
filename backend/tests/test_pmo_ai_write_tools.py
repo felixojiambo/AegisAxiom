@@ -17,6 +17,7 @@ import pytest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
+from fake_user_repo import patched_pg_users
 from services.ai.agents.tools.conversational_tools import (
     OPEN,
     TOOL_REGISTRY,
@@ -251,21 +252,23 @@ class TestNameResolution:
 
     @pytest.mark.asyncio
     async def test_resolve_unique_match(self):
-        users_coll = _CollectionStub(find_results=[
-            {"user_id": "u_grace", "name": "Grace Holloway", "email": "grace@x.io"},
-        ])
-        db = _DbStub({"users": users_coll})
-        result = await _resolve_user_by_name(db, "Grace")
+        # Phase 2a completion: `users` is Postgres; the resolver goes through
+        # `_pg_users()`, so the doc set is supplied there instead of on the db stub.
+        docs = [{"user_id": "u_grace", "name": "Grace Holloway", "email": "grace@x.io"}]
+        db = _DbStub({})
+        with patched_pg_users(docs):
+            result = await _resolve_user_by_name(db, "Grace")
         assert result == {"user_id": "u_grace"}
 
     @pytest.mark.asyncio
     async def test_resolve_ambiguous_returns_candidates(self):
-        users_coll = _CollectionStub(find_results=[
+        docs = [
             {"user_id": "u_g1", "name": "Grace Holloway", "email": "grace.h@x.io"},
             {"user_id": "u_g2", "name": "Grace Linden", "email": "grace.l@x.io"},
-        ])
-        db = _DbStub({"users": users_coll})
-        result = await _resolve_user_by_name(db, "Grace")
+        ]
+        db = _DbStub({})
+        with patched_pg_users(docs):
+            result = await _resolve_user_by_name(db, "Grace")
         assert result["error"] == "ambiguous"
         assert len(result["candidates"]) == 2
         # Detail must hint at how many matched so the LLM can phrase the ask.
@@ -273,9 +276,9 @@ class TestNameResolution:
 
     @pytest.mark.asyncio
     async def test_resolve_not_found(self):
-        users_coll = _CollectionStub(find_results=[])
-        db = _DbStub({"users": users_coll})
-        result = await _resolve_user_by_name(db, "Nobody")
+        db = _DbStub({})
+        with patched_pg_users([]):
+            result = await _resolve_user_by_name(db, "Nobody")
         assert result["error"] == "not_found"
 
     @pytest.mark.asyncio
@@ -283,10 +286,10 @@ class TestNameResolution:
         """v1.3 Theme B: name resolution is now scoped to project members.
         The two ambiguous Graces must both be on the project for the
         ambiguous result to fire; otherwise scoping would narrow to one."""
-        users_coll = _CollectionStub(find_results=[
+        user_docs = [
             {"user_id": "u_g1", "name": "Grace H", "email": "g1@x.io"},
             {"user_id": "u_g2", "name": "Grace L", "email": "g2@x.io"},
-        ])
+        ]
         pm_tasks_coll = _CollectionStub(
             find_one_result={"task_id": "task_1", "project_id": "proj_1"},
         )
@@ -298,14 +301,13 @@ class TestNameResolution:
             },
         )
         db = _DbStub({
-            "users": users_coll,
             "pm_tasks": pm_tasks_coll,
             "projects": projects_coll,
         })
         user = _make_user()
         # Patch the route to detect it was NOT called — name resolution
         # must short-circuit on ambiguity.
-        with patch("routes.projects_task.update_task", new=AsyncMock()) as mock_update:
+        with patched_pg_users(user_docs),                 patch("routes.projects_task.update_task", new=AsyncMock()) as mock_update:
             result = await _handle_assign_task(
                 {"task_id": "task_1", "user_id_or_name": "Grace"},
                 db, user,

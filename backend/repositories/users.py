@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import func, select
+from sqlalchemy import update as sa_update
 
 from db.models.users import UserRow, UserResourceTypeAssignmentRow
 from models import User
@@ -251,6 +252,262 @@ class UserRepository(BaseRepository):
             )
         ).all()
         return {cbid: count for cbid, count in rows}
+
+    # ── projects/AI/finance cross-domain callers (2a completion) ────────────
+    #
+    # Phase 2a's census inventoried only the ATTRIBUTE form ``db.users`` and so
+    # missed nine files that reach the collection through the SUBSCRIPT form
+    # ``db["users"]`` — 28 live sites, including a write to ``pm_capacity_tier``.
+    # The methods below are those callers' intents; the seam is closed by
+    # ``scripts/greps/phase2a.txt``, which now covers both forms.
+
+    @staticmethod
+    def _user_card(row: UserRow) -> dict:
+        """``{user_id, name, email}`` — the AI mention-resolver projection."""
+        return {"user_id": row.user_id, "name": row.name, "email": row.email}
+
+    @staticmethod
+    def _capacity_card(row: UserRow) -> dict:
+        """Capacity-admin projection (projects_capacity ``_PROJECTION``).
+
+        Every key is always present. The Mongo projection omitted keys the
+        document lacked and the route patched four of them back with
+        ``setdefault``; columns cannot be absent, so the shape is now
+        deterministic (``picture`` is explicitly ``None`` rather than missing).
+        """
+        return {
+            "user_id": row.user_id,
+            "name": row.name,
+            "email": row.email,
+            "role": row.role,
+            "pm_capacity_tier": row.pm_capacity_tier,
+            "is_assignable_as_pm": row.is_assignable_as_pm,
+            "is_assignable_as_member": row.is_assignable_as_member,
+            "is_active": row.is_active,
+            "picture": row.picture,
+        }
+
+    @staticmethod
+    def _assignable_card(row: UserRow) -> dict:
+        """Assignable-users picker projection — as ``_capacity_card`` less email."""
+        card = UserRepository._capacity_card(row)
+        card.pop("email")
+        return card
+
+    @staticmethod
+    def _ilike_pattern(term: str, *, prefix_only: bool) -> str:
+        """Escape LIKE wildcards, then wrap.
+
+        The term arrives from an LLM and can be prompt-injected, so ``%``/``_``/
+        ``\\`` are escaped rather than interpreted — the ILIKE equivalent of the
+        ``re.escape`` the Mongo ``$regex`` path used to defuse ReDoS.
+        """
+        safe = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        return f"{safe}%" if prefix_only else f"%{safe}%"
+
+    async def user_exists_in_tenant(self, user_id: str, tenant_id: str) -> bool:
+        """Tenant-scoped FK check for pm_id / assignee_id / pm_user_id.
+
+        Cross-tenant users must read as "does not match any user" so a caller
+        cannot probe for the existence of another tenant's user_ids.
+        """
+        return (
+            await self.session.execute(
+                select(UserRow.user_id).where(
+                    UserRow.user_id == user_id, UserRow.tenant_id == tenant_id
+                )
+            )
+        ).first() is not None
+
+    async def count_users_in_tenant(self, user_ids: list[str], tenant_id: str) -> int:
+        """Count how many of ``user_ids`` exist in ``tenant_id`` (bulk FK check)."""
+        ids = list(set(user_ids))
+        if not ids:
+            return 0
+        return (
+            await self.session.execute(
+                select(func.count()).select_from(UserRow).where(
+                    UserRow.user_id.in_(ids), UserRow.tenant_id == tenant_id
+                )
+            )
+        ).scalar_one()
+
+    async def get_user_id_by_email_in_tenant(
+        self, email: str, tenant_id: str
+    ) -> Optional[str]:
+        """Resolve an email to a user_id within one tenant (CSV import)."""
+        return (
+            await self.session.execute(
+                select(UserRow.user_id).where(
+                    UserRow.email == email.strip().lower(),
+                    UserRow.tenant_id == tenant_id,
+                )
+            )
+        ).scalar_one_or_none()
+
+    async def get_emails_by_ids(
+        self, user_ids: list[str], *, tenant_id: Optional[str] = None
+    ) -> dict[str, str]:
+        """``{user_id: email}`` for the given ids (CSV export lookup).
+
+        Users with no row are simply absent from the mapping, matching the old
+        cursor behaviour. Missing emails collapse to ``""``, as before.
+        """
+        ids = list(set(user_ids))
+        if not ids:
+            return {}
+        stmt = select(UserRow.user_id, UserRow.email).where(UserRow.user_id.in_(ids))
+        if tenant_id is not None:
+            stmt = stmt.where(UserRow.tenant_id == tenant_id)
+        rows = (await self.session.execute(stmt)).all()
+        return {uid: (email or "") for uid, email in rows}
+
+    async def list_assignable_users(self, *, tenant_id: str, tier: str) -> list[dict]:
+        """PM/member picker, filtered by capacity tier and scoped to a tenant.
+
+        Tier semantics are carried over verbatim from the Mongo filter:
+        ``main`` → main_pm; ``overflow``/``all_pms`` → main_pm or overflow_pm;
+        ``members`` → tier is not "none"; ``all`` → no tier filter. ``is_active``
+        is enforced for every tier.
+
+        Note ``members``: Mongo's ``{"$ne": "none"}`` also matched documents
+        where the field was absent, so the faithful SQL is ``IS DISTINCT FROM``
+        (which keeps NULL rows) — not ``!=`` (which would silently drop them).
+        """
+        stmt = select(UserRow).where(
+            UserRow.tenant_id == tenant_id, UserRow.is_active.is_(True)
+        )
+        if tier == "main":
+            stmt = stmt.where(UserRow.pm_capacity_tier == "main_pm")
+        elif tier in {"overflow", "all_pms"}:
+            stmt = stmt.where(UserRow.pm_capacity_tier.in_(["main_pm", "overflow_pm"]))
+        elif tier == "members":
+            stmt = stmt.where(UserRow.pm_capacity_tier.is_distinct_from("none"))
+        rows = (
+            await self.session.execute(stmt.order_by(UserRow.name.asc()))
+        ).scalars().all()
+        return [self._assignable_card(r) for r in rows]
+
+    async def list_capacity_matrix(self, tenant_id: str) -> list[dict]:
+        """Every user's capacity tier for one tenant, name-ascending."""
+        rows = (
+            await self.session.execute(
+                select(UserRow)
+                .where(UserRow.tenant_id == tenant_id)
+                .order_by(UserRow.name.asc())
+            )
+        ).scalars().all()
+        return [self._capacity_card(r) for r in rows]
+
+    async def get_capacity_row(self, user_id: str, tenant_id: str) -> Optional[dict]:
+        """One user's capacity card, tenant-scoped (the before/after snapshots)."""
+        row = (
+            await self.session.execute(
+                select(UserRow).where(
+                    UserRow.user_id == user_id, UserRow.tenant_id == tenant_id
+                )
+            )
+        ).scalar_one_or_none()
+        return self._capacity_card(row) if row is not None else None
+
+    async def set_capacity_tier(
+        self,
+        user_id: str,
+        tenant_id: str,
+        *,
+        tier: str,
+        is_assignable_as_pm: bool,
+        is_assignable_as_member: bool,
+    ) -> bool:
+        """Flip a user's capacity tier and its two derived flags together.
+
+        One tenant-scoped statement (§A6): a tenant-admin cannot reach across
+        tenants, and the tier never lands without its derived flags. Returns
+        whether a row was actually updated.
+        """
+        result = await self.session.execute(
+            sa_update(UserRow)
+            .where(UserRow.user_id == user_id, UserRow.tenant_id == tenant_id)
+            .values(
+                pm_capacity_tier=tier,
+                is_assignable_as_pm=is_assignable_as_pm,
+                is_assignable_as_member=is_assignable_as_member,
+            )
+            .returning(UserRow.user_id)
+        )
+        return result.first() is not None
+
+    async def search_user_cards(
+        self,
+        term: str,
+        *,
+        prefix_only: bool = True,
+        user_ids: Optional[list[str]] = None,
+        limit: int = 10,
+    ) -> list[dict]:
+        """Name-or-email search returning ``{user_id, name, email}`` cards.
+
+        ``$regex`` → ILIKE per §A4. The caller keeps the two-step
+        prefix-then-contains behaviour (a prefix hit is a better answer than a
+        substring hit), so this takes ``prefix_only`` rather than deciding for
+        it. ``user_ids`` narrows the search to a project's membership.
+        """
+        pattern = self._ilike_pattern(term, prefix_only=prefix_only)
+        stmt = select(UserRow).where(
+            UserRow.name.ilike(pattern, escape="\\")
+            | UserRow.email.ilike(pattern, escape="\\")
+        )
+        if user_ids is not None:
+            if not user_ids:
+                return []
+            stmt = stmt.where(UserRow.user_id.in_(list(user_ids)))
+        rows = (
+            await self.session.execute(stmt.order_by(UserRow.name.asc()).limit(limit))
+        ).scalars().all()
+        return [self._user_card(r) for r in rows]
+
+    async def list_user_cards_by_ids(
+        self, user_ids: list[str], *, limit: int = 20
+    ) -> list[dict]:
+        """``{user_id, name, email}`` cards for a fixed id set (member lists)."""
+        ids = list(user_ids)
+        if not ids:
+            return []
+        rows = (
+            await self.session.execute(
+                select(UserRow)
+                .where(UserRow.user_id.in_(ids))
+                .order_by(UserRow.name.asc())
+                .limit(limit)
+            )
+        ).scalars().all()
+        return [self._user_card(r) for r in rows]
+
+    async def list_capacity_backfill_rows(self, *, limit: int = 100_000) -> list[dict]:
+        """``{user_id, role, is_active, pm_capacity_tier}`` for every user.
+
+        Feeds the one-shot ``seeds/seed_assignable_flags`` backfill, which needs
+        the tier-deriving inputs and nothing else.
+        """
+        rows = (
+            await self.session.execute(
+                select(
+                    UserRow.user_id,
+                    UserRow.role,
+                    UserRow.is_active,
+                    UserRow.pm_capacity_tier,
+                ).order_by(UserRow.user_id.asc()).limit(limit)
+            )
+        ).all()
+        return [
+            {
+                "user_id": r.user_id,
+                "role": r.role,
+                "is_active": r.is_active,
+                "pm_capacity_tier": r.pm_capacity_tier,
+            }
+            for r in rows
+        ]
 
     # ── writes ──────────────────────────────────────────────────────────────
     async def create_user(

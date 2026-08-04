@@ -25,10 +25,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 from pymongo import ReturnDocument
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from auth_helper import get_current_user, has_perm
 from database import get_db
+from db.session import get_session
 from middleware.ai_authz import require_ai_permission
 from middleware.tenant_scoping import get_current_tenant_id
+from repositories.users import UserRepository
 from models import gen_id
 from services.field_registry import (
     register_fields,
@@ -624,6 +628,7 @@ async def bulk_create_tasks(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Create up to 200 tasks in one project. Each row is validated through
     the canonical methodology validator (`validate_task_methodology_fields`
@@ -671,12 +676,9 @@ async def bulk_create_tasks(
             # assignee must belong to the calling tenant.
             if row.assignee_id is not None:
                 if row.assignee_id not in seen_users:
-                    seen_users[row.assignee_id] = bool(
-                        await db["users"].find_one(
-                            {"user_id": row.assignee_id, "tenant_id": tenant_id},
-                            {"_id": 1},
-                        )
-                    )
+                    seen_users[row.assignee_id] = await UserRepository(
+                        pg
+                    ).user_exists_in_tenant(row.assignee_id, tenant_id)
                 if not seen_users[row.assignee_id]:
                     raise HTTPException(
                         status_code=422,
@@ -821,6 +823,7 @@ async def bulk_assign_tasks(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Reassign N tasks to a single user (or unassign with assignee_id=null).
 
@@ -840,8 +843,8 @@ async def bulk_assign_tasks(
 
     if body.assignee_id is not None:
         # Phase 1E.3c — assignee must belong to the calling tenant.
-        if not await db["users"].find_one(
-            {"user_id": body.assignee_id, "tenant_id": tenant_id}, {"_id": 1}
+        if not await UserRepository(pg).user_exists_in_tenant(
+            body.assignee_id, tenant_id
         ):
             raise HTTPException(
                 status_code=422,
@@ -1449,6 +1452,7 @@ async def create_task(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     if not has_perm(current_user, "projects.task.create"):
         raise HTTPException(status_code=403, detail="Permission denied")
@@ -1464,8 +1468,8 @@ async def create_task(
 
     if payload.assignee_id is not None:
         # Phase 1E.3c — assignee must belong to the calling tenant.
-        if not await db["users"].find_one(
-            {"user_id": payload.assignee_id, "tenant_id": tenant_id}, {"_id": 1}
+        if not await UserRepository(pg).user_exists_in_tenant(
+            payload.assignee_id, tenant_id
         ):
             raise HTTPException(
                 status_code=422,
@@ -1598,6 +1602,7 @@ async def update_task(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     db = get_db()
 
@@ -1688,9 +1693,8 @@ async def update_task(
     if "assignee_id" in dumped:
         if dumped["assignee_id"] is not None:
             # Phase 1E.3c — assignee must belong to the calling tenant.
-            if not await db["users"].find_one(
-                {"user_id": dumped["assignee_id"], "tenant_id": tenant_id},
-                {"_id": 1},
+            if not await UserRepository(pg).user_exists_in_tenant(
+                dumped["assignee_id"], tenant_id
             ):
                 raise HTTPException(
                     status_code=422,

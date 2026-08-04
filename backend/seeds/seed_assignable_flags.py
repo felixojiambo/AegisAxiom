@@ -43,7 +43,8 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-from database import get_db, init as db_init
+from db.session import get_sessionmaker
+from repositories.users import UserRepository
 
 logger = logging.getLogger(__name__)
 
@@ -89,10 +90,16 @@ def _resolve_tier(user: Dict[str, Any], *, force: bool) -> str:
     return _derive_tier_from_role(user)
 
 
-async def backfill_users(db: Any, *, force: bool = False) -> Dict[str, int]:
+async def backfill_users(users: UserRepository, *, force: bool = False) -> Dict[str, int]:
+    """Re-derive tier + flags for every user. Idempotent; see module docstring.
+
+    Phase 2a completion: `users` lives in Postgres, so this takes a
+    `UserRepository` rather than the Mongo handle. The caller owns the
+    transaction — `_main` commits once at the end, so a failed run leaves no
+    half-stamped user set (the Mongo version had no such guarantee).
+    """
     summary = {"tier_set": 0, "pm_set": 0, "member_set": 0, "scanned": 0}
-    cursor = db["users"].find({}, {"_id": 0})
-    async for user in cursor:
+    for user in await users.list_capacity_backfill_rows():
         summary["scanned"] += 1
         tier = _resolve_tier(user, force=force)
         flags = _flags_for_tier(tier, user.get("is_active", True))
@@ -101,15 +108,11 @@ async def backfill_users(db: Any, *, force: bool = False) -> Dict[str, int]:
         if force or user.get("pm_capacity_tier") not in _PM_CAPACITY_TIERS:
             updates["pm_capacity_tier"] = tier
         # Derived flags ALWAYS follow tier — re-stamp on every run so
-        # the two stay consistent. Cheap update; idempotent in practice
-        # since update_one with identical $set is a no-op write.
+        # the two stay consistent.
         updates["is_assignable_as_pm"] = flags["is_assignable_as_pm"]
         updates["is_assignable_as_member"] = flags["is_assignable_as_member"]
 
-        await db["users"].update_one(
-            {"user_id": user["user_id"]},
-            {"$set": updates},
-        )
+        await users.update_user(user["user_id"], updates)
         if "pm_capacity_tier" in updates:
             summary["tier_set"] += 1
         summary["pm_set"] += 1
@@ -126,19 +129,20 @@ async def _main() -> None:
     )
     args = parser.parse_args()
 
-    # Stand-alone init when run as a CLI (server normally calls init() at startup).
-    db = get_db()
-    if db is None:
-        mongo_url = os.environ.get("MONGO_URL")
-        db_name = os.environ.get("DB_NAME", "test_database")
-        if not mongo_url:
-            raise SystemExit(
-                "MONGO_URL not set; run from inside the backend container or "
-                "export MONGO_URL/DB_NAME before invoking the script."
-            )
-        db_init(mongo_url, db_name)
-        db = get_db()
-    summary = await backfill_users(db, force=args.force)
+    # Stand-alone Postgres session. `get_sessionmaker()` builds the engine
+    # lazily from DATABASE_URL and raises a clear error if it is unset, so
+    # there is no init/bootstrap dance to do here.
+    if not os.environ.get("DATABASE_URL"):
+        raise SystemExit(
+            "DATABASE_URL not set; run from inside the backend container or "
+            "export DATABASE_URL before invoking the script."
+        )
+    sm = get_sessionmaker()
+    async with sm() as pg:
+        summary = await backfill_users(UserRepository(pg), force=args.force)
+        # One commit for the whole backfill — all users get the new tier/flags,
+        # or none do.
+        await pg.commit()
     print(
         f"Scanned {summary['scanned']} users; "
         f"set pm_capacity_tier on {summary['tier_set']}, "

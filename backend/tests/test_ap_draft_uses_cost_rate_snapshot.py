@@ -34,6 +34,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
+from fake_user_repo import patched_load_user_map, set_current_user_map
+
 
 os.environ.setdefault(
     "JWT_SECRET", "test-secret-for-unit-tests-only-not-for-production"
@@ -92,10 +94,20 @@ class _FinanceDrafts:
         return SimpleNamespace(inserted_id="x")
 
 
+@pytest.fixture(autouse=True)
+def _users_on_postgres():
+    """Phase 2a completion: `users` is Postgres, so the AP builder prefetches
+    them through `_load_user_map` instead of `db["users"]`. Serve the same doc
+    set each test already declares through `_Db(users=...)`."""
+    with patched_load_user_map():
+        yield
+
+
 class _Db:
     """Map-style accessor so ``db["users"]`` etc. work like Motor."""
 
     def __init__(self, *, entries, users, projects=None):
+        set_current_user_map(users)
         self._collections = {
             "time_entries": _TimeEntries(entries),
             "users": _Users(users),

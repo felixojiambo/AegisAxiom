@@ -24,6 +24,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from fake_user_repo import patched_pg_users_live, set_current_user_docs
 from services.ai.agents.tools.conversational_tools import (
     _handle_assign_task,
     _project_member_ids,
@@ -112,8 +113,18 @@ class _Coll:
         return True
 
 
+@pytest.fixture(autouse=True)
+def _users_on_postgres():
+    """Phase 2a completion: the resolver reads `users` from Postgres via
+    `conversational_tools._pg_users()`, not `db["users"]`. Serve the same doc
+    set each test already declares through `_Db(users=[...])`."""
+    with patched_pg_users_live():
+        yield
+
+
 class _Db:
     def __init__(self, users=None, projects=None, pm_tasks=None):
+        set_current_user_docs(users)
         self._collections = {
             "users": _Coll(users or []),
             "projects": _Coll(projects or []),

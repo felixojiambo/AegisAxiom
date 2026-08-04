@@ -40,6 +40,27 @@ def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+async def _load_user_map(user_ids: List[str]) -> Dict[str, Any]:
+    """``{user_id: User}`` for every id referenced by a time-entry batch.
+
+    Phase 2a completion: `users` is Postgres. These lookups used to sit inside
+    the per-entry loops as `db["users"].find_one(...)`, so a batch of N entries
+    issued N queries; one prefetch keeps a single session for the whole build
+    and drops the N+1. Callers read only `contractor_business_id` and `name`,
+    both of which ride on the `User` DTO.
+    """
+    from db.session import get_sessionmaker
+    from repositories.users import UserRepository
+
+    ids = sorted({uid for uid in user_ids if uid})
+    if not ids:
+        return {}
+    sm = get_sessionmaker()
+    async with sm() as pg:
+        found = await UserRepository(pg).get_users_by_ids(ids)
+    return {u.user_id: u for u in found}
+
+
 def _get_hours(entry: dict) -> float:
     """Normalise the two hour-field names used across legacy time entries."""
     return float(entry.get("duration_hours") or entry.get("hours") or 0.0)
@@ -222,6 +243,10 @@ async def build_ap_drafts(
     if not time_entries:
         return [], [{"reason": "no_approved_entries", "period": f"{period_start}/{period_end}"}], []
 
+    # One Postgres round-trip for every user this batch touches (see
+    # _load_user_map), instead of one per entry inside the loops below.
+    user_map = await _load_user_map([e.get("user_id") for e in time_entries])
+
     # Group by contractor_business_id (preferred) or user_id
     # Each group key maps to metadata + entries
     grouped: Dict[str, Dict[str, Any]] = {}
@@ -231,11 +256,11 @@ async def build_ap_drafts(
         if not uid:
             continue
 
-        user = await db["users"].find_one({"user_id": uid}, {"_id": 0})
+        user = user_map.get(uid)
         if not user:
             continue
 
-        business_id = user.get("contractor_business_id")
+        business_id = user.contractor_business_id
         group_key = business_id if business_id else uid
 
         if group_key not in grouped:
@@ -290,9 +315,9 @@ async def build_ap_drafts(
                 counterparty = business_id
                 warnings.append(f"contractor_business {business_id} not found; using id as name")
         else:
-            user = await db["users"].find_one({"user_id": contractor_uid}, {"_id": 0})
+            user = user_map.get(contractor_uid)
             if user:
-                counterparty = user.get("name", contractor_uid)
+                counterparty = user.name or contractor_uid
             else:
                 counterparty = contractor_uid
                 warnings.append(f"user {contractor_uid} not found; using id as name")
@@ -306,14 +331,14 @@ async def build_ap_drafts(
             line_key = f"{uid}_{project_id}"
 
             if line_key not in line_items_dict:
-                entry_user = await db["users"].find_one({"user_id": uid}, {"_id": 0})
+                entry_user = user_map.get(uid)
                 project = None
                 if entry.get("project_id"):
                     project = await db["projects"].find_one(
                         {"project_id": entry["project_id"]}, {"_id": 0}
                     )
 
-                user_name = entry_user.get("name", uid) if entry_user else uid
+                user_name = (entry_user.name or uid) if entry_user else uid
                 project_name = project.get("name", "") if project else ""
                 description = f"{user_name}"
                 if project_name:
