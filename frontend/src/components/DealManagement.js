@@ -874,7 +874,7 @@ export default function DealManagement() {
             <Target size={48} className="mx-auto text-aegisaxiom-text-muted/60 mb-3" />
             <p className="text-aegisaxiom-text font-medium mb-2">No Closed Won Deals Found</p>
             <p className="text-aegisaxiom-text-secondary text-sm mb-4">
-              Get started by syncing deals from Zoho CRM or checking your deal stage filters.
+              Get started by syncing deals/migrate CRM or checking your deal stage filters.
             </p>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-center gap-2 sm:gap-3">
               <button
