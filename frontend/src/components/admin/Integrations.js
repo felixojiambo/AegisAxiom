@@ -78,24 +78,24 @@ function IntegrationCard({ name, icon, status, onConnect, onDisconnect, onSync, 
 }
 
 export default function Integrations() {
-  const [status, setStatus] = useState({ zoho: {} });
+  const [status, setStatus] = useState({ crm: {} });
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     loadStatus();
     // Handle OAuth callback redirects
-    const zohoParam = searchParams.get('zoho');
-    if (zohoParam === 'connected') {
-      toast.success('Zoho connected successfully! Starting initial sync...');
+    const crmParam = searchParams.get('crm');
+    if (crmParam === 'connected') {
+      toast.success('crm connected successfully! Starting initial sync...');
       setSearchParams({});
       // Auto-trigger sync after connection
       setTimeout(async () => {
-        await syncZoho();
+        await synccrm();
         await loadStatus();
       }, 500);
-    } else if (zohoParam === 'error') {
+    } else if (crmParam === 'error') {
       toast.error(
-        `Zoho connection failed: ${decodeURIComponent(searchParams.get('msg') || 'Unknown error')}`,
+        `crm connection failed: ${decodeURIComponent(searchParams.get('msg') || 'Unknown error')}`,
       );
       setSearchParams({});
     }
@@ -104,34 +104,34 @@ export default function Integrations() {
     const res = await api.get(`${API}/api/integrations/status`);
     if (res.ok) setStatus(await res.json());
   };
-  const connectZoho = async () => {
-    const res = await api.get(`${API}/api/integrations/zoho/auth-url`);
+  const connectcrm = async () => {
+    const res = await api.get(`${API}/api/integrations/auth-url`);
     if (res.ok) {
       const { url } = await res.json();
       if (url.startsWith('#')) {
         toast.error(
-          'Zoho credentials not configured. Please add ZOHO_CLIENT_ID and ZOHO_CLIENT_SECRET to your backend .env file.',
+          'crm credentials not configured. Please add crm_CLIENT_ID and crm_CLIENT_SECRET to your backend .env file.',
         );
         return;
       }
       window.location.href = url;
     }
   };
-  const disconnectZoho = async () => {
-    const res = await api.delete(`${API}/api/integrations/zoho/disconnect`);
+  const disconnectcrm = async () => {
+    const res = await api.delete(`${API}/api/integrations/disconnect`);
     if (res.ok) {
-      toast.success('Zoho disconnected');
+      toast.success('crm disconnected');
       loadStatus();
     }
   };
-  const syncZoho = async () => {
+  const synccrm = async () => {
     setLoading(true);
     try {
       const results = await Promise.all([
-        api.post(`${API}/api/integrations/sync/zoho`, {}),
-        api.post(`${API}/api/integrations/sync/zoho/deals`, {}),
-        api.post(`${API}/api/integrations/sync/zoho/commissions`, {}),
-        api.post(`${API}/api/integrations/sync/zoho/deals-enriched`, {}),
+        api.post(`${API}/api/integrations/sync`, {}),
+        api.post(`${API}/api/integrations/sync/deals`, {}),
+        api.post(`${API}/api/integrations/sync/commissions`, {}),
+        api.post(`${API}/api/integrations/sync/deals-enriched`, {}),
       ]);
       const messages = await Promise.all(results.filter((r) => r.ok).map((r) => r.json()));
       messages.forEach((d) => toast.success(d.message));
@@ -149,7 +149,7 @@ export default function Integrations() {
           Integrations
         </h1>
         <p className="text-aegisaxiom-text-muted text-sm mt-1">
-          Connect AEGISAXIOM to your Zoho environment.
+          Connect AEGISAXIOM to your CRM environment.
         </p>
       </div>
 
@@ -163,9 +163,9 @@ export default function Integrations() {
           <p className="text-aegisaxiom-text-secondary text-xs mt-1 leading-relaxed">
             To activate these integrations, add your API credentials to{' '}
             <code className="text-violet-700 dark:text-violet-300 font-mono break-all">
-              /app/backend/.env
+              env
             </code>
-            . Contact your SimpliMeta technical team for OAuth app setup.
+            . Contact your Aegis technical team for OAuth app setup.
           </p>
         </div>
       </div>
@@ -173,13 +173,13 @@ export default function Integrations() {
       {/* Integration cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <IntegrationCard
-          name="Zoho"
+          name="crm"
           icon="🟦"
           description="Sync Accounts, Deals, Commission Data & Support Tickets"
-          status={status.zoho}
-          onConnect={connectZoho}
-          onDisconnect={disconnectZoho}
-          onSync={syncZoho}
+          status={status.crm}
+          onConnect={connectcrm}
+          onDisconnect={disconnectcrm}
+          onSync={synccrm}
         />
         <div className="glass-card p-5 sm:p-6 opacity-60">
           <div className="flex items-start gap-3 mb-3">
@@ -187,14 +187,14 @@ export default function Integrations() {
               🟦
             </div>
             <div className="min-w-0">
-              <p className="text-aegisaxiom-text-secondary text-sm font-semibold">Zoho Desk</p>
+              <p className="text-aegisaxiom-text-secondary text-sm font-semibold">crm Desk</p>
               <p className="text-aegisaxiom-text-muted text-xs leading-snug mt-0.5">
                 Support ticket management
               </p>
             </div>
           </div>
           <span className="inline-block text-xs px-2 py-1 bg-aegisaxiom-surface text-aegisaxiom-text-secondary border border-aegisaxiom-border rounded-lg">
-            Configured via Zoho token
+            Configured via crm token
           </span>
         </div>
         <div className="glass-card p-5 sm:p-6 opacity-60">
@@ -203,14 +203,14 @@ export default function Integrations() {
               🟦
             </div>
             <div className="min-w-0">
-              <p className="text-aegisaxiom-text-secondary text-sm font-semibold">Zoho Projects</p>
+              <p className="text-aegisaxiom-text-secondary text-sm font-semibold">crm Projects</p>
               <p className="text-aegisaxiom-text-muted text-xs leading-snug mt-0.5">
                 Time logs, billable hours sync
               </p>
             </div>
           </div>
           <span className="inline-block text-xs px-2 py-1 bg-aegisaxiom-surface text-aegisaxiom-text-secondary border border-aegisaxiom-border rounded-lg">
-            Configured via Zoho token
+            Configured via crm token
           </span>
         </div>
       </div>
@@ -224,14 +224,14 @@ export default function Integrations() {
           OAuth Redirect URIs
         </h3>
         <p className="text-aegisaxiom-text-muted text-xs mb-4 leading-relaxed">
-          Register these callback URLs in your Zoho API console under{' '}
+          Register these callback URLs in your crm API console under{' '}
           <strong className="text-aegisaxiom-text-secondary">Authorized Redirect URIs</strong>:
         </p>
         <div className="mb-6">
           {[
             {
-              label: 'Zoho CRM — Redirect URI',
-              url: `${window.location.origin}/api/integrations/zoho/callback`,
+              label: 'crm CRM — Redirect URI',
+              url: `${window.location.origin}/api/integrations/callback`,
             },
           ].map((w) => (
             <UrlRow key={w.label} label={w.label} url={w.url} />
@@ -245,11 +245,11 @@ export default function Integrations() {
           Webhook Endpoints
         </h3>
         <p className="text-aegisaxiom-text-muted text-xs mb-4 leading-relaxed">
-          Configure these URLs in your Zoho settings to enable real-time sync:
+          Configure these URLs in your crm settings to enable real-time sync:
         </p>
         <div>
           {[
-            { label: 'Zoho', url: `${API}/api/integrations/webhooks/zoho/crm` },
+            { label: 'crm', url: `${API}/api/integrations/webhooks/crm` },
           ].map((w) => (
             <UrlRow key={w.label} label={w.label} url={w.url} />
           ))}

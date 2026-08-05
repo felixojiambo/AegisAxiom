@@ -297,11 +297,11 @@ export default function SalesRepDashboard() {
         <div className="glass-card p-4 border border-amber-200 dark:border-amber-600/30 bg-amber-50 dark:bg-amber-600/10 flex items-start gap-3 mb-4 mt-4">
           <Clock size={16} className="text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
           <div>
-            <p className="text-amber-700 dark:text-amber-300 text-sm font-medium">Zoho Not Connected</p>
+            <p className="text-amber-700 dark:text-amber-300 text-sm font-medium">CRM Not Connected YET, WILL MIGRATE</p>
             <p className="text-aegisaxiom-text-secondary text-xs mt-0.5">
-              Commission data is not available until Zoho is reconnected. Go to{' '}
+              Commission data is not available until CRM connected. Go to{' '}
               <a href="/admin/integrations" className="text-violet-600 dark:text-violet-400 hover:underline">
-                Admin → Integrations
+                Admin -> Integrations
               </a>{' '}
               to reconnect.
             </p>
@@ -613,7 +613,7 @@ export default function SalesRepDashboard() {
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-aegisaxiom-text-muted text-sm">
                     {data?.zoho_connected === false
-                      ? 'Reconnect Zoho to load deal data.'
+                      ? 'Reconnect CRM to load deal data.'
                       : 'No deals found.'}
                   </td>
                 </tr>
