@@ -1,0 +1,53 @@
+# Phase 2a — platform-core identity: zero-grep pattern list.
+#
+# Consumed by `scripts/verify.ps1 -Grep scripts/greps/phase2a.txt` (and the .sh
+# twin). Any hit in live backend code is a FAILURE: these seven collections are
+# on Postgres and are reached only through repositories/{users,auth,tenants,
+# org_branding}.py. This file is permanent — it makes a 2a regression detectable
+# forever, long after the phase prompt is gone.
+#
+# FORMAT
+#   * one regex per line; blank lines and `#` lines are ignored
+#   * .NET-compatible (PowerShell Select-String) AND PCRE-compatible (grep -P)
+#   * `(?<!\x60)` = "not preceded by a backtick". Prose references inside
+#     docstrings (``db.users.find(...)``) are documentation, not call sites,
+#     and are the ONLY exemption. Two live examples this guards:
+#       backend/repositories/users.py:365  ``db.users.find({...})``
+#       backend/db/models/tenants.py:3     ``db.tenants``
+#
+# SEARCH SCOPE (fixed by the harness, per phase2a-census §1.8 — "live backend
+# code"): every *.py under backend/ EXCEPT tests/, scripts/, migrations/,
+# archive/, __pycache__/. Those are the test suite and one-off Mongo data-fix
+# scripts; they are dead code paths, not live request paths.
+#
+# COLLECTIONS COVERED (7 — the plan's Phase 2a scope line says "users, auth
+# (sessions, password_reset_tokens, oauth_states, oauth_tokens), tenants, org
+# branding"; expanded, that is seven collections):
+#   users · user_sessions · password_reset_tokens · oauth_states ·
+#   oauth_tokens · tenants · org_branding
+#
+# Both access forms are covered per collection: attribute (`db.users`) and
+# subscript (`db["users"]`). The subscript form is live elsewhere in this repo
+# (e.g. routes/finance_dashboard.py `db["finance_widgets"]`), so omitting it
+# would leave a real hole.
+
+(?<!\x60)\bdb\.users\b
+(?<!\x60)db\[\s*["']users["']\s*\]
+
+(?<!\x60)\bdb\.user_sessions\b
+(?<!\x60)db\[\s*["']user_sessions["']\s*\]
+
+(?<!\x60)\bdb\.password_reset_tokens\b
+(?<!\x60)db\[\s*["']password_reset_tokens["']\s*\]
+
+(?<!\x60)\bdb\.oauth_states\b
+(?<!\x60)db\[\s*["']oauth_states["']\s*\]
+
+(?<!\x60)\bdb\.oauth_tokens\b
+(?<!\x60)db\[\s*["']oauth_tokens["']\s*\]
+
+(?<!\x60)\bdb\.tenants\b
+(?<!\x60)db\[\s*["']tenants["']\s*\]
+
+(?<!\x60)\bdb\.org_branding\b
+(?<!\x60)db\[\s*["']org_branding["']\s*\]

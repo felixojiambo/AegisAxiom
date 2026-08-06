@@ -1,0 +1,62 @@
+{
+  "domain": "postgres (2a)",
+  "name": "auth_me",
+  "request": {
+    "auth": true,
+    "method": "GET",
+    "path": "/api/auth/me"
+  },
+  "sample": {
+    "account_id": null,
+    "ai_usage_viewable_users": [],
+    "contractor_business_id": null,
+    "contractor_business_name": null,
+    "created_at": "2026-07-21T11:41:08.215050Z",
+    "effective_permissions": [
+      "*"
+    ],
+    "email": "<redacted:str>",
+    "extra_permissions": [],
+    "is_active": true,
+    "is_assignable_as_member": true,
+    "is_assignable_as_pm": false,
+    "is_email_verified": "<redacted:bool>",
+    "name": "Admin",
+    "permissions": [
+      "*"
+    ],
+    "picture": null,
+    "pm_capacity_tier": null,
+    "role": "admin",
+    "tenant_id": "ten_simplimeta_root",
+    "user_id": "user_d119bec76af2",
+    "zoho_contact_id": null
+  },
+  "shape": {
+    "account_id": "null",
+    "ai_usage_viewable_users": [],
+    "contractor_business_id": "null",
+    "contractor_business_name": "null",
+    "created_at": "str",
+    "effective_permissions": [
+      "str"
+    ],
+    "email": "str",
+    "extra_permissions": [],
+    "is_active": "bool",
+    "is_assignable_as_member": "bool",
+    "is_assignable_as_pm": "bool",
+    "is_email_verified": "bool",
+    "name": "str",
+    "permissions": [
+      "str"
+    ],
+    "picture": "null",
+    "pm_capacity_tier": "null",
+    "role": "str",
+    "tenant_id": "str",
+    "user_id": "str",
+    "zoho_contact_id": "null"
+  },
+  "status": 200
+}

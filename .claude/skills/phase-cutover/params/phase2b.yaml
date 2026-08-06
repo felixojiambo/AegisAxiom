@@ -1,0 +1,271 @@
+# Phase 2b — Platform core: RBAC, governance, observability.
+#
+# The first live instance of /phase-cutover. Every value below is derived from
+# .claude/plans/postgres-migration-plan.md (Phase 2, 2b block; §A4/§A6/§A7;
+# OQ-10) and .claude/plans/phase2b-census.md, which is already written and
+# recommends PROCEED. Names only — no secret values appear in this file.
+
+phase: "2b"
+title: "roles, permissions, policies/policy_targets, audit_logs; validate_dag port; roles_legacy_read deletion"
+plan_ref:
+  - "postgres-migration-plan.md Phase 2 (2b block)"
+  - "§A4 search (distinct → SELECT DISTINCT, trigram GIN)"
+  - "§A6 CAS + transactions"
+  - "§A7 validate_dag + SKIP_STARTUP_DAG_VALIDATION"
+  - "OQ-10 duplicate api_errors router"
+
+census: ".claude/plans/phase2b-census.md"   # COMPLETE — re-verify counts, do not rewrite
+census_verdict: "PROCEED (one scope trim: api_errors is not a collection — see sweeps)"
+
+# --------------------------------------------------------------------------
+# Collections. ~122 refs / ~22 files per census §1.
+# The grep pattern file MUST cover BOTH access forms for each of these:
+#   (?<!\x60)\bdb\.<name>\b     and     db\[\s*["']<name>["']\s*\]
+# Phase 2a shipped with 28 live db["users"] sites because only the first form
+# was checked. Do not repeat that.
+# --------------------------------------------------------------------------
+collections:
+  - name: roles
+    refs: 50
+    ddl: "roles(role_id text PK, name text UNIQUE, display_name, description, color, is_system, is_default, permissions jsonb, created_at, updated_at)"
+    notes: "permissions is an opaque key list — JSONB, never a child table"
+  - name: permissions
+    refs: 18
+    ddl: "permissions(key text PK, \"group\", label, source, app_id, is_active, implies jsonb, created_at, updated_at)"
+    notes: "key is the natural PK (all upserts keyed on it); implies jsonb holds the DAG edges"
+  - name: policies
+    refs: 17
+    ddl: "policies(policy_id text PK, name, description, module, entity, enabled, is_system, priority, trigger jsonb, condition_logic, condition_pattern, conditions jsonb, actions jsonb, created_by, created_at, updated_at, deleted_at)"
+    notes: "index (module, entity) for engine lookup; (enabled) WHERE deleted_at IS NULL"
+  - name: policy_targets
+    refs: 11
+    ddl: "policy_targets(id bigserial PK, policy_id text FK->policies ON DELETE CASCADE, target_type, target_id, tenant_id, created_at)"
+    notes: "schemaless today — PIN the final columns by reading all 11 sites during implementation, not from this sketch"
+  - name: audit_logs
+    refs: 26
+    ddl: "audit_logs(id bigserial PK, event_category, event_type, severity, actor_id, actor_email, resource_type, resource_id, action, outcome, details jsonb, timestamp timestamptz)"
+    notes: >-
+      Hot WRITE path (fires on ~every mutating request) — index for writes, not
+      just reads. Mirror the retired Mongo index set: (timestamp DESC),
+      (event_category,timestamp DESC), (event_type,timestamp DESC),
+      (actor_id,timestamp DESC), (resource_type,resource_id,timestamp DESC).
+      §A4 trigram GIN on the text columns the list endpoint searches.
+
+# --------------------------------------------------------------------------
+# Alembic lane claim. CLAIMED — a second lane must pick a different number.
+# --------------------------------------------------------------------------
+migration_revision: "0005_platform_core_rbac"
+down_revision: "0004_drop_scaffolding_hello"   # head at claim time (2026-08-02)
+lane_note: >-
+  0005 is claimed by this phase. Any concurrent lane must claim 0006+ BEFORE it
+  starts and record the claim in its own params file. A collision is a STOP, not
+  a renumber. If another lane lands 0005 first, rebase down_revision onto the new
+  head BEFORE running the Alembic round-trip.
+
+# --------------------------------------------------------------------------
+# Files. Anything not listed here is out of scope for this phase.
+# --------------------------------------------------------------------------
+in_scope_files:
+  new:
+    - backend/alembic/versions/0005_platform_core_rbac.py
+    - backend/db/models/roles.py
+    - backend/db/models/permissions.py
+    - backend/db/models/policies.py
+    - backend/db/models/audit.py
+    - backend/repositories/roles.py
+    - backend/repositories/permissions.py
+    - backend/repositories/policies.py
+    - backend/repositories/audit.py
+    - backend/tests/test_platform_core_rbac_pg.py
+    - backend/tests/test_platform_core_policies_pg.py
+    - backend/tests/test_platform_core_audit_pg.py
+    - backend/tests/test_platform_core_dag_validation_pg.py
+    - scripts/greps/phase2b.txt
+  in_domain_rewrites:
+    - backend/services/permission_registry.py     # incl. validate_dag port
+    - backend/services/permission_seeder.py
+    - backend/services/policy_engine.py           # policy_targets.find @517
+    - backend/services/policy_seeds.py
+    - backend/services/security_logger.py         # log_security_event (hot write)
+    - backend/services/audit_service.py           # log_action
+    - backend/routes/roles.py                     # CRUD, clone, seed_default_roles
+    - backend/routes/policies.py
+    - backend/routes/audit.py                     # distinct @149/@204 -> SELECT DISTINCT
+    - backend/db/models/__init__.py               # register the new modules
+    - backend/server.py                           # startup wiring + OQ-10 dedup
+  cross_domain_callers:
+    - backend/auth_helper.py                      # :290 roles_legacy_read -> roles repo
+    - backend/routes/auth.py                      # :45/:50 _build_user_with_permissions
+    - backend/routes/admin.py
+    - backend/routes/ai_employees.py
+    - backend/routes/projects_events.py
+    - backend/routes/projects_recent_changes.py
+    - backend/services/ingestion/rbac_generator.py
+    - backend/services/ingestion/reconcile.py
+    - backend/services/ingestion/service.py
+    - backend/services/ai/agents/tools/conversational_tools.py
+  docs:
+    - CLAUDE.md                                   # shim table: drop roles_legacy_read
+    - backend/repositories/CONVENTIONS.md         # add the 2b rules (see below)
+
+protected:
+  - path: backend/routes/api_errors.py
+    reason: "Stateless GCP Error Reporting forwarder. NOT a collection (census §0.1). No repository, no model, no migration. Touching it is a STOP."
+  - path: backend/routes/nova.py
+    reason: "Nova is parked (§A9). Only the permission-key sweep below may touch it, and only after the verify-before-remove check passes."
+  - path: backend/db/models/users.py
+    reason: "Phase 2a. 2b adds no columns here; role linkage stays by role NAME as today."
+  - path: backend/repositories/users.py
+    reason: "Phase 2a. Permission closure is computed in the auth path, not stored (CONVENTIONS §4)."
+  - path: backend/services/field_registry.py
+    reason: "In-memory registry, datastore-agnostic (census §0.3). Out of scope."
+
+# --------------------------------------------------------------------------
+# Legacy-read shims
+# --------------------------------------------------------------------------
+shims_created: []          # 2b creates none
+
+shims_deleted:
+  - name: roles_legacy_read
+    sites:
+      - backend/auth_helper.py:222   # docstring
+      - backend/auth_helper.py:290   # db.roles.find_one({name}, {permissions})
+      - backend/routes/auth.py:45    # docstring
+      - backend/routes/auth.py:50    # db = get_db()
+    replacement: "RolesRepository(pg).get_role_permissions(role_name); get_implication_graph() reads Postgres permissions"
+    note: >-
+      get_current_user already receives `pg = Depends(get_session)` from 2a — reuse
+      it, no new caller impact. Keep the 60s implication-graph cache; it now caches
+      the Postgres read. After 2b, get_current_user is 100% Postgres except
+      ai_employees_legacy_read.
+
+shims_remaining_after:
+  - ai_employees_legacy_read      # Phase 8
+  - tenant_app_grants_legacy_read # Phase 8
+  - app_registry_legacy_read      # Phase 8
+
+# --------------------------------------------------------------------------
+# The one genuinely new piece of logic (§A7)
+# --------------------------------------------------------------------------
+validate_dag_port:
+  source: "backend/services/permission_registry.py:458 — async def validate_dag(db=None)"
+  steps:
+    - "get_implication_graph() reads db.permissions -> permissions repo: SELECT key, implies WHERE is_active. The iterative-DFS tri-state cycle detection is pure Python — unchanged."
+    - "Add SKIP_STARTUP_DAG_VALIDATION (default off): early-return + log when set."
+    - "Make the STARTUP call non-fatal: an unreachable or empty Postgres must not hard-crash boot (log + continue). A real cycle on a reachable DB still fails loudly. server.py currently calls it deliberately un-try/except'd — that changes."
+    - "Runs after seed_system_permissions (Postgres) at startup."
+  why: >-
+    This is the audit §5d "Atlas DAG-validation crash" — the exact failure this
+    machine already hit. Ungated + fatal on every boot today.
+  tests_required:
+    - "cycle detection still raises on a real cycle"
+    - "SKIP_STARTUP_DAG_VALIDATION=true short-circuits and logs"
+    - "unreachable/empty DB at startup logs and continues (boot survives)"
+
+new_env_flags:
+  - SKIP_STARTUP_DAG_VALIDATION   # name only; default off
+
+# --------------------------------------------------------------------------
+# Sweeps — both must be LOGGED, and the second has a trap
+# --------------------------------------------------------------------------
+sweeps:
+  - id: api-errors-dedup
+    what: "Remove the duplicate api_router.include_router(api_errors_router, ...) registration."
+    where: "backend/server.py:303 AND :306 — byte-identical (the plan's OQ-10 cites the stale :327/:331)."
+    action: "Delete ONE of the two lines. Verify the remaining one still registers with tags=[\"Observability - Frontend Errors\"]."
+    verify: "POST /api/errors still routes; the route appears exactly once in the OpenAPI paths."
+    log: "Record which line number was deleted and the resulting single line number."
+
+  - id: orphaned-nova-permissions
+    what: "Remove permission keys orphaned by the Nova/FCC park (§A9), which nova.py:49-52 explicitly defers to this phase."
+    trap: >-
+      *** finance.cashflow.view MUST NOT BE REMOVED. *** It looks like a Nova key
+      (registered by @register_module_permissions("nova"), group "Finance - Cash
+      Flow") but it gates the SURVIVING Cashflow Planner at
+      backend/routes/nova.py:147 (require_ai_permission) and :173. Removing it
+      breaks or silently opens a live endpoint. Three other keys `implies` it, so
+      deleting them also rewrites DAG edges validate_dag walks — sequence the
+      permission delete and the DAG re-validation in that order, in one
+      transaction, and re-run validate_dag afterwards.
+    candidates:
+      - key: "nova.export.create"
+        live_consumers: "none outside routes/roles.py seed lists"
+        disposition: "REMOVE (confirm during impl)"
+      - key: "nova.use"
+        live_consumers: "backend/services/ai/conductor.py:675 has_perm(user, \"nova.use\")"
+        disposition: "KEEP — still referenced"
+      - key: "finance.cashflow.export"
+        live_consumers: "registered in nova.py only; implies finance.cashflow.view"
+        disposition: "decide during impl; if removed, drop the implies edge too"
+      - key: "finance.nova.run_projection"
+        live_consumers: "registered in nova.py only; implies view + edit_assumptions"
+        disposition: "decide during impl; if removed, drop the implies edges too"
+      - key: "finance.cashflow.edit_assumptions"
+        live_consumers: "registered in nova.py only; implies finance.cashflow.view"
+        disposition: "decide during impl"
+      - key: "finance.cashflow.view"
+        live_consumers: "routes/nova.py:147 (route gate), :173"
+        disposition: "*** KEEP — REMOVING THIS IS THE TRAP ***"
+    method: >-
+      verify-before-remove: for EVERY key, grep the whole live backend for
+      "<key>" and '<key>' outside routes/roles.py seed lists. A key with any
+      route gate, has_perm, require_perm, or require_ai_permission consumer is
+      NOT orphaned. Also strip the key from every role's permissions array
+      (roles.permissions JSONB) in the same transaction, or roles will reference
+      a key that no longer exists.
+    verify: "validate_dag passes after the sweep; /api/roles still returns; a user holding finance.cashflow.view still gets 200 on the Cashflow Planner route."
+    log: "Record every key considered, its consumer evidence, and the keep/remove decision. Silent removal is a failure."
+
+# --------------------------------------------------------------------------
+# Verification
+# --------------------------------------------------------------------------
+grep_pattern_file: "scripts/greps/phase2b.txt"
+
+contract_endpoints:
+  - "/api/auth/login"       # roles feed the permission closure — must not drift
+  - "/api/auth/me"          # permissions/effective_permissions arrays
+  - "/api/tenants"          # 2a regression guard
+  - "/api/roles"            # THIS phase's domain — shape must be byte-compatible
+  - "/api/contracts"        # still-Mongo parallel-run guard
+contracts_note: >-
+  /api/roles is already in contracts/captures/roles_list.json, recorded while it
+  was Mongo-backed. That capture is the 2b acceptance test: after cutover the
+  shape must compare clean WITHOUT re-recording. Add /api/audit and /api/policies
+  captures before starting so their shapes are pinned too.
+
+smoke_migrated: "/api/roles"      # Postgres after 2b
+smoke_legacy: "/api/contracts"    # still Mongo until Phase 4a
+
+test_paths:
+  - "tests/test_platform_core_*_pg.py"
+
+gate: |
+  scripts\verify.ps1 -Alembic -Grep scripts\greps\phase2b.txt `
+    -Tests tests/test_platform_core_*_pg.py -Boot -Smoke `
+    -SmokeMigrated /api/roles -SmokeLegacy /api/contracts `
+    -Contracts contracts\captures
+
+# --------------------------------------------------------------------------
+# Phase-specific STOP conditions (on top of the skill's standing list)
+# --------------------------------------------------------------------------
+stop_conditions:
+  - "policy_targets' real columns differ materially from the census sketch and a FK to policies cannot be established — report before inventing a shape."
+  - "A nova permission key marked REMOVE turns out to have a live consumer — stop the sweep and report, do not remove it anyway."
+  - "roles_legacy_read cannot be deleted because a caller has no AsyncSession in scope — report the caller; do not thread a new global session in."
+  - "Revision 0005 is already present in backend/alembic/versions/ — another lane claimed it. STOP."
+  - "The 2a grep (scripts/greps/phase2a.txt) is still red. 2b builds on 2a's seam; fix or formally accept 2a's 28 open db[\"users\"] sites first."
+
+# --------------------------------------------------------------------------
+# CONVENTIONS.md additions this phase must write
+# --------------------------------------------------------------------------
+conventions_additions:
+  - "JSONB for opaque governance sub-arrays: role permissions, permission implies, policy conditions/actions/trigger."
+  - "distinct() -> SELECT DISTINCT."
+  - "Non-fatal startup-validation pattern (SKIP_* flag + boot-survivable wrapper) for future validators."
+  - "Zero-grep pattern files must cover BOTH db.<name> and db[\"<name>\"] — the 2a subscript-form miss."
+
+handoff: >-
+  Operator's next action: run /phase-cutover with this file. Step 1 re-verifies
+  the existing census against the current tree; step 6 is the harness gate. Note
+  the 2a grep is currently RED (28 db["users"] sites) — decide that before or
+  during 2b, since 2b's gate re-runs every scripts/greps/*.txt.

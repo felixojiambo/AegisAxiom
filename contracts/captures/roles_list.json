@@ -1,0 +1,57 @@
+{
+  "domain": "mongo (2b)",
+  "name": "roles_list",
+  "request": {
+    "auth": true,
+    "method": "GET",
+    "path": "/api/roles"
+  },
+  "sample": [
+    {
+      "color": "#7C3AED",
+      "created_at": "2026-07-19T12:38:05.085000",
+      "description": "Full access to everything. Cannot be modified.",
+      "display_name": "Administrator",
+      "is_default": true,
+      "is_system": true,
+      "name": "admin",
+      "permissions": [
+        "*"
+      ],
+      "role_id": "role_admin",
+      "updated_at": "2026-07-19T12:38:05.085000"
+    },
+    {
+      "color": "#2563EB",
+      "created_at": "2026-07-19T12:38:05.085000",
+      "description": "Full visibility into sales pipeline, teams, and commissions.",
+      "display_name": "Director of Sales",
+      "is_default": true,
+      "is_system": false,
+      "name": "director",
+      "permissions": [
+        "opportunities.create",
+        "opportunities.edit.all"
+      ],
+      "role_id": "role_director",
+      "updated_at": "2026-07-19T12:38:05.085000"
+    }
+  ],
+  "shape": [
+    {
+      "color": "str",
+      "created_at": "str",
+      "description": "str",
+      "display_name": "str",
+      "is_default": "bool",
+      "is_system": "bool",
+      "name": "str",
+      "permissions": [
+        "str"
+      ],
+      "role_id": "str",
+      "updated_at": "str"
+    }
+  ],
+  "status": 200
+}

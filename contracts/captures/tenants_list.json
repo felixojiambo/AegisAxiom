@@ -1,0 +1,42 @@
+{
+  "domain": "postgres (2a)",
+  "name": "tenants_list",
+  "request": {
+    "auth": true,
+    "method": "GET",
+    "path": "/api/tenants"
+  },
+  "sample": {
+    "count": 1,
+    "tenants": [
+      {
+        "created_at": "2026-07-21T11:41:06.645647Z",
+        "created_by": "system_seed",
+        "name": "SimpliMeta",
+        "parent_tenant_id": null,
+        "slug": "simplimeta",
+        "status": "active",
+        "tenant_id": "ten_simplimeta_root",
+        "tenant_type": "root",
+        "updated_at": "2026-07-21T11:41:06.645647Z"
+      }
+    ]
+  },
+  "shape": {
+    "count": "int",
+    "tenants": [
+      {
+        "created_at": "str",
+        "created_by": "str",
+        "name": "str",
+        "parent_tenant_id": "null",
+        "slug": "str",
+        "status": "str",
+        "tenant_id": "str",
+        "tenant_type": "str",
+        "updated_at": "str"
+      }
+    ]
+  },
+  "status": 200
+}
