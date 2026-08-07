@@ -38,9 +38,14 @@ DISABLE_BACKGROUND_JOBS = env_flag("DISABLE_BACKGROUND_JOBS")
 
 # Initialize database BEFORE importing routes
 import database
+# Initialize database BEFORE importing routes
+import database
 
-database.init(os.environ["MONGO_URL"], os.environ["DB_NAME"])
+mongo_url = os.getenv("MONGO_URL")
+db_name = os.getenv("DB_NAME", "aegis")
 
+if mongo_url:
+    database.init(mongo_url, db_name)
 # Import routers after DB init
 from routes.auth import router as auth_router
 from routes.tenants import router as tenants_router
