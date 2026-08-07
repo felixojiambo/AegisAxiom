@@ -440,16 +440,14 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def on_startup():
-    if not os.getenv("MONGO_URL"):
-        logger.warning("MONGO_URL not configured — skipping MongoDB startup seeds and indexes")
-        return
+    has_mongo = bool(os.getenv("MONGO_URL"))
+    db = database.get_db() if has_mongo else None
 
-    db = database.get_db()
+    if not has_mongo:
+        logger.warning("MONGO_URL not configured — running in Postgres-only mode (skipping MongoDB seeds & indexes)")
+
     # ------------------------------------------------------------
     # Observability — GCP Error Reporting (v1.3 Theme B)
-    #
-    # Eager-init so the first failing request doesn't pay the
-    # credentials/handshake cost. No-op when GCP_PROJECT_ID isn't set.
     # ------------------------------------------------------------
     try:
         from services.observability import _init_client as _init_error_reporting
@@ -463,90 +461,66 @@ async def on_startup():
     if SKIP_STARTUP_SEEDS:
         logger.info("Skipping startup seed/bootstrap writes because SKIP_STARTUP_SEEDS=true")
     else:
-        # Seed the SimpliMeta root tenant + backfill existing users.
-        # Must run before role/permission seeds because they may scope
-        # to tenants in later phases.
+        # Postgres-backed tenant seed ALWAYS runs
         from seeds.seed_tenants import seed_tenants
-        await seed_tenants()  # Phase 2a: Postgres-backed (opens its own session)
+        await seed_tenants()
 
-        from routes.roles import seed_default_roles
-        await seed_default_roles(db)
+        if db:
+            from routes.roles import seed_default_roles
+            await seed_default_roles(db)
 
-        # Phase 1B.6 — the 1B.4 catalog migration startup hook is removed.
-        # It was a rollout-window safety net; with 1B.5's provisioning API
-        # now the canonical (and only) path that creates linked instance
-        # rows, the hook is dead code on every boot.
-        #
-        # The seed function itself stays at seeds/seed_ai_employee_catalog.py
-        # because it's idempotent and useful for ad-hoc reconciliation
-        # (e.g., backfilling linkage if an emergency raw-Mongo insert ever
-        # bypasses the API). Callers must invoke it manually now.
+            try:
+                await db.permissions.create_index("key", unique=True)
+                await db.permissions.create_index("source")
+                await db.permissions.create_index("app_id", sparse=True)
+                await db.permissions.create_index("is_active")
+            except Exception as e:
+                logger.warning(f"Permissions registry index setup hit a non-fatal error: {e}")
 
-        # Create permissions registry indexes BEFORE seeding so concurrent
-        # startups cannot insert duplicate documents on the same key.
-        try:
-            await db.permissions.create_index("key", unique=True)
-            await db.permissions.create_index("source")
-            await db.permissions.create_index("app_id", sparse=True)
-            await db.permissions.create_index("is_active")
-        except Exception as e:
-            logger.warning(f"Permissions registry index setup hit a non-fatal error: {e}")
+            from services.permission_registry import (
+                seed_system_permissions,
+                deactivate_keys,
+                strip_keys_from_roles,
+            )
+            await seed_system_permissions(db)
 
-        from services.permission_registry import (
-            seed_system_permissions,
-            deactivate_keys,
-            strip_keys_from_roles,
-        )
-        await seed_system_permissions(db)
+            try:
+                from routes.roles import _DEPRECATED_FINANCE_KEYS
+                await deactivate_keys(_DEPRECATED_FINANCE_KEYS, db)
+                await strip_keys_from_roles(_DEPRECATED_FINANCE_KEYS, db)
+            except Exception as e:
+                logger.warning(f"Deprecated key cleanup warning (non-fatal): {e}")
 
-        # Retire deprecated permission keys (idempotent)
-        try:
-            from routes.roles import _DEPRECATED_FINANCE_KEYS
-            await deactivate_keys(_DEPRECATED_FINANCE_KEYS, db)
-            await strip_keys_from_roles(_DEPRECATED_FINANCE_KEYS, db)
-        except Exception as e:
-            logger.warning(f"Deprecated key cleanup warning (non-fatal): {e}")
+            try:
+                from seeds.seed_projects_rbac import seed_projects_rbac
+                await seed_projects_rbac(db)
+            except Exception as e:
+                logger.warning(f"Projects RBAC seed warning (non-fatal): {e}")
 
-        try:
-            from seeds.seed_projects_rbac import seed_projects_rbac
-            await seed_projects_rbac(db)
-        except Exception as e:
-            logger.warning(f"Projects RBAC seed warning (non-fatal): {e}")
+            try:
+                from seeds.seed_builtin_ingestions import seed_builtin_ingestions
+                await seed_builtin_ingestions(db)
+            except Exception as e:
+                logger.warning(f"Built-in ingestions seed warning (non-fatal): {e}")
 
-        # Built-in ingested apps that pre-date the live /ingest-app pipeline
-        # (projects-pmo, finance-cc) need app_registry rows so they show up
-        # in the App Ingestion admin module. Idempotent upsert.
-        try:
-            from seeds.seed_builtin_ingestions import seed_builtin_ingestions
-            await seed_builtin_ingestions(db)
-        except Exception as e:
-            logger.warning(f"Built-in ingestions seed warning (non-fatal): {e}")
+            from routes.default_resource_types import seed_default_resource_types
+            await seed_default_resource_types(db)
 
-        from routes.default_resource_types import seed_default_resource_types
-        await seed_default_resource_types(db)
+            from services.policy_seeds import seed_system_policies
+            await seed_system_policies(db)
 
-        from services.policy_seeds import seed_system_policies
-        await seed_system_policies(db)
+            from services.workflow_seeds import seed_system_workflows
+            await seed_system_workflows(db)
 
-        from services.workflow_seeds import seed_system_workflows
-        await seed_system_workflows(db)
+            try:
+                from services.ai_dispatcher_seed import bootstrap_ai_dispatcher
+                await bootstrap_ai_dispatcher(db)
+            except Exception as e:
+                logger.warning(f"AI Dispatcher bootstrap warning (non-fatal): {e}")
 
-        # AI Dispatcher (AppDirect dispatch AI POC) — idempotent.
-        # Creates dispatcher_decisions.message_id unique index plus 4 POC
-        # teams (Orders, Quotes, Cable, Specialized). Re-runs are no-ops if
-        # the rows already exist. See services/ai_dispatcher_seed.py.
-        try:
-            from services.ai_dispatcher_seed import bootstrap_ai_dispatcher
-            await bootstrap_ai_dispatcher(db)
-        except Exception as e:
-            logger.warning(f"AI Dispatcher bootstrap warning (non-fatal): {e}")
-
-        # Auto-seed admin account if none exists.
+        # Postgres-backed admin auto-init ALWAYS runs
         admin_email = os.getenv("ADMIN_EMAIL")
         admin_password = os.getenv("ADMIN_PASSWORD")
-        # PR cleanup A7. Reject the .env.example placeholder so a
-        # copy paste deploy that forgot to fill ADMIN_PASSWORD in
-        # cannot create an admin user with a guessable password.
         if admin_email == "REPLACE_ME_BEFORE_DEPLOY" or admin_password == "REPLACE_ME_BEFORE_DEPLOY":
             logger.error(
                 "ADMIN_EMAIL or ADMIN_PASSWORD is still the .env.example placeholder. "
@@ -555,10 +529,8 @@ async def on_startup():
             raise ValueError(
                 "ADMIN_EMAIL or ADMIN_PASSWORD is still the placeholder REPLACE_ME_BEFORE_DEPLOY"
             )
+
         if admin_email and admin_password:
-            # Phase 2a: admin auto-init runs against the Postgres users
-            # repository (opens its own session — this is startup, not a
-            # request). Behavior preserved: create only when no admin exists.
             import uuid
             from auth_helper import hash_password
             from datetime import datetime, timezone
@@ -593,378 +565,280 @@ async def on_startup():
         else:
             logger.warning("ADMIN_EMAIL and ADMIN_PASSWORD not set - admin auto-initialization skipped")
 
-    # Permission DAG validation is a fail-fast safety check, not a seed
-    # step. It must run on every boot - including the SKIP_STARTUP_SEEDS=true
-    # path used when developing against a live Atlas database - so that a
-    # corrupt 'implies' graph (cycles, dangling refs) is detected at
-    # startup instead of producing silently-wrong RBAC decisions later.
-    try:
-        from services.permission_registry import validate_dag
-        await validate_dag(db)
-    except Exception as e:
-        logger.error(
-            "Permission DAG validation failed at startup: %s",
-            e,
-        )
-        raise
+    if db:
+        try:
+            from services.permission_registry import validate_dag
+            await validate_dag(db)
+        except Exception as e:
+            logger.error("Permission DAG validation failed at startup: %s", e)
+            raise
 
-    # Register ingestion event-bus listeners. Import side-effect only -
-    # the module's import wires handlers onto the event bus.
-    #
-    # Deliberately NOT wrapped in try/except. Ingestion is not optional
-    # in any deploy mode, so a broken import is a hard error: better to
-    # crash startup loudly than to silently drop every ingestion event
-    # for the process lifetime while the server appears healthy.
     import services.ingestion.event_listeners  # noqa: F401
 
     # ------------------------------------------------------------
-    # MongoDB index creation
+    # MongoDB index creation & optional seeds
     # ------------------------------------------------------------
-    if SKIP_STARTUP_INDEXES:
-        logger.info("Skipping MongoDB startup index creation because SKIP_STARTUP_INDEXES=true")
-    else:
-        try:
-            # NOTE (Phase 2a): Mongo indexes for the migrated platform-core
-            # identity collections (users, user_sessions, password_reset_tokens,
-            # tenants, oauth_tokens, oauth_states) are removed here — those
-            # tables + indexes now live in Postgres, owned by Alembic (§A7).
-            await db.accounts.create_index("account_id", unique=True)
-            await db.accounts.create_index("zoho_account_id", sparse=True)
-            await db.deals.create_index("deal_id", unique=True)
-            await db.deals.create_index("account_id")
-            await db.deals.create_index("deal_owner_id")
-            await db.deals.create_index("assigned_sales_rep_id", sparse=True)
-            await db.deals.create_index("zoho_deal_id", sparse=True)
-            await db.commissions.create_index("commission_id", unique=True)
-            await db.commissions.create_index("deal_id")
-            await db.commissions.create_index("user_id")
-            await db.products.create_index("product_id", unique=True)
-            await db.products.create_index("product_type")
-            await db.invoices.create_index("invoice_id", unique=True)
-            await db.invoices.create_index("account_id")
-            await db.invoices.create_index("invoice_number", sparse=True)
-            await db.contracts.create_index("contract_id", unique=True)
-            await db.contracts.create_index("account_id")
-            await db.field_jobs.create_index("job_id", unique=True)
-            await db.field_jobs.create_index("account_id")
-            await db.chat_sessions.create_index("session_id", unique=True)
-            await db.chat_sessions.create_index("user_id")
-            await db.chat_messages.create_index("session_id")
-            await db.roles.create_index("name", unique=True)
-            # (password_reset_tokens + tenants + users indexes → Postgres/Alembic, Phase 2a)
+    if db:
+        if SKIP_STARTUP_INDEXES:
+            logger.info("Skipping MongoDB startup index creation because SKIP_STARTUP_INDEXES=true")
+        else:
+            try:
+                await db.accounts.create_index("account_id", unique=True)
+                await db.accounts.create_index("zoho_account_id", sparse=True)
+                await db.deals.create_index("deal_id", unique=True)
+                await db.deals.create_index("account_id")
+                await db.deals.create_index("deal_owner_id")
+                await db.deals.create_index("assigned_sales_rep_id", sparse=True)
+                await db.deals.create_index("zoho_deal_id", sparse=True)
+                await db.commissions.create_index("commission_id", unique=True)
+                await db.commissions.create_index("deal_id")
+                await db.commissions.create_index("user_id")
+                await db.products.create_index("product_id", unique=True)
+                await db.products.create_index("product_type")
+                await db.invoices.create_index("invoice_id", unique=True)
+                await db.invoices.create_index("account_id")
+                await db.invoices.create_index("invoice_number", sparse=True)
+                await db.contracts.create_index("contract_id", unique=True)
+                await db.contracts.create_index("account_id")
+                await db.field_jobs.create_index("job_id", unique=True)
+                await db.field_jobs.create_index("account_id")
+                await db.chat_sessions.create_index("session_id", unique=True)
+                await db.chat_sessions.create_index("user_id")
+                await db.chat_messages.create_index("session_id")
+                await db.roles.create_index("name", unique=True)
 
-            # AI Employee catalog + entitlements — Phase 1B.1
-            #
-            # ai_employee_definitions: tenant-agnostic catalog. Querying by
-            # type and is_published is the common catalog-list path; querying
-            # by is_active when surfacing SimpliMeta admin views.
-            await db.ai_employee_definitions.create_index("definition_id", unique=True)
-            await db.ai_employee_definitions.create_index("type")
-            await db.ai_employee_definitions.create_index([("is_published", 1), ("is_active", 1)])
-            # tenant_app_assignments: a tenant can hold at most one assignment
-            # per definition (revocations are status transitions, not deletes,
-            # so this enforces idempotent grant semantics). Lookups by tenant
-            # (catalog filtering) and by definition (impact analysis on
-            # blueprint changes) are both first-class.
-            await db.tenant_app_assignments.create_index("assignment_id", unique=True)
-            await db.tenant_app_assignments.create_index(
-                [("tenant_id", 1), ("definition_id", 1)], unique=True
-            )
-            await db.tenant_app_assignments.create_index("tenant_id")
-            await db.tenant_app_assignments.create_index("definition_id")
-            await db.tenant_app_assignments.create_index("status")
+                await db.ai_employee_definitions.create_index("definition_id", unique=True)
+                await db.ai_employee_definitions.create_index("type")
+                await db.ai_employee_definitions.create_index([("is_published", 1), ("is_active", 1)])
 
-            # Phase 1E.1 — Tenant app grants (entitlements for ingested apps).
-            # Same uniqueness convention as tenant_app_assignments: one grant
-            # per (tenant_id, app_id) pair, revocations are status transitions
-            # on the permanent row. Lookups by tenant (sidebar render in 1E.2)
-            # and by app (impact analysis when an app is archived) are both
-            # first-class.
-            await db.tenant_app_grants.create_index("grant_id", unique=True)
-            await db.tenant_app_grants.create_index(
-                [("tenant_id", 1), ("app_id", 1)], unique=True
-            )
-            await db.tenant_app_grants.create_index("tenant_id")
-            await db.tenant_app_grants.create_index("app_id")
-            await db.tenant_app_grants.create_index("status")
+                await db.tenant_app_assignments.create_index("assignment_id", unique=True)
+                await db.tenant_app_assignments.create_index([("tenant_id", 1), ("definition_id", 1)], unique=True)
+                await db.tenant_app_assignments.create_index("tenant_id")
+                await db.tenant_app_assignments.create_index("definition_id")
+                await db.tenant_app_assignments.create_index("status")
 
-            # AI Employee instance indexes — Phase 1B.2
-            #
-            # The ai_employees collection has been queried by employee_id since
-            # day one but never had an index on it. 1B.2 corrects that with a
-            # unique constraint (we have verified no duplicates across
-            # localhost/dev/prod). If this index creation ever fails on
-            # startup, that indicates a duplicate slipped in and needs
-            # investigation before the migration in 1B.4.
-            #
-            # The three linkage indexes are sparse: pre-1B.4 rows do not
-            # carry these fields (see routes/ai_employees.py — the keys are
-            # conditionally persisted). Once the 1B.4 backfill stamps every
-            # row with at least tenant_id, the sparseness becomes moot but
-            # costs nothing to retain.
-            #
-            # (tenant_id, status) supports the most common upcoming query
-            # shape: "list active AI Employee instances for tenant X".
-            await db.ai_employees.create_index("employee_id", unique=True)
-            await db.ai_employees.create_index("tenant_id", sparse=True)
-            await db.ai_employees.create_index(
-                [("tenant_id", 1), ("status", 1)], sparse=True
-            )
-            await db.ai_employees.create_index("definition_id", sparse=True)
-            await db.ai_employees.create_index("assignment_id", sparse=True)
+                await db.tenant_app_grants.create_index("grant_id", unique=True)
+                await db.tenant_app_grants.create_index([("tenant_id", 1), ("app_id", 1)], unique=True)
+                await db.tenant_app_grants.create_index("tenant_id")
+                await db.tenant_app_grants.create_index("app_id")
+                await db.tenant_app_grants.create_index("status")
 
-            # (oauth_tokens + oauth_states indexes → Postgres/Alembic, Phase 2a)
-            await db.audit_logs.create_index([("timestamp", -1)])
-            await db.audit_logs.create_index("action")
-            await db.audit_logs.create_index("actor_id")
-            await db.audit_logs.create_index("event_category")
-            await db.audit_logs.create_index("event_type")
-            await db.audit_logs.create_index("severity")
-            await db.audit_logs.create_index("outcome")
-            await db.audit_logs.create_index([("event_category", 1), ("timestamp", -1)])
-            await db.audit_logs.create_index([("event_type", 1), ("timestamp", -1)])
-            await db.audit_logs.create_index([("actor_id", 1), ("timestamp", -1)])
-            await db.audit_logs.create_index([("actor_email", 1), ("timestamp", -1)])
-            await db.audit_logs.create_index([("resource_type", 1), ("resource_id", 1), ("timestamp", -1)])
+                await db.ai_employees.create_index("employee_id", unique=True)
+                await db.ai_employees.create_index("tenant_id", sparse=True)
+                await db.ai_employees.create_index([("tenant_id", 1), ("status", 1)], sparse=True)
+                await db.ai_employees.create_index("definition_id", sparse=True)
+                await db.ai_employees.create_index("assignment_id", sparse=True)
 
-            # (External-accounting sync-request and Nova export-artifact
-            # indexes removed in Phase 1 — accounting-integration removal +
-            # Nova/FCC park. The collections they indexed no longer exist.)
+                await db.audit_logs.create_index([("timestamp", -1)])
+                await db.audit_logs.create_index("action")
+                await db.audit_logs.create_index("actor_id")
+                await db.audit_logs.create_index("event_category")
+                await db.audit_logs.create_index("event_type")
+                await db.audit_logs.create_index("severity")
+                await db.audit_logs.create_index("outcome")
+                await db.audit_logs.create_index([("event_category", 1), ("timestamp", -1)])
+                await db.audit_logs.create_index([("event_type", 1), ("timestamp", -1)])
+                await db.audit_logs.create_index([("actor_id", 1), ("timestamp", -1)])
+                await db.audit_logs.create_index([("actor_email", 1), ("timestamp", -1)])
+                await db.audit_logs.create_index([("resource_type", 1), ("resource_id", 1), ("timestamp", -1)])
 
-            await db.projects.create_index("project_id", unique=True)
-            await db.projects.create_index("contract_id")
-            await db.projects.create_index("account_id")
-            await db.projects.create_index("pm_id")
-            await db.projects.create_index("project_type")
-            await db.projects.create_index("status")
-            await db.projects.create_index("template_id")
+                await db.projects.create_index("project_id", unique=True)
+                await db.projects.create_index("contract_id")
+                await db.projects.create_index("account_id")
+                await db.projects.create_index("pm_id")
+                await db.projects.create_index("project_type")
+                await db.projects.create_index("status")
+                await db.projects.create_index("template_id")
 
-            await db.time_entries.create_index("entry_id", unique=True)
-            await db.time_entries.create_index("project_id")
-            await db.time_entries.create_index("contract_id")
-            await db.time_entries.create_index("user_id")
-            await db.time_entries.create_index("week_start")
-            await db.time_entries.create_index("status")
-            await db.time_entries.create_index("account_id")
-            await db.time_entries.create_index([("user_id", 1), ("week_start", 1)])
+                await db.time_entries.create_index("entry_id", unique=True)
+                await db.time_entries.create_index("project_id")
+                await db.time_entries.create_index("contract_id")
+                await db.time_entries.create_index("user_id")
+                await db.time_entries.create_index("week_start")
+                await db.time_entries.create_index("status")
+                await db.time_entries.create_index("account_id")
+                await db.time_entries.create_index([("user_id", 1), ("week_start", 1)])
 
-            await db.pm_tasks.create_index("task_id", unique=True)
-            await db.pm_tasks.create_index("project_id")
-            await db.pm_tasks.create_index("parent_task_id")
-            await db.pm_tasks.create_index("assignee_id")
-            await db.pm_sprints.create_index("sprint_id", unique=True)
-            await db.pm_sprints.create_index("project_id")
-            await db.pm_waves.create_index("wave_id", unique=True)
-            await db.pm_waves.create_index("project_id")
-            await db.pm_threads.create_index("thread_id", unique=True)
-            await db.pm_threads.create_index("wave_id")
-            await db.pm_threads.create_index("owner_id")
-            await db.pm_blocker_tickets.create_index("blocker_ticket_id", unique=True)
-            await db.pm_blocker_tickets.create_index("thread_id")
-            await db.pm_templates.create_index("template_id", unique=True)
-            await db.pm_templates.create_index("project_type")
+                await db.pm_tasks.create_index("task_id", unique=True)
+                await db.pm_tasks.create_index("project_id")
+                await db.pm_tasks.create_index("parent_task_id")
+                await db.pm_tasks.create_index("assignee_id")
+                await db.pm_sprints.create_index("sprint_id", unique=True)
+                await db.pm_sprints.create_index("project_id")
+                await db.pm_waves.create_index("wave_id", unique=True)
+                await db.pm_waves.create_index("project_id")
+                await db.pm_threads.create_index("thread_id", unique=True)
+                await db.pm_threads.create_index("wave_id")
+                await db.pm_threads.create_index("owner_id")
+                await db.pm_blocker_tickets.create_index("blocker_ticket_id", unique=True)
+                await db.pm_blocker_tickets.create_index("thread_id")
+                await db.pm_templates.create_index("template_id", unique=True)
+                await db.pm_templates.create_index("project_type")
 
-            await db.dashboards.create_index("dashboard_id", unique=True)
-            await db.dashboards.create_index([("user_id", 1), ("order", 1)])
-            await db.capacity_health_rules.create_index("rule_id", unique=True)
+                await db.dashboards.create_index("dashboard_id", unique=True)
+                await db.dashboards.create_index([("user_id", 1), ("order", 1)])
+                await db.capacity_health_rules.create_index("rule_id", unique=True)
 
-            await db.policies.create_index("policy_id", unique=True)
-            await db.policies.create_index([("module", 1), ("entity", 1), ("enabled", 1)])
-            await db.policies.create_index("deleted_at")
+                await db.policies.create_index("policy_id", unique=True)
+                await db.policies.create_index([("module", 1), ("entity", 1), ("enabled", 1)])
+                await db.policies.create_index("deleted_at")
 
-            await db.ai_usage.create_index([("created_at", -1)])
-            await db.ai_usage.create_index("user_id")
-            await db.ai_usage.create_index("agent")
-            await db.ai_usage.create_index("model")
-            await db.ai_model_config.create_index("key", unique=True)
-            await db.ai_model_pricing.create_index("model", unique=True)
+                await db.ai_usage.create_index([("created_at", -1)])
+                await db.ai_usage.create_index("user_id")
+                await db.ai_usage.create_index("agent")
+                await db.ai_usage.create_index("model")
+                await db.ai_model_config.create_index("key", unique=True)
+                await db.ai_model_pricing.create_index("model", unique=True)
 
-            await db.opportunities.create_index("tracking_number", unique=True, sparse=True)
+                await db.opportunities.create_index("tracking_number", unique=True, sparse=True)
 
-            await db.ai_employee_knowledge.create_index([("employee_id", 1), ("module_number", 1)])
-            await db.ai_employee_knowledge.create_index([("employee_id", 1), ("tags", 1)])
-            await db.ai_employee_knowledge.create_index("knowledge_id", unique=True)
-            await db.ai_employee_user_state.create_index([("user_id", 1), ("employee_id", 1)], unique=True)
-            await db.ai_chat_artifacts.create_index("artifact_id", unique=True)
-            await db.ai_chat_artifacts.create_index([("session_id", 1), ("status", 1)])
-            await db.ai_chat_artifacts.create_index([("user_id", 1), ("created_at", -1)])
-            await db.certifications.create_index([("user_id", 1), ("certification_type", 1)])
-            await db.certifications.create_index("certification_id", unique=True)
+                await db.ai_employee_knowledge.create_index([("employee_id", 1), ("module_number", 1)])
+                await db.ai_employee_knowledge.create_index([("employee_id", 1), ("tags", 1)])
+                await db.ai_employee_knowledge.create_index("knowledge_id", unique=True)
+                await db.ai_employee_user_state.create_index([("user_id", 1), ("employee_id", 1)], unique=True)
+                await db.ai_chat_artifacts.create_index("artifact_id", unique=True)
+                await db.ai_chat_artifacts.create_index([("session_id", 1), ("status", 1)])
+                await db.ai_chat_artifacts.create_index([("user_id", 1), ("created_at", -1)])
+                await db.certifications.create_index([("user_id", 1), ("certification_type", 1)])
+                await db.certifications.create_index("certification_id", unique=True)
 
-            await db.chat_uploads.create_index([("user_id", 1), ("session_id", 1)])
-            await db.chat_uploads.create_index("upload_id", unique=True)
-            await db.chat_uploads.create_index("created_at", expireAfterSeconds=30 * 24 * 3600)
+                await db.chat_uploads.create_index([("user_id", 1), ("session_id", 1)])
+                await db.chat_uploads.create_index("upload_id", unique=True)
+                await db.chat_uploads.create_index("created_at", expireAfterSeconds=30 * 24 * 3600)
 
-            await db.vega_discovery_sessions.create_index([("user_id", 1), ("status", 1)])
-            await db.vega_discovery_sessions.create_index("session_id", unique=True)
-            await db.vega_discovery_sessions.create_index("opportunity_name")
-            await db.vega_discovery_sessions.create_index("chat_session_id")
-            await db.vega_discovery_sessions.create_index([("user_id", 1), ("discovery_mode", 1)])
+                await db.vega_discovery_sessions.create_index([("user_id", 1), ("status", 1)])
+                await db.vega_discovery_sessions.create_index("session_id", unique=True)
+                await db.vega_discovery_sessions.create_index("opportunity_name")
+                await db.vega_discovery_sessions.create_index("chat_session_id")
+                await db.vega_discovery_sessions.create_index([("user_id", 1), ("discovery_mode", 1)])
 
-            await db.vega_events.create_index("event_id", unique=True)
-            await db.vega_events.create_index([("session_id", 1), ("created_at", 1)])
-            await db.vega_events.create_index([("user_id", 1), ("created_at", -1)])
-            await db.vega_events.create_index([("event_type", 1), ("created_at", -1)])
-            await db.vega_events.create_index("created_at", expireAfterSeconds=90 * 24 * 3600)
+                await db.vega_events.create_index("event_id", unique=True)
+                await db.vega_events.create_index([("session_id", 1), ("created_at", 1)])
+                await db.vega_events.create_index([("user_id", 1), ("created_at", -1)])
+                await db.vega_events.create_index([("event_type", 1), ("created_at", -1)])
+                await db.vega_events.create_index("created_at", expireAfterSeconds=90 * 24 * 3600)
 
-            # Vega v3 — versioned artifact storage (Wave 5 / Thread 5a).
-            # Each row is one immutable version of a discovery_analysis_v3
-            # artifact. Counters back persist_artifact_version's atomic
-            # find_one_and_update allocation. 90-day TTL keeps storage
-            # bounded — only the latest version is read by default.
-            await db.vega_artifact_versions.create_index(
-                [("artifact_id", 1), ("version", 1)], unique=True,
-            )
-            await db.vega_artifact_versions.create_index(
-                [("artifact_id", 1), ("created_at", -1)],
-            )
-            await db.vega_artifact_versions.create_index(
-                "created_at", expireAfterSeconds=90 * 24 * 3600,
-            )
-            await db.vega_artifact_version_counters.create_index(
-                "artifact_id", unique=True,
-            )
-
-            await db.bpmn_diagrams.create_index("bpmn_id", unique=True)
-            await db.bpmn_diagrams.create_index("workflow_id")
-            await db.bpmn_diagrams.create_index([("created_by", 1), ("created_at", -1)])
-
-            await db.app_registry.create_index("app_id", unique=True)
-            await db.app_registry.create_index("slug", unique=True)
-            await db.app_registry.create_index("status")
-            await db.app_registry.create_index("source_repo_url")
-            await db.app_modules.create_index("module_id", unique=True)
-            await db.app_modules.create_index([("app_id", 1), ("name", 1)], unique=True)
-            await db.app_modules.create_index("app_id")
-            await db.app_modules.create_index("permission_prefix")
-            await db.app_ingestion_log.create_index("app_id")
-            await db.app_ingestion_log.create_index([("app_id", 1), ("created_at", -1)])
-            await db.ingestion_artifacts.create_index([("app_id", 1), ("artifact_type", 1), ("version", 1)], unique=True)
-            await db.ingestion_field_catalogue.create_index([("app_id", 1), ("module_name", 1), ("version", 1)], unique=True)
-            await db.ingestion_state.create_index([("app_id", 1), ("ingestion_version", 1)], unique=True)
-
-            # (Nova general_ledger indexes + projection_runs indexes removed in
-            # Phase 1 — accounting-integration removal + Nova/FCC park. Those
-            # collections no longer exist.)
-
-            # finance_snapshots aging filters the surviving finance_drafts
-            # collection by kind+sync_status. Index name kept stable so
-            # create_index stays a no-op on existing deployments.
-            await db.finance_drafts.create_index(
-                [("kind", 1), ("sync_status", 1)],
-                name="nova_kind_sync_status",
-                background=True,
-            )
-
-            await db.finance_snapshots.create_index("snapshot_id", unique=True)
-            await db.finance_snapshots.create_index([("tenant_id", 1), ("created_at", -1)])
-            # Unique on (tenant_id, snapshot_date) enforces the
-            # daily-upsert cap: hourly refreshes within the same UTC
-            # day overwrite the same document instead of accumulating
-            # ~24 redundant rows per tenant per day.
-            await db.finance_snapshots.create_index(
-                [("tenant_id", 1), ("snapshot_date", -1)],
-                unique=True,
-            )
-
-            await db.policy_targets.create_index(
-                [("app_id", 1), ("module", 1), ("entity", 1), ("event", 1)],
-                unique=True,
-            )
-            await db.policy_targets.create_index([("app_id", 1), ("is_active", 1)])
-            await db.policy_targets.create_index([("module", 1), ("entity", 1), ("is_active", 1)])
-
-            logger.info("MongoDB indexes ensured")
-        except Exception as e:
-            logger.warning(f"Index creation warning (non-fatal): {e}")
-
-    # Marketplace sync reads AI employee documents and registers them in memory.
-    # It is not a seed. Keep it enabled so emp_ai_vega and other marketplace
-    # agents are available when the DB user can read ai_employees.
-    try:
-        from services.ai.agents.marketplace import sync_marketplace_agents
-        await sync_marketplace_agents(db)
-    except Exception as e:
-        logger.warning(f"Marketplace sync warning (non-fatal): {e}")
-
-    # ------------------------------------------------------------
-    # Optional AI employee seed
-    # ------------------------------------------------------------
-    if os.environ.get("SEED_AI_EMPLOYEES") == "true" and not SKIP_STARTUP_SEEDS:
-        try:
-            from seeds.seed_arc import seed_arc
-            await seed_arc(db)
-            logger.info("ARC curriculum seeded")
-        except Exception as e:
-            logger.warning(f"ARC seed warning (non-fatal): {e}")
-        try:
-            from seeds.seed_vega import seed_vega
-            await seed_vega(db)
-            logger.info("Vega knowledge base seeded")
-        except Exception as e:
-            logger.warning(f"Vega seed warning (non-fatal): {e}")
-        try:
-            from seeds.seed_orion import seed_orion
-            await seed_orion(db)
-            logger.info("Orion knowledge base seeded")
-        except Exception as e:
-            logger.warning(f"Orion seed warning (non-fatal): {e}")
-        try:
-            from seeds.seed_pmo import seed_pmo
-            await seed_pmo(db)
-            logger.info("PMO Assistant seeded")
-        except Exception as e:
-            logger.warning(f"PMO Assistant seed warning (non-fatal): {e}")
-    elif os.environ.get("SEED_AI_EMPLOYEES") == "true":
-        logger.info("Skipping AI employee seeds because SKIP_STARTUP_SEEDS=true")
-
-    # ------------------------------------------------------------
-    # Optional MATCH dev seed — pre-fills the MATCH settings singleton
-    # and a canonical Nextiva (dev) provider template so operators do
-    # not have to paste tokens / webhook URLs on every fresh stack.
-    # Separate flag from SEED_AI_EMPLOYEES because MATCH is data-only,
-    # not an AI employee. NEVER enable in production — defaults include
-    # a local-only AppDirect bearer.
-    # ------------------------------------------------------------
-    if os.getenv("MATCH_DEV_SEED", "").lower() == "true":
-        try:
-            from seeds.seed_match_dev import seed_match_dev
-            await seed_match_dev(db)
-            logger.info("MATCH dev seed: complete")
-        except Exception as e:
-            logger.warning(f"MATCH dev seed failed (non-blocking): {e}")
-
-    # ------------------------------------------------------------
-    # AI schema discovery / pricing seed
-    # ------------------------------------------------------------
-    if SKIP_STARTUP_SEEDS:
-        logger.info("Skipping AI schema discovery and pricing seed because SKIP_STARTUP_SEEDS=true")
-    else:
-        try:
-            from services.ai.schema import discover as discover_schema
-            await discover_schema(db)
-        except Exception as e:
-            logger.warning(f"AI schema discovery warning (non-fatal): {e}")
-
-        try:
-            default_pricing = [
-                {"model": "gemini-2.0-flash", "input_per_million": 0.10, "output_per_million": 0.40},
-                {"model": "gemini-2.5-flash", "input_per_million": 0.30, "output_per_million": 2.50},
-                {"model": "gemini-2.5-flash-lite", "input_per_million": 0.10, "output_per_million": 0.40},
-                {"model": "gemini-2.5-pro", "input_per_million": 1.25, "output_per_million": 10.00},
-                {"model": "gemini-3-flash-preview", "input_per_million": 0.50, "output_per_million": 3.00},
-                {"model": "gemini-3.1-pro-preview", "input_per_million": 2.00, "output_per_million": 12.00},
-                {"model": "gemini-3.1-flash-lite-preview", "input_per_million": 0.25, "output_per_million": 1.50},
-            ]
-            for p in default_pricing:
-                await db.ai_model_pricing.update_one(
-                    {"model": p["model"]},
-                    {"$setOnInsert": p},
-                    upsert=True,
+                await db.vega_artifact_versions.create_index(
+                    [("artifact_id", 1), ("version", 1)], unique=True,
                 )
-            logger.info("AI model pricing defaults seeded")
+                await db.vega_artifact_versions.create_index(
+                    [("artifact_id", 1), ("created_at", -1)],
+                )
+                await db.vega_artifact_versions.create_index(
+                    "created_at", expireAfterSeconds=90 * 24 * 3600,
+                )
+                await db.vega_artifact_version_counters.create_index(
+                    "artifact_id", unique=True,
+                )
+
+                await db.bpmn_diagrams.create_index("bpmn_id", unique=True)
+                await db.bpmn_diagrams.create_index("workflow_id")
+                await db.bpmn_diagrams.create_index([("created_by", 1), ("created_at", -1)])
+
+                await db.app_registry.create_index("app_id", unique=True)
+                await db.app_registry.create_index("slug", unique=True)
+                await db.app_registry.create_index("status")
+                await db.app_registry.create_index("source_repo_url")
+                await db.app_modules.create_index("module_id", unique=True)
+                await db.app_modules.create_index([("app_id", 1), ("name", 1)], unique=True)
+                await db.app_modules.create_index("app_id")
+                await db.app_modules.create_index("permission_prefix")
+                await db.app_ingestion_log.create_index("app_id")
+                await db.app_ingestion_log.create_index([("app_id", 1), ("created_at", -1)])
+                await db.ingestion_artifacts.create_index([("app_id", 1), ("artifact_type", 1), ("version", 1)], unique=True)
+                await db.ingestion_field_catalogue.create_index([("app_id", 1), ("module_name", 1), ("version", 1)], unique=True)
+                await db.ingestion_state.create_index([("app_id", 1), ("ingestion_version", 1)], unique=True)
+
+                await db.finance_drafts.create_index(
+                    [("kind", 1), ("sync_status", 1)],
+                    name="nova_kind_sync_status",
+                    background=True,
+                )
+
+                await db.finance_snapshots.create_index("snapshot_id", unique=True)
+                await db.finance_snapshots.create_index([("tenant_id", 1), ("created_at", -1)])
+                await db.finance_snapshots.create_index(
+                    [("tenant_id", 1), ("snapshot_date", -1)],
+                    unique=True,
+                )
+
+                await db.policy_targets.create_index(
+                    [("app_id", 1), ("module", 1), ("entity", 1), ("event", 1)],
+                    unique=True,
+                )
+                await db.policy_targets.create_index([("app_id", 1), ("is_active", 1)])
+                await db.policy_targets.create_index([("module", 1), ("entity", 1), ("is_active", 1)])
+
+                logger.info("MongoDB indexes ensured")
+            except Exception as e:
+                logger.warning(f"Index creation warning (non-fatal): {e}")
+
+        try:
+            from services.ai.agents.marketplace import sync_marketplace_agents
+            await sync_marketplace_agents(db)
         except Exception as e:
-            logger.warning(f"AI pricing seed warning (non-fatal): {e}")
+            logger.warning(f"Marketplace sync warning (non-fatal): {e}")
+
+        if os.environ.get("SEED_AI_EMPLOYEES") == "true" and not SKIP_STARTUP_SEEDS:
+            try:
+                from seeds.seed_arc import seed_arc
+                await seed_arc(db)
+                logger.info("ARC curriculum seeded")
+            except Exception as e:
+                logger.warning(f"ARC seed warning (non-fatal): {e}")
+            try:
+                from seeds.seed_vega import seed_vega
+                await seed_vega(db)
+                logger.info("Vega knowledge base seeded")
+            except Exception as e:
+                logger.warning(f"Vega seed warning (non-fatal): {e}")
+            try:
+                from seeds.seed_orion import seed_orion
+                await seed_orion(db)
+                logger.info("Orion knowledge base seeded")
+            except Exception as e:
+                logger.warning(f"Orion seed warning (non-fatal): {e}")
+            try:
+                from seeds.seed_pmo import seed_pmo
+                await seed_pmo(db)
+                logger.info("PMO Assistant seeded")
+            except Exception as e:
+                logger.warning(f"PMO Assistant seed warning (non-fatal): {e}")
+
+        if os.getenv("MATCH_DEV_SEED", "").lower() == "true":
+            try:
+                from seeds.seed_match_dev import seed_match_dev
+                await seed_match_dev(db)
+                logger.info("MATCH dev seed: complete")
+            except Exception as e:
+                logger.warning(f"MATCH dev seed failed (non-blocking): {e}")
+
+        if not SKIP_STARTUP_SEEDS:
+            try:
+                from services.ai.schema import discover as discover_schema
+                await discover_schema(db)
+            except Exception as e:
+                logger.warning(f"AI schema discovery warning (non-fatal): {e}")
+
+            try:
+                default_pricing = [
+                    {"model": "gemini-2.0-flash", "input_per_million": 0.10, "output_per_million": 0.40},
+                    {"model": "gemini-2.5-flash", "input_per_million": 0.30, "output_per_million": 2.50},
+                    {"model": "gemini-2.5-flash-lite", "input_per_million": 0.10, "output_per_million": 0.40},
+                    {"model": "gemini-2.5-pro", "input_per_million": 1.25, "output_per_million": 10.00},
+                    {"model": "gemini-3-flash-preview", "input_per_million": 0.50, "output_per_million": 3.00},
+                    {"model": "gemini-3.1-pro-preview", "input_per_million": 2.00, "output_per_million": 12.00},
+                    {"model": "gemini-3.1-flash-lite-preview", "input_per_million": 0.25, "output_per_million": 1.50},
+                ]
+                for p in default_pricing:
+                    await db.ai_model_pricing.update_one(
+                        {"model": p["model"]},
+                        {"$setOnInsert": p},
+                        upsert=True,
+                    )
+                logger.info("AI model pricing defaults seeded")
+            except Exception as e:
+                logger.warning(f"AI pricing seed warning (non-fatal): {e}")
 
     # ------------------------------------------------------------
     # Background jobs / schedulers
@@ -974,55 +848,51 @@ async def on_startup():
         return
 
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
-    from services.zoho_service import ZohoService
-
-    _sync_lock = False
-
-    async def _hourly_zoho_sync():
-        nonlocal _sync_lock
-        if _sync_lock:
-            logger.warning("[Hourly Sync] Skipped - previous sync still running")
-            return
-        _sync_lock = True
-        try:
-            db = database.get_db()
-            svc = ZohoService()
-            acc_new, acc_updated = await svc.sync_accounts_from_zoho(db)
-            deal_synced, deal_updated, deal_accts = await svc.sync_deals_from_zoho(db)
-            comm_count = await svc.sync_commission_data(db)
-            enriched_count = await svc.sync_deals_enriched(db)
-            logger.info(
-                f"[Hourly Sync] Accounts: {acc_new} new / {acc_updated} updated | "
-                f"Deals: {deal_synced} new / {deal_updated} updated | "
-                f"Commissions: {comm_count} | Enriched Deals: {enriched_count}"
-            )
-        except Exception as e:
-            logger.warning(f"[Hourly Sync] Skipped (Zoho not connected or error): {e}")
-        finally:
-            _sync_lock = False
-
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(_hourly_zoho_sync, "interval", minutes=15, id="zoho_15min_sync")
 
-    from services.fs_notifications import run_day_before_reminders
-    scheduler.add_job(run_day_before_reminders, "cron", hour=8, minute=0, id="fs_day_before_reminders")
+    if db:
+        from services.zoho_service import ZohoService
+        _sync_lock = False
 
-    # Nova finance snapshots: hourly so AR/AP totals Nova quotes never lag
-    # by more than ~60 minutes behind finance_drafts (formerly ar_invoices / ap_bills
-    # before the Wave 2D migration), plus a startup priming run so the first
-    # chat turn after a deploy doesn't miss data.
-    from datetime import datetime as _now_dt, timezone as _now_tz
-    from services.nova_engine.finance_snapshots import refresh_finance_snapshots
-    scheduler.add_job(
-        refresh_finance_snapshots,
-        "interval",
-        hours=1,
-        id="nova_finance_snapshot",
-        next_run_time=_now_dt.now(_now_tz.utc),
-    )
+        async def _hourly_zoho_sync():
+            nonlocal _sync_lock
+            if _sync_lock:
+                logger.warning("[Hourly Sync] Skipped - previous sync still running")
+                return
+            _sync_lock = True
+            try:
+                db_inst = database.get_db()
+                svc = ZohoService()
+                acc_new, acc_updated = await svc.sync_accounts_from_zoho(db_inst)
+                deal_synced, deal_updated, deal_accts = await svc.sync_deals_from_zoho(db_inst)
+                comm_count = await svc.sync_commission_data(db_inst)
+                enriched_count = await svc.sync_deals_enriched(db_inst)
+                logger.info(
+                    f"[Hourly Sync] Accounts: {acc_new} new / {acc_updated} updated | "
+                    f"Deals: {deal_synced} new / {deal_updated} updated | "
+                    f"Commissions: {comm_count} | Enriched Deals: {enriched_count}"
+                )
+            except Exception as e:
+                logger.warning(f"[Hourly Sync] Skipped (Zoho not connected or error): {e}")
+            finally:
+                _sync_lock = False
 
-    # Platform-core auth TTL sweep (Phase 2a, plan R10): Postgres has no native
-    # TTL, so expired sessions / reset tokens / oauth states are swept here.
+        scheduler.add_job(_hourly_zoho_sync, "interval", minutes=15, id="zoho_15min_sync")
+
+        from services.fs_notifications import run_day_before_reminders
+        scheduler.add_job(run_day_before_reminders, "cron", hour=8, minute=0, id="fs_day_before_reminders")
+
+        from datetime import datetime as _now_dt, timezone as _now_tz
+        from services.nova_engine.finance_snapshots import refresh_finance_snapshots
+        scheduler.add_job(
+            refresh_finance_snapshots,
+            "interval",
+            hours=1,
+            id="nova_finance_snapshot",
+            next_run_time=_now_dt.now(_now_tz.utc),
+        )
+
+    # Postgres Auth TTL sweep ALWAYS runs
     from services.auth_cleanup import cleanup_expired_auth_state
     scheduler.add_job(
         cleanup_expired_auth_state, "interval", minutes=30, id="auth_ttl_cleanup"
@@ -1030,42 +900,44 @@ async def on_startup():
 
     scheduler.start()
     app.state.scheduler = scheduler
-    logger.info("APScheduler started - Zoho sync every 15 minutes, FS reminders daily at 8 AM")
+    logger.info("APScheduler started")
 
-    # ---- Workflow Rules Engine ----
-    try:
-        from services.event_bus import get_event_bus
-        from services.workflow_engine import handle_event
-        from services.workflow_scheduler import start_workflow_scheduler
-        from routes.workflow_rules import set_scheduler_ref
+    if db:
+        # ---- Workflow Rules Engine ----
+        try:
+            from services.event_bus import get_event_bus
+            from services.workflow_engine import handle_event
+            from services.workflow_scheduler import start_workflow_scheduler
+            from routes.workflow_rules import set_scheduler_ref
 
-        event_bus = get_event_bus()
-        event_bus.subscribe(handle_event)
+            event_bus = get_event_bus()
+            event_bus.subscribe(handle_event)
 
-        set_scheduler_ref(scheduler)
-        await start_workflow_scheduler(scheduler)
+            set_scheduler_ref(scheduler)
+            await start_workflow_scheduler(scheduler)
 
-        if SKIP_STARTUP_INDEXES:
-            logger.info("Skipping workflow-rule index creation because SKIP_STARTUP_INDEXES=true")
-        else:
-            db = database.get_db()
-            await db.workflow_rules.create_index([("module", 1), ("enabled", 1), ("deleted_at", 1)])
-            await db.workflow_rules.create_index([("trigger.type", 1)])
-            await db.workflow_rule_executions.create_index([("rule_id", 1), ("triggered_at", -1)])
-            await db.workflow_rule_executions.create_index([("status", 1)])
-            await db.notifications.create_index([("user_id", 1), ("read", 1), ("created_at", -1)])
-            await db.hardware_material_requests.create_index([("opportunity_id", 1), ("status", 1)])
-            await db.hardware_material_requests.create_index([("distributor_id", 1), ("status", 1)])
-            await db.hardware_material_requests.create_index([("status", 1), ("needed_by_date", 1)])
-            await db.hardware_material_requests.create_index([("request_id", 1)], unique=True)
-            await db.hardware_material_requests.create_index([("deleted_at", 1), ("status", 1)])
-            await db.hardware_material_requests.create_index([("deleted_at", 1), ("opportunity_id", 1)])
-            await db.hardware_material_requests.create_index([("deleted_at", 1), ("distributor_id", 1)])
-            await db.distributors.create_index([("name", 1)], unique=True)
-            await db.distributors.create_index([("deleted_at", 1), ("status", 1)])
-        logger.info("Workflow rules engine initialized")
-    except Exception as e:
-        logger.warning(f"Workflow rules engine startup failed (non-fatal): {e}")
+            if SKIP_STARTUP_INDEXES:
+                logger.info("Skipping workflow-rule index creation because SKIP_STARTUP_INDEXES=true")
+            else:
+                await db.workflow_rules.create_index([("module", 1), ("enabled", 1), ("deleted_at", 1)])
+                await db.workflow_rules.create_index([("trigger.type", 1)])
+                await db.workflow_rule_executions.create_index([("rule_id", 1), ("triggered_at", -1)])
+                await db.workflow_rule_executions.create_index([("status", 1)])
+                await db.notifications.create_index([("user_id", 1), ("read", 1), ("created_at", -1)])
+                await db.hardware_material_requests.create_index([("opportunity_id", 1), ("status", 1)])
+                await db.hardware_material_requests.create_index([("distributor_id", 1), ("status", 1)])
+                await db.hardware_material_requests.create_index([("status", 1), ("needed_by_date", 1)])
+                await db.hardware_material_requests.create_index([("request_id", 1)], unique=True)
+                await db.hardware_material_requests.create_index([("deleted_at", 1), ("status", 1)])
+                await db.hardware_material_requests.create_index([("deleted_at", 1), ("opportunity_id", 1)])
+                await db.hardware_material_requests.create_index([("deleted_at", 1), ("distributor_id", 1)])
+                await db.distributors.create_index([("name", 1)], unique=True)
+                await db.distributors.create_index([("deleted_at", 1), ("status", 1)])
+            logger.info("Workflow rules engine initialized")
+        except Exception as e:
+            logger.warning(f"Workflow rules engine startup failed (non-fatal): {e}")
+
+
 
 
 @app.on_event("shutdown")
