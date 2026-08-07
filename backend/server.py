@@ -441,7 +441,7 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def on_startup():
     if not os.getenv("MONGO_URL"):
-        logger.warning("MONGO_URL not provided — skipping Mongo startup seeds/indexes")
+        logger.warning("MONGO_URL not configured — skipping MongoDB startup seeds and indexes")
         return
 
     db = database.get_db()
