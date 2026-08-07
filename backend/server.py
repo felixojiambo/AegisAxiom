@@ -440,8 +440,11 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def on_startup():
-    db = database.get_db()
+    if not os.getenv("MONGO_URL"):
+        logger.warning("MONGO_URL not provided — skipping Mongo startup seeds/indexes")
+        return
 
+    db = database.get_db()
     # ------------------------------------------------------------
     # Observability — GCP Error Reporting (v1.3 Theme B)
     #
