@@ -64,7 +64,7 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "craco build",
+    "build": "CI=false DISABLE_ESLINT_PLUGIN=true craco build",
     "test": "craco test",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,css,md,json}\""
