@@ -331,7 +331,9 @@ api_router.include_router(match_uploads_router, prefix="/match/uploads", tags=["
 @api_router.get("/health")
 async def health():
     return {"status": "ok", "service": "AEGISAXIOM API"}
-
+@app.get("/")
+async def root():
+    return {"message": "AEGISAXIOM API is running", "docs": "/api/health"}
 
 app.include_router(api_router)
 
@@ -936,9 +938,6 @@ async def on_startup():
             logger.info("Workflow rules engine initialized")
         except Exception as e:
             logger.warning(f"Workflow rules engine startup failed (non-fatal): {e}")
-
-
-
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
