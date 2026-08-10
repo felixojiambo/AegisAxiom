@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
-from database import get_db
 from db.session import get_session
 from models import User, UserCreate, UserLogin, PasswordReset, ForgotPasswordRequest, ResetPasswordRequest, GoogleCodeRequest, GoogleInviteCodeRequest, AdminSetupRequest
 from services.audit_service import log_action
@@ -40,24 +39,12 @@ async def _build_user_with_permissions(user: User) -> User:
     invite-accept / profile-update responses carry the same closure-aware
     permission list ``/api/auth/me`` returns. Backend route guards never trust
     ``effective_permissions`` from the wire — they recompute via has_perm().
-
-    Phase 2a: the base user comes from Postgres (the repository ``User`` DTO);
-    the role lookup remains Mongo (``roles_legacy_read``, deleted in 2b).
     """
     from auth_helper import get_cached_implication_graph
     from services.permission_implications import resolve_implications
 
-    db = get_db()  # roles_legacy_read (Mongo; Phase 2b)
     user_dict = user.model_dump()
-    role_name = user.role
-    if role_name:
-        role_doc = await db.roles.find_one({"name": role_name}, {"_id": 0})
-        if role_doc:
-            user_dict["permissions"] = role_doc.get("permissions", [])
-        else:
-            user_dict["permissions"] = user_dict.get("permissions") or []
-    else:
-        user_dict["permissions"] = user_dict.get("permissions") or []
+    user_dict["permissions"] = user_dict.get("permissions") or []
 
     # Resolve effective_permissions for the wire payload. The closure input must
     # union role permissions with per-user extra_permissions, matching
