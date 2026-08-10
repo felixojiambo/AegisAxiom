@@ -31,6 +31,19 @@ from rate_limiter import limiter
 
 router = APIRouter()
 
+DEFAULT_ROLE_PERMISSIONS = {
+    "admin": ["*"],
+    "sales_ops": [
+        "sales_ops:*",
+        "proposals:*",
+        "contractors:*",
+        "solutions_design:*",
+        "projects:read",
+    ],
+    "project_manager": ["projects:*"],
+    "customer": ["customer:*"],
+}
+
 
 async def _build_user_with_permissions(user: User) -> User:
     """Return a copy of ``user`` with role permissions + closure filled in.
@@ -44,7 +57,13 @@ async def _build_user_with_permissions(user: User) -> User:
     from services.permission_implications import resolve_implications
 
     user_dict = user.model_dump()
-    user_dict["permissions"] = user_dict.get("permissions") or []
+
+    # Hydrate permissions from user role fallback + explicit user permissions
+    role_perms = DEFAULT_ROLE_PERMISSIONS.get(user.role, [])
+    explicit_perms = user_dict.get("permissions") or []
+    base_permissions = set(explicit_perms) | set(role_perms)
+
+    user_dict["permissions"] = list(base_permissions)
 
     # Resolve effective_permissions for the wire payload. The closure input must
     # union role permissions with per-user extra_permissions, matching
@@ -58,10 +77,14 @@ async def _build_user_with_permissions(user: User) -> User:
             "falling back to convention-only closure"
         )
         registry_graph = {}
-    combined = set(user_dict.get("permissions") or []) | set(
-        user_dict.get("extra_permissions") or []
-    )
-    closure = resolve_implications(combined, registry_graph=registry_graph)
+
+    combined = base_permissions | set(user_dict.get("extra_permissions") or [])
+
+    if "*" in combined:
+        closure = {"*"} | set(resolve_implications(combined, registry_graph=registry_graph))
+    else:
+        closure = resolve_implications(combined, registry_graph=registry_graph)
+
     user_dict["effective_permissions"] = sorted(closure)
 
     return User(**user_dict)
