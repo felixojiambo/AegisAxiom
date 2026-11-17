@@ -8,6 +8,7 @@ import json
 import re
 import uuid
 import logging
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 from services.vega_events import emit_vega_event
@@ -1836,6 +1837,24 @@ _UPDATE_TASK_FIELD_WHITELIST = {
 }
 
 
+@asynccontextmanager
+async def _pg_users():
+    """Yield a `UserRepository` on a short-lived Postgres session.
+
+    Phase 2a completion: these AI tools are plain coroutines, not FastAPI
+    handlers, so they have no `Depends(get_session)` to borrow. Same
+    open-a-session-locally shape the other migrated service callers use
+    (`services/fs_notifications.py`, `services/google_docs_service.py`).
+    Read-only — nothing here commits.
+    """
+    from db.session import get_sessionmaker
+    from repositories.users import UserRepository
+
+    sm = get_sessionmaker()
+    async with sm() as pg:
+        yield UserRepository(pg)
+
+
 def _is_uuid_like(s: str) -> bool:
     """Loose check: AEGISAXIOM user_ids are uuid hex, occasionally prefixed.
     Used to decide whether `user_id_or_name` needs name resolution."""
@@ -1855,26 +1874,16 @@ async def _resolve_user_by_name(db, name: str) -> dict:
 
     name = name.strip()
 
-    # Escape regex metacharacters to defuse ReDoS — the name comes from the
-    # LLM, which can be prompt-injected with patterns like ``^(a+)+$``.
-    safe_name = re.escape(name)
-
     # Anchored prefix first (cheap) then fall back to contains-substring so
     # "@grace" finds "Grace Holloway" without the AI having to know the
-    # full name.
-    regex = {"$regex": f"^{safe_name}", "$options": "i"}
-    candidates = await db["users"].find(
-        {"$or": [{"name": regex}, {"email": regex}]},
-        {"_id": 0, "user_id": 1, "name": 1, "email": 1},
-    ).limit(10).to_list(10)
-
-    if not candidates:
-        # Try contains-substring as fallback.
-        contains = {"$regex": safe_name, "$options": "i"}
-        candidates = await db["users"].find(
-            {"$or": [{"name": contains}, {"email": contains}]},
-            {"_id": 0, "user_id": 1, "name": 1, "email": 1},
-        ).limit(10).to_list(10)
+    # full name. The LIKE-wildcard escaping that replaces the old `re.escape`
+    # lives in the repository — the name still comes from a promptable LLM.
+    async with _pg_users() as users:
+        candidates = await users.search_user_cards(name, prefix_only=True, limit=10)
+        if not candidates:
+            candidates = await users.search_user_cards(
+                name, prefix_only=False, limit=10
+            )
 
     if not candidates:
         return {"error": "not_found", "detail": f"No user matched '{name}'"}
@@ -1931,8 +1940,8 @@ async def _resolve_user_by_name_on_project(
       * 1 candidate → ``{user_id: ...}``
       * >1 candidates → ``{error: "ambiguous", candidates: [...]}``
 
-    The lookup is a single Mongo query: find users in the workspace whose
-    user_id is in the project's member set AND whose name/email matches.
+    The lookup is a single Postgres query: find users whose user_id is in the
+    project's member set AND whose name/email matches.
     """
     if not name or not name.strip():
         return {"error": "not_found", "message": "No name provided"}
@@ -1946,38 +1955,26 @@ async def _resolve_user_by_name_on_project(
         }
 
     name = name.strip()
+    ids = list(member_ids)
 
-    # Escape regex metacharacters to defuse ReDoS — the name comes from the
-    # LLM, which can be prompt-injected with patterns like ``^(a+)+$``.
-    safe_name = re.escape(name)
-
-    prefix_regex = {"$regex": f"^{safe_name}", "$options": "i"}
-    candidates = await db["users"].find(
-        {
-            "user_id": {"$in": list(member_ids)},
-            "$or": [{"name": prefix_regex}, {"email": prefix_regex}],
-        },
-        {"_id": 0, "user_id": 1, "name": 1, "email": 1},
-    ).limit(10).to_list(10)
-
-    if not candidates:
-        # Contains-fallback for the same scope.
-        contains = {"$regex": safe_name, "$options": "i"}
-        candidates = await db["users"].find(
-            {
-                "user_id": {"$in": list(member_ids)},
-                "$or": [{"name": contains}, {"email": contains}],
-            },
-            {"_id": 0, "user_id": 1, "name": 1, "email": 1},
-        ).limit(10).to_list(10)
+    async with _pg_users() as users:
+        # Prefix first, contains as fallback — both scoped to project members.
+        candidates = await users.search_user_cards(
+            name, prefix_only=True, user_ids=ids, limit=10
+        )
+        if not candidates:
+            candidates = await users.search_user_cards(
+                name, prefix_only=False, user_ids=ids, limit=10
+            )
+        member_docs = (
+            await users.list_user_cards_by_ids(ids, limit=20)
+            if not candidates
+            else []
+        )
 
     if not candidates:
         # 0 matches on project — surface the actual member list so the LLM
         # can suggest a real person instead of guessing.
-        member_docs = await db["users"].find(
-            {"user_id": {"$in": list(member_ids)}},
-            {"_id": 0, "user_id": 1, "name": 1, "email": 1},
-        ).limit(20).to_list(20)
         return {
             "error": "not_found",
             "message": f"No user '{name}' on this project",
@@ -2187,10 +2184,10 @@ async def _handle_assign_task(
         # project. AI hallucinated IDs shouldn't slip past membership.
         member_ids = await _project_member_ids(db, project_id) if project_id else set()
         if project_id and raw not in member_ids:
-            member_docs = await db["users"].find(
-                {"user_id": {"$in": list(member_ids)}},
-                {"_id": 0, "user_id": 1, "name": 1, "email": 1},
-            ).limit(20).to_list(20)
+            async with _pg_users() as users:
+                member_docs = await users.list_user_cards_by_ids(
+                    list(member_ids), limit=20
+                )
             await _audit_pmo_ai_action(
                 db, tool_name="assign_task", tier=1, user=user,
                 session_id=session_id, resource_type="task",

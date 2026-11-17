@@ -163,7 +163,7 @@ export default function AuthPage() {
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
                     className={inputCls}
-                    placeholder="you@simplimeta.io"
+                    placeholder="you@aegisai.io"
                     required
                     autoFocus
                   />
@@ -193,7 +193,7 @@ export default function AuthPage() {
           >
             Technology Services,
             <span className="block bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-              Simpli Enabled.
+              Aegis Enabled.
             </span>
           </h2>
           <p className="text-[#a5a7c0] text-sm mt-2">
@@ -220,7 +220,7 @@ export default function AuthPage() {
               AEGISAXIOM
             </span>
           </div>
-          <p className="text-aegisaxiom-text-muted text-sm">by SimpliMeta</p>
+          <p className="text-aegisaxiom-text-muted text-sm">by AegisAI</p>
         </div>
 
         {/* Welcome heading */}
@@ -273,7 +273,7 @@ export default function AuthPage() {
               value={form.email}
               onChange={set}
               className={inputCls}
-              placeholder="you@simplimeta.io"
+              placeholder="you@aegis.io"
               required
               data-testid="email-input"
             />
@@ -377,17 +377,17 @@ export default function AuthPage() {
           >
             Technology Services,
             <span className="block bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-              Simpli Enabled.
+              AegisAI Enabled.
             </span>
           </h2>
           <p className="text-[#a5a7c0] text-base leading-relaxed mb-10">
-            Your unified commission management hub — track deals, partners, payouts, contracts, and
+            Your unified commission management hub - track deals, partners, payouts, contracts, and
             client relationships, powered by AI.
           </p>
           {[
-            'RBAC-enforced data security',
-            'Real-time Zoho & QuickBooks sync',
-            'AI-powered commission insights with Claude',
+            'Enforced data security',
+            'Real-time finance sync',
+            'AI-powered insights',
           ].map((item) => (
             <div key={item} className="flex items-center gap-3 mb-3">
               <div className="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-400/40 flex items-center justify-center shrink-0">

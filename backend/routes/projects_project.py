@@ -20,10 +20,14 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from auth_helper import get_current_user, has_perm
 from database import get_db
+from db.session import get_session
 from middleware.ai_authz import require_ai_permission
 from middleware.tenant_scoping import get_current_tenant_id
+from repositories.users import UserRepository
 from models import gen_id
 from pymongo import ReturnDocument
 
@@ -478,6 +482,7 @@ async def create_project(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     if not has_perm(current_user, "projects.project.create"):
         raise HTTPException(status_code=403, detail="Permission denied")
@@ -502,18 +507,15 @@ async def create_project(
     # Phase 1E.3c — PM must belong to the calling tenant. Users from
     # other tenants are invisible (treated as "does not match any user")
     # to avoid leaking the existence of cross-tenant user_ids.
-    if effective_pm_id and not await db["users"].find_one(
-        {"user_id": effective_pm_id, "tenant_id": tenant_id}, {"_id": 1}
+    if effective_pm_id and not await UserRepository(pg).user_exists_in_tenant(
+        effective_pm_id, tenant_id
     ):
         raise HTTPException(
             status_code=422, detail=f"pm_id {effective_pm_id} does not match any user"
         )
     if payload.assigned_user_ids:
-        cnt = await db["users"].count_documents(
-            {
-                "user_id": {"$in": list(set(payload.assigned_user_ids))},
-                "tenant_id": tenant_id,
-            }
+        cnt = await UserRepository(pg).count_users_in_tenant(
+            list(set(payload.assigned_user_ids)), tenant_id
         )
         if cnt != len(set(payload.assigned_user_ids)):
             raise HTTPException(
@@ -576,6 +578,7 @@ async def create_project_from_template(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Create a project from a pm_templates document.
 
@@ -620,8 +623,8 @@ async def create_project_from_template(
     )
     pm_id = effective_pm_id
     # Phase 1E.3c — PM must belong to the calling tenant.
-    if effective_pm_id and not await db["users"].find_one(
-        {"user_id": effective_pm_id, "tenant_id": tenant_id}, {"_id": 1}
+    if effective_pm_id and not await UserRepository(pg).user_exists_in_tenant(
+        effective_pm_id, tenant_id
     ):
         raise HTTPException(
             status_code=422, detail=f"pm_id {effective_pm_id} does not match any user"
@@ -745,6 +748,7 @@ async def update_project(
     request: Request,
     current_user=Depends(get_current_user),
     tenant_id: str = Depends(get_current_tenant_id),
+    pg: AsyncSession = Depends(get_session),
 ):
     db = get_db()
 
@@ -805,8 +809,8 @@ async def update_project(
 
     if dumped.get("pm_id") is not None:
         # Phase 1E.3c — PM must belong to the calling tenant.
-        if not await db["users"].find_one(
-            {"user_id": dumped["pm_id"], "tenant_id": tenant_id}, {"_id": 1}
+        if not await UserRepository(pg).user_exists_in_tenant(
+            dumped["pm_id"], tenant_id
         ):
             raise HTTPException(
                 status_code=422,
@@ -815,9 +819,7 @@ async def update_project(
 
     if dumped.get("assigned_user_ids"):
         ids = list(set(dumped["assigned_user_ids"]))
-        cnt = await db["users"].count_documents(
-            {"user_id": {"$in": ids}, "tenant_id": tenant_id}
-        )
+        cnt = await UserRepository(pg).count_users_in_tenant(ids, tenant_id)
         if cnt != len(ids):
             raise HTTPException(
                 status_code=422,

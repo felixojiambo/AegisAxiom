@@ -163,7 +163,7 @@ export default function HomePage() {
               />
             </div>
             <span className="text-aegisaxiom-text font-bold text-lg">AEGISAXIOM</span>
-            <span className="text-aegisaxiom-text-muted text-xs ml-1">by SimpliMeta</span>
+            <span className="text-aegisaxiom-text-muted text-xs ml-1">by Aegis</span>
           </div>
           <button
             onClick={() => navigate('/login')}
@@ -196,19 +196,19 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 bg-violet-50 dark:bg-violet-500/10 border border-violet-500/30 rounded-full px-4 py-1.5 mb-6">
             <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
             <span className="text-violet-700 dark:text-violet-300 text-xs font-medium">
-              AI Operations · Powered by SimpliMeta
+              AI Operations · Powered by AegisAI
             </span>
           </div>
 
           <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight mb-6">
             Your Business,
             <span className="block bg-gradient-to-r from-violet-400 via-fuchsia-400 to-violet-300 bg-clip-text text-transparent">
-              Simpli Operated.
+              AegisAI Systems.
             </span>
           </h1>
 
           <p className="text-aegisaxiom-text-secondary text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-            AEGISAXIOM is SimpliMeta's AI operations platform — deploy accountable AI employees, replace
+            AEGISAXIOM is AegisAI's AI operations platform — deploy accountable AI employees, replace
             legacy SaaS with custom apps, and govern every workflow in one place.
           </p>
 
@@ -322,9 +322,9 @@ export default function HomePage() {
                 }`}
               />
               <div>
-                <div className="text-aegisaxiom-text font-bold text-sm">AEGISAXIOM by SimpliMeta</div>
+                <div className="text-aegisaxiom-text font-bold text-sm">AEGISAXIOM by AegisAI</div>
                 <div className="text-aegisaxiom-text-muted text-xs">
-                  Unified operations, simpli operated.
+                  Unified operations, AegisAI.
                 </div>
               </div>
             </div>
@@ -380,7 +380,7 @@ export default function HomePage() {
           {/* Bottom row */}
           <div className="mt-8 pt-6 border-t border-aegisaxiom-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <p className="text-aegisaxiom-text-muted text-xs">
-              © {new Date().getFullYear()} SimpliMeta. All rights reserved.
+              © {new Date().getFullYear()} AegisAI. All rights reserved.
             </p>
             <p className="text-aegisaxiom-text-muted text-xs">AEGISAXIOM · v1.0</p>
           </div>

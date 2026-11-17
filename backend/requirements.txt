@@ -148,3 +148,4 @@ pgvector==0.5.0
 # fixtures skip cleanly when neither TEST_DATABASE_URL nor Docker is available,
 # so the existing mongomock-motor suite is unaffected if this import is absent.
 testcontainers==4.14.2
+grpcio-status>=1.71.2

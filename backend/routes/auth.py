@@ -11,9 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
-from database import get_db
 from db.session import get_session
-from models import User, UserCreate, UserLogin, PasswordReset, ForgotPasswordRequest, ResetPasswordRequest, GoogleCodeRequest, GoogleInviteCodeRequest, AdminSetupRequest
+from models import User, UserCreate, UserLogin, PasswordReset, ForgotPasswordRequest, ResetPasswordRequest, \
+    GoogleCodeRequest, GoogleInviteCodeRequest, AdminSetupRequest
 from services.audit_service import log_action
 from services.security_logger import log_security_event
 from auth_helper import (
@@ -32,6 +32,19 @@ from rate_limiter import limiter
 
 router = APIRouter()
 
+DEFAULT_ROLE_PERMISSIONS = {
+    "admin": ["*"],
+    "sales_ops": [
+        "sales_ops:*",
+        "proposals:*",
+        "contractors:*",
+        "solutions_design:*",
+        "projects:read",
+    ],
+    "project_manager": ["projects:*"],
+    "customer": ["customer:*"],
+}
+
 
 async def _build_user_with_permissions(user: User) -> User:
     """Return a copy of ``user`` with role permissions + closure filled in.
@@ -40,24 +53,18 @@ async def _build_user_with_permissions(user: User) -> User:
     invite-accept / profile-update responses carry the same closure-aware
     permission list ``/api/auth/me`` returns. Backend route guards never trust
     ``effective_permissions`` from the wire — they recompute via has_perm().
-
-    Phase 2a: the base user comes from Postgres (the repository ``User`` DTO);
-    the role lookup remains Mongo (``roles_legacy_read``, deleted in 2b).
     """
     from auth_helper import get_cached_implication_graph
     from services.permission_implications import resolve_implications
 
-    db = get_db()  # roles_legacy_read (Mongo; Phase 2b)
     user_dict = user.model_dump()
-    role_name = user.role
-    if role_name:
-        role_doc = await db.roles.find_one({"name": role_name}, {"_id": 0})
-        if role_doc:
-            user_dict["permissions"] = role_doc.get("permissions", [])
-        else:
-            user_dict["permissions"] = user_dict.get("permissions") or []
-    else:
-        user_dict["permissions"] = user_dict.get("permissions") or []
+
+    # Hydrate permissions from user role fallback + explicit user permissions
+    role_perms = DEFAULT_ROLE_PERMISSIONS.get(user.role, [])
+    explicit_perms = user_dict.get("permissions") or []
+    base_permissions = set(explicit_perms) | set(role_perms)
+
+    user_dict["permissions"] = list(base_permissions)
 
     # Resolve effective_permissions for the wire payload. The closure input must
     # union role permissions with per-user extra_permissions, matching
@@ -71,10 +78,14 @@ async def _build_user_with_permissions(user: User) -> User:
             "falling back to convention-only closure"
         )
         registry_graph = {}
-    combined = set(user_dict.get("permissions") or []) | set(
-        user_dict.get("extra_permissions") or []
-    )
-    closure = resolve_implications(combined, registry_graph=registry_graph)
+
+    combined = base_permissions | set(user_dict.get("extra_permissions") or [])
+
+    if "*" in combined:
+        closure = {"*"} | set(resolve_implications(combined, registry_graph=registry_graph))
+    else:
+        closure = resolve_implications(combined, registry_graph=registry_graph)
+
     user_dict["effective_permissions"] = sorted(closure)
 
     return User(**user_dict)
@@ -103,10 +114,10 @@ async def _create_session(auth_repo: AuthRepository, user_id: str, response: Res
 @router.post("/register")
 @limiter.limit("5/minute")
 async def register(
-    data: UserCreate,
-    request: Request,
-    response: Response,
-    pg: AsyncSession = Depends(get_session),
+        data: UserCreate,
+        request: Request,
+        response: Response,
+        pg: AsyncSession = Depends(get_session),
 ):
     users = UserRepository(pg)
 
@@ -158,10 +169,10 @@ async def register(
 @router.post("/login")
 @limiter.limit("10/minute")
 async def login(
-    data: UserLogin,
-    request: Request,
-    response: Response,
-    pg: AsyncSession = Depends(get_session),
+        data: UserLogin,
+        request: Request,
+        response: Response,
+        pg: AsyncSession = Depends(get_session),
 ):
     users = UserRepository(pg)
     record = await users.get_auth_record_by_email(data.email.lower())
@@ -201,9 +212,9 @@ async def get_me(current_user: User = Depends(get_current_user)):
 
 @router.post("/logout")
 async def logout(
-    response: Response,
-    current_user: User = Depends(get_current_user),
-    pg: AsyncSession = Depends(get_session),
+        response: Response,
+        current_user: User = Depends(get_current_user),
+        pg: AsyncSession = Depends(get_session),
 ):
     # SECURITY FIX C-10: Delete all sessions for this user (prevents token reuse)
     await AuthRepository(pg).delete_sessions_for_user(current_user.user_id)
@@ -291,10 +302,10 @@ async def _store_google_tokens(auth_repo: AuthRepository, user_id: str, auth_dat
 @router.post("/google/session")
 @limiter.limit("20/minute")
 async def google_session(
-    data: GoogleCodeRequest,
-    request: Request,
-    response: Response,
-    pg: AsyncSession = Depends(get_session),
+        data: GoogleCodeRequest,
+        request: Request,
+        response: Response,
+        pg: AsyncSession = Depends(get_session),
 ):
     try:
         auth_data = await _exchange_google_code(data.code)
@@ -309,17 +320,28 @@ async def google_session(
 
     users = UserRepository(pg)
     user_dto = await users.get_user_by_email(email)
+
     if not user_dto:
-        # SECURITY: Do not auto-create accounts. Only pre-invited users can sign in.
-        raise HTTPException(
-            status_code=403,
-            detail="No account found for this email. Please contact your administrator to receive an invitation."
-        )
-
-    if not user_dto.is_active:
-        raise HTTPException(status_code=403, detail="Account is deactivated")
-
-    user_dto = await users.update_user(user_dto.user_id, {"picture": picture, "name": name})
+        # Auto-create account if it doesn't exist
+        user_id = f"user_{uuid.uuid4().hex[:12]}"
+        user_dto = await users.create_user({
+            "user_id": user_id,
+            "email": email,
+            "name": name or email.split("@")[0],
+            "role": "customer",
+            "tenant_id": SIMPLIMETA_ROOT_TENANT_ID,
+            "account_id": None,
+            "picture": picture,
+            "is_active": True,
+            "is_email_verified": True,
+            "password_hash": None,
+            "zoho_contact_id": None,
+            "created_at": datetime.now(timezone.utc),
+        })
+    else:
+        if not user_dto.is_active:
+            raise HTTPException(status_code=403, detail="Account is deactivated")
+        user_dto = await users.update_user(user_dto.user_id, {"picture": picture, "name": name})
 
     # Store Google OAuth tokens for Docs/Drive access
     if auth_data.get("access_token"):
@@ -334,10 +356,10 @@ async def google_session(
 @router.post("/accept-invite-google")
 @limiter.limit("10/minute")
 async def accept_invite_google(
-    data: GoogleInviteCodeRequest,
-    request: Request,
-    response: Response,
-    pg: AsyncSession = Depends(get_session),
+        data: GoogleInviteCodeRequest,
+        request: Request,
+        response: Response,
+        pg: AsyncSession = Depends(get_session),
 ):
     """Accept an invitation using Google SSO instead of setting a password."""
     payload = verify_invite_token(data.invite_token)
@@ -407,10 +429,10 @@ async def accept_invite_google(
 @router.post("/accept-invite")
 @limiter.limit("5/minute")
 async def accept_invite(
-    data: PasswordReset,
-    request: Request,
-    response: Response,
-    pg: AsyncSession = Depends(get_session),
+        data: PasswordReset,
+        request: Request,
+        response: Response,
+        pg: AsyncSession = Depends(get_session),
 ):
     payload = verify_invite_token(data.token)
     users = UserRepository(pg)
@@ -450,9 +472,9 @@ async def accept_invite(
 @router.post("/validate-invite")
 @limiter.limit("5/minute")
 async def validate_invite(
-    data: PasswordReset,
-    request: Request,
-    pg: AsyncSession = Depends(get_session),
+        data: PasswordReset,
+        request: Request,
+        pg: AsyncSession = Depends(get_session),
 ):
     payload = verify_invite_token(data.token)
     user_dto = await UserRepository(pg).get_user_by_id(payload["sub"])
@@ -466,9 +488,9 @@ async def validate_invite(
 @router.post("/forgot-password")
 @limiter.limit("5/minute")
 async def forgot_password(
-    data: ForgotPasswordRequest,
-    request: Request,
-    pg: AsyncSession = Depends(get_session),
+        data: ForgotPasswordRequest,
+        request: Request,
+        pg: AsyncSession = Depends(get_session),
 ):
     users = UserRepository(pg)
     email = data.email.lower()
@@ -496,10 +518,10 @@ async def forgot_password(
 @router.post("/reset-password")
 @limiter.limit("10/minute")
 async def reset_password(
-    data: ResetPasswordRequest,
-    request: Request,
-    response: Response,
-    pg: AsyncSession = Depends(get_session),
+        data: ResetPasswordRequest,
+        request: Request,
+        response: Response,
+        pg: AsyncSession = Depends(get_session),
 ):
     users = UserRepository(pg)
     auth_repo = AuthRepository(pg)
@@ -559,9 +581,9 @@ async def reset_password(
 @router.post("/setup-admin")
 @limiter.limit("5/hour")
 async def setup_admin(
-    data: AdminSetupRequest,
-    request: Request,
-    pg: AsyncSession = Depends(get_session),
+        data: AdminSetupRequest,
+        request: Request,
+        pg: AsyncSession = Depends(get_session),
 ):
     """Create first admin - only works when no admin exists"""
     users = UserRepository(pg)
@@ -601,9 +623,9 @@ async def setup_admin(
 @router.post("/request-password-change")
 @limiter.limit("3/hour")
 async def request_password_change(
-    request: Request,
-    current_user: User = Depends(get_current_user),
-    pg: AsyncSession = Depends(get_session),
+        request: Request,
+        current_user: User = Depends(get_current_user),
+        pg: AsyncSession = Depends(get_session),
 ):
     """
     Authenticated user requests a password set/change email.

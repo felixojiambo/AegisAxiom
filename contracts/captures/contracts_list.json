@@ -1,0 +1,30 @@
+{
+  "domain": "mongo (4a)",
+  "name": "contracts_list",
+  "request": {
+    "auth": true,
+    "method": "GET",
+    "path": "/api/contracts"
+  },
+  "sample": {
+    "has_next": false,
+    "has_prev": false,
+    "items": [],
+    "limit": 100,
+    "page": 1,
+    "pages": 1,
+    "skip": 0,
+    "total": 0
+  },
+  "shape": {
+    "has_next": "bool",
+    "has_prev": "bool",
+    "items": [],
+    "limit": "int",
+    "page": "int",
+    "pages": "int",
+    "skip": "int",
+    "total": "int"
+  },
+  "status": 200
+}
