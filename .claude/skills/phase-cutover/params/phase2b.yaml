@@ -216,6 +216,32 @@ sweeps:
     verify: "validate_dag passes after the sweep; /api/roles still returns; a user holding finance.cashflow.view still gets 200 on the Cashflow Planner route."
     log: "Record every key considered, its consumer evidence, and the keep/remove decision. Silent removal is a failure."
 
+  - id: default-role-permissions-dedup
+    what: "Delete the hardcoded DEFAULT_ROLE_PERMISSIONS dict from routes/auth.py so login / register / invite-accept / profile-update responses stop computing role permissions from a second, drift-prone source."
+    where: "backend/routes/auth.py:35-46 (the dict) AND :63 (role_perms = DEFAULT_ROLE_PERMISSIONS.get(user.role, []) inside _build_user_with_permissions)."
+    action: >-
+      Remove the dict entirely. Change _build_user_with_permissions to resolve
+      role_perms the same way get_current_user resolves them post-roles_legacy_read-
+      deletion above — RolesRepository(pg).get_role_permissions(user.role) — so both
+      auth paths (and has_perm's precomputed closure, which both feed) read role
+      permissions from one source, the roles repository, instead of a hardcoded
+      convention table that can silently drift from the roles table.
+    verify: >-
+      Zero-grep for DEFAULT_ROLE_PERMISSIONS across live backend code (no hits,
+      including the subscript form — n/a here since it was a module dict, not a
+      Mongo collection, but confirm no stray reference survives in
+      routes/auth.py or elsewhere). /api/auth/me response shape stays byte-
+      compatible against its stored contract capture (same keys, same types —
+      a VALUE diff in permissions/effective_permissions for a role whose actual
+      roles-table permissions differ from the old hardcoded table is expected
+      and must be reconciled, not waved through as "just a capture update").
+    log: >-
+      Record the role names exercised (admin, sales_ops, project_manager,
+      customer at minimum) and confirm each one's RolesRepository-resolved
+      permissions match — or intentionally supersede — the deleted
+      DEFAULT_ROLE_PERMISSIONS entry for that role. A silent behavior change
+      here is a failure, not just a shape diff.
+
 # --------------------------------------------------------------------------
 # Verification
 # --------------------------------------------------------------------------
