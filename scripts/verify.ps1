@@ -72,9 +72,23 @@ $RepoRoot    = Split-Path -Parent $PSScriptRoot
 $ComposeMain = Join-Path $RepoRoot 'docker-compose.yml'
 $ComposeTest = Join-Path $RepoRoot 'docker-compose.test.yml'
 
-# In-container view of the test database. docker-compose.test.yml shares this
-# repo's compose project name, so `postgres-test` resolves on the shared default
-# network — no host.docker.internal hop, no compose-file edit.
+# docker-compose.test.yml runs under ITS OWN compose project — not the main
+# stack's implicit (directory-name-derived) project — so `up`/`down` on either
+# compose file never sees the other's containers as orphans and the two stacks
+# stop fighting over who owns the default network's config hash. Main's project
+# name is left exactly as Compose infers it (no -p anywhere for $ComposeMain);
+# this only renames the TEST stack's project.
+$MainProjectName = ((Split-Path -Leaf $RepoRoot).ToLowerInvariant() -replace '[^a-z0-9_-]', '')
+$TestProjectName = "$MainProjectName-test"
+# The main stack's implicit default network (created the first time anything
+# under $ComposeMain starts). Ensure-TestDb bridges postgres-test onto it below
+# so `docker compose -f $ComposeMain run backend` can still resolve `postgres-test`
+# by hostname even though the two stacks are now different projects.
+$MainNetworkName = "${MainProjectName}_default"
+
+# In-container view of the test database. Reachable by hostname because
+# Ensure-TestDb explicitly bridges postgres-test onto $MainNetworkName — no
+# host.docker.internal hop, no compose-file edit.
 $TestDbUrlContainer = 'postgresql+asyncpg://aegis:aegis@postgres-test:5432/aegis_test'
 # Host view of the same database (published port), for reference/native runs.
 $TestDbUrlHost      = 'postgresql+asyncpg://aegis:aegis@localhost:5544/aegis_test'
@@ -116,8 +130,11 @@ function Test-DockerUp {
 }
 
 function Get-ComposeContainerId {
-    param([string]$ComposeFile, [string]$Service)
-    $id = & docker compose -f $ComposeFile ps -q $Service
+    param([string]$ComposeFile, [string]$Service, [string]$Project = '')
+    $a = @('compose')
+    if ($Project) { $a += @('-p', $Project) }
+    $a += @('-f', $ComposeFile, 'ps', '-q', $Service)
+    $id = & docker @a
     if ($LASTEXITCODE -ne 0) { return $null }
     return ($id | Select-Object -First 1)
 }
@@ -142,29 +159,40 @@ function Wait-ContainerState {
     return $false
 }
 
-# NOTE: never pass --remove-orphans. docker-compose.test.yml shares the compose
-# project name, so the main stack would delete postgres-test as an "orphan".
+# NOTE: never pass --remove-orphans anywhere in this script.
 function Ensure-TestDb {
-    $id = Get-ComposeContainerId -ComposeFile $ComposeTest -Service 'postgres-test'
+    $id = Get-ComposeContainerId -ComposeFile $ComposeTest -Service 'postgres-test' -Project $TestProjectName
     $state = Get-ContainerState -Id $id
     if ($state -ne 'healthy' -and $state -ne 'running') {
-        Detail 'test db: bringing up docker-compose.test.yml'
-        & docker compose -f $ComposeTest up -d | Out-Null
+        Detail "test db: bringing up docker-compose.test.yml (project=$TestProjectName)"
+        & docker compose -p $TestProjectName -f $ComposeTest up -d | Out-Null
         if ($LASTEXITCODE -ne 0) { return $false }
         $script:StartedTestDb = $true
-        $id = Get-ComposeContainerId -ComposeFile $ComposeTest -Service 'postgres-test'
+        $id = Get-ComposeContainerId -ComposeFile $ComposeTest -Service 'postgres-test' -Project $TestProjectName
     }
     if (-not (Wait-ContainerState -Id $id -Accept @('healthy') -TimeoutSec 120)) {
         Detail 'test db: never became healthy'
         return $false
     }
+
+    # Bridge: the test stack is its own project now, so postgres-test lands on
+    # its own private default network. $ComposeMain containers (e.g. `docker
+    # compose run backend` during -Alembic/-Tests) still need to resolve
+    # `postgres-test` by hostname, so connect it onto the main project's
+    # default network under that alias. Create the network if $ComposeMain
+    # hasn't started anything yet this session; ignore "already connected" —
+    # both are expected steady states, not failures.
+    & docker network inspect $MainNetworkName 2>$null | Out-Null
+    if ($LASTEXITCODE -ne 0) { & docker network create $MainNetworkName 2>$null | Out-Null }
+    & docker network connect --alias postgres-test $MainNetworkName $id 2>$null | Out-Null
+
     return $true
 }
 
 function Remove-TestDbIfStarted {
     if ($script:StartedTestDb -and -not $Keep) {
-        Detail 'test db: tearing down (started by this run; pass -Keep to leave it up)'
-        & docker compose -f $ComposeTest down -v | Out-Null
+        Detail "test db: tearing down (started by this run; pass -Keep to leave it up; project=$TestProjectName)"
+        & docker compose -p $TestProjectName -f $ComposeTest down -v | Out-Null
     }
 }
 
