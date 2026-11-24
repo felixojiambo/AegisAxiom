@@ -467,7 +467,7 @@ async def on_startup():
         from seeds.seed_tenants import seed_tenants
         await seed_tenants()
 
-        if db:
+        if db is not None:
             from routes.roles import seed_default_roles
             await seed_default_roles(db)
 
@@ -567,7 +567,7 @@ async def on_startup():
         else:
             logger.warning("ADMIN_EMAIL and ADMIN_PASSWORD not set - admin auto-initialization skipped")
 
-    if db:
+    if db is not None:
         try:
             from services.permission_registry import validate_dag
             await validate_dag(db)
@@ -580,7 +580,7 @@ async def on_startup():
     # ------------------------------------------------------------
     # MongoDB index creation & optional seeds
     # ------------------------------------------------------------
-    if db:
+    if db is not None:
         if SKIP_STARTUP_INDEXES:
             logger.info("Skipping MongoDB startup index creation because SKIP_STARTUP_INDEXES=true")
         else:
@@ -852,7 +852,7 @@ async def on_startup():
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
     scheduler = AsyncIOScheduler()
 
-    if db:
+    if db is not None:
         from services.zoho_service import ZohoService
         _sync_lock = False
 
@@ -904,7 +904,7 @@ async def on_startup():
     app.state.scheduler = scheduler
     logger.info("APScheduler started")
 
-    if db:
+    if db is not None:
         # ---- Workflow Rules Engine ----
         try:
             from services.event_bus import get_event_bus
