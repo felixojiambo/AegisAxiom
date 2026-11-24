@@ -2,18 +2,26 @@ name: backend-tests
 
 # The enforced OUTER loop of the Postgres migration harness (H4).
 #
-# Three jobs, three different failure modes closed:
-#   pg-tests   real Postgres from docker-compose.test.yml; a run where the PG
-#              suite SKIPS fails the job. Skipped-as-green is the failure mode
-#              this job exists to kill, so it is asserted on pytest OUTPUT, not
-#              just on the exit code (pytest exits 0 when everything skips).
-#   zero-grep  scripts/verify.sh --grep over every completed-phase pattern file,
-#              so a merged regression that reintroduces `db.users` (either the
-#              attribute or the subscript form) can never land silently.
-#   full-suite the existing mongomock-motor suites, running as-is until their
-#              domains migrate. Kept intentionally separate: those tests have
-#              legitimate skips, and folding them in would blunt the PG
-#              skip-as-fail assertion above.
+# Four jobs, four different failure modes closed:
+#   pg-tests    real Postgres from docker-compose.test.yml; a run where the PG
+#               suite SKIPS fails the job. Skipped-as-green is the failure mode
+#               this job exists to kill, so it is asserted on pytest OUTPUT, not
+#               just on the exit code (pytest exits 0 when everything skips).
+#   zero-grep   scripts/verify.sh --grep over every completed-phase pattern file,
+#               so a merged regression that reintroduces `db.users` (either the
+#               attribute or the subscript form) can never land silently.
+#   full-suite  the existing mongomock-motor suites, running as-is until their
+#               domains migrate. Kept intentionally separate: those tests have
+#               legitimate skips, and folding them in would blunt the PG
+#               skip-as-fail assertion above.
+#   boot-check  the gap the other three jobs leave open: none of them ever
+#               starts the FastAPI app, so a startup-time crash (e.g. truth-
+#               testing a Motor database handle instead of comparing it with
+#               None — the exact bug this job was added to catch) can pass
+#               alembic, pytest, AND zero-grep, then take main down on boot.
+#               Builds the real backend image, boots it for real against mongo
+#               + postgres service containers via scripts/verify.sh --boot
+#               --smoke, and fails on any startup traceback.
 #
 # scripts/verify.sh --native runs python on the runner (deps installed here,
 # service DB reachable directly) instead of in a container — same profiles, same
@@ -173,3 +181,48 @@ jobs:
       - name: Tear down the test Postgres
         if: always()
         run: docker compose -f docker-compose.test.yml down -v
+
+  # ------------------------------------------------------------------
+  # 4. Boot check — actually starts the app; a startup crash must fail CI
+  # ------------------------------------------------------------------
+  boot-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # CI-local env, derived from the committed example — no secrets involved.
+      # MONGO_URL / DATABASE_URL / CHROMADB_URL in .env.example already point at
+      # the compose service names (mongo / postgres / aegisaxiom-chromadb); only
+      # the REPLACE_ME_BEFORE_DEPLOY placeholders need a local value to boot —
+      # server.py refuses to start admin auto-init with the placeholder still
+      # set (see backend/server.py on_startup), so these are required, not optional.
+      - name: Build backend/.env from backend/.env.example (local values, no secrets)
+        run: |
+          cp backend/.env.example backend/.env
+          sed -i \
+            -e 's/^JWT_SECRET=.*/JWT_SECRET=ci-boot-check-local-jwt-secret/' \
+            -e 's/^ADMIN_EMAIL=.*/ADMIN_EMAIL=admin@ci.local/' \
+            -e 's/^ADMIN_PASSWORD=.*/ADMIN_PASSWORD=ci-boot-check-local-admin/' \
+            -e 's/^ADMIN_NAME=.*/ADMIN_NAME=CI Admin/' \
+            backend/.env
+
+      - name: Build the backend image
+        run: docker compose -f docker-compose.yml build backend
+
+      # mongo + postgres per this job's purpose; chromadb is also required
+      # because backend's compose depends_on blocks its own startup on
+      # chromadb's healthcheck regardless of what this job is here to test.
+      - name: Start mongo + postgres + chromadb service containers
+        run: docker compose -f docker-compose.yml up -d --wait mongo postgres chromadb
+
+      # The actual gap this job closes: boot the real app image for real and
+      # fail on any startup traceback (scripts/verify.sh scans the force-
+      # recreated container's log for "Traceback" and for "Application startup
+      # complete"), then prove login + health + me + one endpoint of each
+      # datastore works end to end.
+      - name: Verify — boot + smoke
+        run: bash scripts/verify.sh --boot --smoke
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.yml down -v

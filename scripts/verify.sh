@@ -26,8 +26,23 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMPOSE_MAIN="$REPO_ROOT/docker-compose.yml"
 COMPOSE_TEST="$REPO_ROOT/docker-compose.test.yml"
 
-# In-container view: docker-compose.test.yml shares this repo's compose project
-# name, so `postgres-test` resolves on the shared default network.
+# docker-compose.test.yml runs under ITS OWN compose project — not the main
+# stack's implicit (directory-name-derived) project — so `up`/`down` on either
+# compose file never sees the other's containers as orphans and the two
+# stacks stop fighting over who owns the default network's config hash.
+# $COMPOSE_MAIN keeps Compose's inferred project name unchanged (no -p
+# anywhere for it); only the TEST stack's project is renamed.
+MAIN_PROJECT_NAME="$(basename "$REPO_ROOT" | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z0-9_-')"
+TEST_PROJECT_NAME="${MAIN_PROJECT_NAME}-test"
+# The main stack's implicit default network (created the first time anything
+# under $COMPOSE_MAIN starts). ensure_test_db() bridges postgres-test onto it
+# below so `docker compose -f $COMPOSE_MAIN run backend` can still resolve
+# `postgres-test` by hostname even though the two stacks are now different
+# projects.
+MAIN_NETWORK_NAME="${MAIN_PROJECT_NAME}_default"
+
+# In-container view: reachable by hostname because ensure_test_db() explicitly
+# bridges postgres-test onto $MAIN_NETWORK_NAME.
 TEST_DB_URL_CONTAINER="${VERIFY_TEST_DATABASE_URL:-postgresql+asyncpg://aegis:aegis@postgres-test:5432/aegis_test}"
 # Native/host view (published port), overridable by the caller / CI.
 TEST_DB_URL_NATIVE="${TEST_DATABASE_URL:-postgresql+asyncpg://aegis:aegis@localhost:5544/aegis_test}"
@@ -134,8 +149,7 @@ if [ "$NEEDS_DOCKER" -eq 1 ] && ! docker info >/dev/null 2>&1; then
 fi
 
 # --------------------------------------------------------------------------
-# Docker helpers. NEVER pass --remove-orphans: docker-compose.test.yml shares
-# the compose project name and the main stack would delete postgres-test.
+# Docker helpers. NEVER pass --remove-orphans anywhere in this script.
 # --------------------------------------------------------------------------
 container_state() {
   local id="$1"
@@ -157,22 +171,34 @@ wait_state() { # id accept timeout
 ensure_test_db() {
   [ "$NATIVE" -eq 1 ] && return 0   # CI supplies TEST_DATABASE_URL itself
   local id state
-  id="$(docker compose -f "$COMPOSE_TEST" ps -q postgres-test 2>/dev/null | head -1)"
+  id="$(docker compose -p "$TEST_PROJECT_NAME" -f "$COMPOSE_TEST" ps -q postgres-test 2>/dev/null | head -1)"
   state="$(container_state "$id")"
   if [ "$state" != healthy ] && [ "$state" != running ]; then
-    detail 'test db: bringing up docker-compose.test.yml'
-    docker compose -f "$COMPOSE_TEST" up -d >/dev/null || return 1
+    detail "test db: bringing up docker-compose.test.yml (project=$TEST_PROJECT_NAME)"
+    docker compose -p "$TEST_PROJECT_NAME" -f "$COMPOSE_TEST" up -d >/dev/null || return 1
     STARTED_TEST_DB=1
-    id="$(docker compose -f "$COMPOSE_TEST" ps -q postgres-test 2>/dev/null | head -1)"
+    id="$(docker compose -p "$TEST_PROJECT_NAME" -f "$COMPOSE_TEST" ps -q postgres-test 2>/dev/null | head -1)"
   fi
   wait_state "$id" healthy 120 || { detail 'test db: never became healthy'; return 1; }
+
+  # Bridge: the test stack is its own project now, so postgres-test lands on
+  # its own private default network. $COMPOSE_MAIN containers (e.g. `docker
+  # compose run backend` during --alembic/--tests) still need to resolve
+  # `postgres-test` by hostname, so connect it onto the main project's default
+  # network under that alias. Create the network if $COMPOSE_MAIN hasn't
+  # started anything yet this session; ignore "already connected" — both are
+  # expected steady states, not failures.
+  docker network inspect "$MAIN_NETWORK_NAME" >/dev/null 2>&1 \
+    || docker network create "$MAIN_NETWORK_NAME" >/dev/null 2>&1
+  docker network connect --alias postgres-test "$MAIN_NETWORK_NAME" "$id" >/dev/null 2>&1
+
   return 0
 }
 
 teardown_test_db() {
   if [ "$STARTED_TEST_DB" -eq 1 ] && [ "$KEEP" -eq 0 ]; then
-    detail 'test db: tearing down (started by this run; pass --keep to leave it up)'
-    docker compose -f "$COMPOSE_TEST" down -v >/dev/null 2>&1
+    detail "test db: tearing down (started by this run; pass --keep to leave it up; project=$TEST_PROJECT_NAME)"
+    docker compose -p "$TEST_PROJECT_NAME" -f "$COMPOSE_TEST" down -v >/dev/null 2>&1
   fi
 }
 trap teardown_test_db EXIT
