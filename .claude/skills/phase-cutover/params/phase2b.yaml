@@ -303,11 +303,14 @@ contract_endpoints:
   - "/api/tenants"          # 2a regression guard
   - "/api/roles"            # THIS phase's domain — shape must be byte-compatible
   - "/api/contracts"        # still-Mongo parallel-run guard
+  - "/api/audit"            # audit_list.json — pinned Mongo-backed 2026-11-25
+  - "/api/admin/policies"   # policies_list.json — pinned Mongo-backed 2026-11-25 (router mounts under /admin; /api/policies is a 404)
 contracts_note: >-
   /api/roles is already in contracts/captures/roles_list.json, recorded while it
   was Mongo-backed. That capture is the 2b acceptance test: after cutover the
-  shape must compare clean WITHOUT re-recording. Add /api/audit and /api/policies
-  captures before starting so their shapes are pinned too.
+  shape must compare clean WITHOUT re-recording. /api/audit and
+  /api/admin/policies were captured Mongo-backed before step 3 (audit_list.json,
+  policies_list.json). compare checks every file in contracts/captures.
 
 smoke_migrated: "/api/roles"      # Postgres after 2b
 smoke_legacy: "/api/contracts"    # still Mongo until Phase 4a

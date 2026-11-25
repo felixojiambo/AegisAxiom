@@ -1,0 +1,62 @@
+{
+  "domain": "mongo (2b)",
+  "name": "audit_list",
+  "request": {
+    "auth": true,
+    "method": "GET",
+    "path": "/api/audit"
+  },
+  "sample": {
+    "items": [
+      {
+        "action": "login",
+        "actor_email": "<redacted:str>",
+        "actor_id": "user_d119bec76af2",
+        "audit_id": "audit_38d7da96d4744c84",
+        "details": {},
+        "event_category": "activity",
+        "resource_id": null,
+        "resource_type": "auth",
+        "timestamp": "2026-11-25T19:26:12.857000"
+      },
+      {
+        "action": "login",
+        "actor_email": "<redacted:str>",
+        "actor_id": "user_d119bec76af2",
+        "audit_id": "audit_f928e847691f4eef",
+        "details": {},
+        "event_category": "activity",
+        "resource_id": null,
+        "resource_type": "auth",
+        "timestamp": "2026-11-25T19:25:43.030000"
+      }
+    ],
+    "limit": 50,
+    "skip": 0,
+    "total": 26
+  },
+  "shape": {
+    "items": [
+      {
+        "action": "str",
+        "actor_email": "str",
+        "actor_id": "str",
+        "audit_id": "str",
+        "details": {
+          "reason": "str"
+        },
+        "event_category": "str",
+        "event_type": "str",
+        "outcome": "str",
+        "resource_id": "null",
+        "resource_type": "str",
+        "severity": "str",
+        "timestamp": "str"
+      }
+    ],
+    "limit": "int",
+    "skip": "int",
+    "total": "int"
+  },
+  "status": 200
+}
