@@ -216,19 +216,21 @@ async def get_current_user(
 
     Phase 2a cutover: ``user_sessions`` and ``users`` are read from **Postgres**
     via the repositories (``pg`` session threaded in as a nested dependency — no
-    change required at the 466 ``Depends(get_current_user)`` call sites). Two
-    reads remain Mongo-backed during the parallel run and are marked as shims:
+    change required at the 466 ``Depends(get_current_user)`` call sites).
+    Phase 2b: role permissions come from ``RolesRepository`` on the same ``pg``
+    session and the implication graph from the Postgres ``permissions`` table
+    (the 2a ``roles_legacy_read`` shim is deleted). One read remains
+    Mongo-backed during the parallel run and is marked as a shim:
 
-      * ``roles_legacy_read`` — ``db.roles`` + the implication graph. Roles /
-        permissions are Phase **2b**; deleted then.
       * ``ai_employees_legacy_read`` — ``db.ai_employees`` (the AI-employee tag).
         ``ai_employees`` is Phase **8**; deleted then.
     """
     from models import User
     from repositories.auth import AuthRepository
+    from repositories.roles import RolesRepository
     from repositories.users import UserRepository
 
-    db = get_db()  # Mongo — only for the two legacy-read shims below.
+    db = get_db()  # Mongo — only for the ai_employees_legacy_read shim below.
     token = None
     if session_token:
         token = session_token
@@ -287,11 +289,9 @@ async def get_current_user(
     # Base user fields come from the Postgres DTO; permissions are derived below.
     user_doc = user_dto.model_dump()
 
-    # --- roles_legacy_read (Mongo; Phase 2b) --------------------------------
-    # Role permissions + per-user overrides. Deleted in 2b when roles migrate.
+    # Role permissions (Postgres, roles repository) + per-user overrides.
     role_name = user_dto.role or "customer"
-    role_doc = await db.roles.find_one({"name": role_name}, {"_id": 0, "permissions": 1})
-    role_permissions = role_doc.get("permissions", []) if role_doc else []
+    role_permissions = await RolesRepository(pg).get_role_permissions(role_name)
     user_extras = user_dto.extra_permissions or []
     permissions = list(set(role_permissions + user_extras))
 

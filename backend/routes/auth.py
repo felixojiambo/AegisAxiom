@@ -32,35 +32,28 @@ from rate_limiter import limiter
 
 router = APIRouter()
 
-DEFAULT_ROLE_PERMISSIONS = {
-    "admin": ["*"],
-    "sales_ops": [
-        "sales_ops:*",
-        "proposals:*",
-        "contractors:*",
-        "solutions_design:*",
-        "projects:read",
-    ],
-    "project_manager": ["projects:*"],
-    "customer": ["customer:*"],
-}
 
-
-async def _build_user_with_permissions(user: User) -> User:
+async def _build_user_with_permissions(user: User, pg: AsyncSession) -> User:
     """Return a copy of ``user`` with role permissions + closure filled in.
 
     Used by ALL auth endpoints that return user data so login / register /
     invite-accept / profile-update responses carry the same closure-aware
     permission list ``/api/auth/me`` returns. Backend route guards never trust
     ``effective_permissions`` from the wire — they recompute via has_perm().
+
+    Phase 2b: role permissions come from the roles table via
+    ``RolesRepository`` — the same source ``auth_helper.get_current_user``
+    reads. The hardcoded role->permissions convention dict that
+    used to live here (a second, drift-prone source) is deleted.
     """
     from auth_helper import get_cached_implication_graph
+    from repositories.roles import RolesRepository
     from services.permission_implications import resolve_implications
 
     user_dict = user.model_dump()
 
-    # Hydrate permissions from user role fallback + explicit user permissions
-    role_perms = DEFAULT_ROLE_PERMISSIONS.get(user.role, [])
+    # Hydrate permissions from the user's role + explicit user permissions
+    role_perms = await RolesRepository(pg).get_role_permissions(user.role or "customer")
     explicit_perms = user_dict.get("permissions") or []
     base_permissions = set(explicit_perms) | set(role_perms)
 
@@ -162,7 +155,7 @@ async def register(
         "created_at": datetime.now(timezone.utc),
     })
     token = await _create_session(AuthRepository(pg), user_id, response)
-    user = await _build_user_with_permissions(created)
+    user = await _build_user_with_permissions(created, pg)
     return {"user": user, "token": token}
 
 
@@ -201,7 +194,7 @@ async def login(
     token = await _create_session(AuthRepository(pg), user_dto.user_id, response)
     await log_action("login", user_dto.user_id, user_dto.email, "auth")
 
-    user = await _build_user_with_permissions(user_dto)
+    user = await _build_user_with_permissions(user_dto, pg)
     return {"user": user, "token": token}
 
 
@@ -349,7 +342,7 @@ async def google_session(
 
     token = await _create_session(AuthRepository(pg), user_dto.user_id, response)
     await log_action("login_google", user_dto.user_id, user_dto.email, "auth")
-    user = await _build_user_with_permissions(user_dto)
+    user = await _build_user_with_permissions(user_dto, pg)
     return {"user": user, "token": token}
 
 
@@ -422,7 +415,7 @@ async def accept_invite_google(
     token = await _create_session(auth_repo, payload["sub"], response)
     await log_action("invite_accepted_google", payload["sub"], updated.email, "auth")
 
-    user = await _build_user_with_permissions(updated)
+    user = await _build_user_with_permissions(updated, pg)
     return {"user": user, "token": token}
 
 
@@ -465,7 +458,7 @@ async def accept_invite(
     # FIX CRITICAL-3: Wipe any pre-existing sessions when accepting an invite
     await auth_repo.delete_sessions_for_user(payload["sub"])
     token = await _create_session(auth_repo, payload["sub"], response)
-    user = await _build_user_with_permissions(updated)
+    user = await _build_user_with_permissions(updated, pg)
     return {"user": user, "token": token}
 
 
@@ -574,7 +567,7 @@ async def reset_password(
         resource="user", resource_id=user_dto.user_id,
         action="password_reset", outcome="success",
     )
-    user = await _build_user_with_permissions(user_dto)
+    user = await _build_user_with_permissions(user_dto, pg)
     return {"user": user, "token": token, "message": "Password reset successful."}
 
 

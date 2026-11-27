@@ -2,8 +2,12 @@ import time
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional
 
-from database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from auth_helper import get_current_user, has_perm
+from db.session import get_session
+from repositories.audit import AuditFilter, AuditRepository
+from repositories.policies import PolicyTargetRepository
 from services.field_registry import register_fields, register_module_events, register_module_config
 
 router = APIRouter()
@@ -42,10 +46,11 @@ async def get_audit_logs(
     severity: Optional[str] = None,
     outcome: Optional[str] = None,
     current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
 ):
     """Paginated audit log query.
 
-    Reads from the unified audit_logs collection. Activity events
+    Reads from the unified audit_logs table. Activity events
     (event_category="activity") come from services.audit_service;
     security events (event_category="security") from
     services.security_logger. Legacy entries written before the schema
@@ -56,66 +61,32 @@ async def get_audit_logs(
     """
     if not has_perm(current_user, "audit.view"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
-    # Build the filter as a list of conjunct clauses so any future addition
-    # (e.g., date-range, multi-condition tag) can append safely without
-    # silently overwriting an existing $or clause. Falls back to a flat
-    # filter when only one clause is present so simple queries don't carry
-    # extra Mongo machinery.
-    clauses: list = []
-    if action:
-        clauses.append({"action": action})
-    if resource_type:
-        # Trailing-dot value = module-only filter (e.g. "davies_pmo.") sent by
-        # the admin UI when a module is selected without an entity. Translate
-        # to a prefix match so every entity under that module surfaces.
-        if resource_type.endswith("."):
-            import re as _re
-            clauses.append({
-                "resource_type": {"$regex": f"^{_re.escape(resource_type)}"}
-            })
-        else:
-            clauses.append({"resource_type": resource_type})
-    if actor_id:
-        clauses.append({"actor_id": actor_id})
-    if event_category:
-        if event_category == "activity":
-            # Legacy entries written before the schema unification have no
-            # event_category — surface them under "Activity" so the
-            # existing UI keeps showing the same history.
-            clauses.append({
-                "$or": [
-                    {"event_category": "activity"},
-                    {"event_category": {"$exists": False}},
-                ]
-            })
-        else:
-            clauses.append({"event_category": event_category})
-    if event_type:
-        clauses.append({"event_type": event_type})
-    if severity:
-        clauses.append({"severity": severity})
-    if outcome:
-        clauses.append({"outcome": outcome})
-    if not clauses:
-        filt = {}
-    elif len(clauses) == 1:
-        filt = clauses[0]
-    else:
-        filt = {"$and": clauses}
-    docs = (
-        await db.audit_logs.find(filt, {"_id": 0})
-        .sort("timestamp", -1)
-        .skip(skip)
-        .limit(min(limit, 200))
-        .to_list(min(limit, 200))
+    # Phase 2b: Postgres via AuditRepository. Same conjunctive filter set as
+    # the Mongo clause list: a trailing-dot resource_type (e.g. "davies_pmo.",
+    # sent by the admin UI when a module is selected without an entity) is a
+    # module-prefix match (LIKE, trigram-served); event_category="activity"
+    # also matches legacy rows with no event_category (NULL).
+    filt = AuditFilter(
+        action=action or None,
+        resource_type=resource_type or None,
+        actor_id=actor_id or None,
+        event_category=event_category or None,
+        event_type=event_type or None,
+        severity=severity or None,
+        outcome=outcome or None,
     )
-    total = await db.audit_logs.count_documents(filt)
+    repo = AuditRepository(pg)
+    records = await repo.list_logs(filt, skip=skip, limit=min(limit, 200))
+    total = await repo.count_logs(filt)
+    docs = [r.to_api_dict() for r in records]
     return {"items": docs, "total": total, "skip": skip, "limit": limit}
 
 
 @router.get("/known-modules")
-async def get_known_modules(current_user=Depends(get_current_user)):
+async def get_known_modules(
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+):
     """Module/entity catalog for the audit log filter dropdown.
 
     Combines two sources:
@@ -140,13 +111,13 @@ async def get_known_modules(current_user=Depends(get_current_user)):
     if cached is not None and (now - _known_modules_cache["timestamp"]) < _KNOWN_MODULES_TTL:
         return cached
 
-    db = get_db()
+    audit_repo = AuditRepository(pg)
 
     # 1. Pull distinct resource_types from audit_logs and keep only the
     #    `module.entity` shaped ones. Native single-token resource types
     #    (e.g. "contract", "user", "policy") are surfaced through a
     #    separate filter and don't belong in the module-level dropdown.
-    audit_resource_types = await db.audit_logs.distinct("resource_type")
+    audit_resource_types = await audit_repo.distinct_resource_types()
     audit_pairs: dict = {}  # (module, entity) -> True
     for rt in audit_resource_types:
         if not rt or not isinstance(rt, str) or "." not in rt:
@@ -157,23 +128,18 @@ async def get_known_modules(current_user=Depends(get_current_user)):
         audit_pairs[(module, entity)] = True
 
     # 2. Pull active rows from policy_targets so freshly-ingested modules
-    #    appear before any audit activity exists. Tolerant of a missing
-    #    collection on fresh deploys.
+    #    appear before any audit activity exists. The table always exists
+    #    post-0005; the read stays tolerant, inside a SAVEPOINT so a failure
+    #    cannot poison the request transaction for the reads below.
     ingestion_pairs: set = set()
     try:
-        collections = await db.list_collection_names()
-        if "policy_targets" in collections:
-            target_docs = await db.policy_targets.find(
-                {"is_active": True},
-                {"_id": 0, "module": 1, "entity": 1},
-            ).to_list(5000)
-            for doc in target_docs:
-                module = doc.get("module")
-                entity = doc.get("entity")
-                if module and entity:
-                    ingestion_pairs.add((module, entity))
+        async with pg.begin_nested():
+            targets = await PolicyTargetRepository(pg).list_active_targets()
+        for t in targets:
+            if t.module and t.entity:
+                ingestion_pairs.add((t.module, t.entity))
     except Exception:
-        # Don't fail the dropdown if policy_targets is unreachable —
+        # Don't fail the dropdown if policy_targets is unreadable —
         # the audit_logs-derived pairs are still useful on their own.
         ingestion_pairs = set()
 
@@ -201,10 +167,9 @@ async def get_known_modules(current_user=Depends(get_current_user)):
         event_count = 0
         for entity in entities:
             rt = f"{module}.{entity}"
-            event_types = await db.audit_logs.distinct("event_type", {"resource_type": rt})
-            # distinct() returns [] when nothing matches; filter out
-            # empty/None entries so legacy rows missing event_type don't
-            # inflate the count.
+            event_types = await audit_repo.distinct_event_types(rt)
+            # SELECT DISTINCT already excludes NULL; the filter below still
+            # drops empty strings so legacy rows don't inflate the count.
             event_count += sum(1 for et in event_types if et)
         result.append({
             "module": module,

@@ -2067,7 +2067,8 @@ async def _audit_pmo_ai_action(
             "details": details,
             "timestamp": datetime.now(timezone.utc),
         }
-        await db.audit_logs.insert_one(entry)
+        from services.audit_service import write_audit_entry  # Phase 2b: audit_logs is Postgres
+        await write_audit_entry(entry)
     except Exception as e:
         # Audit write is best-effort. The failure already happened — losing
         # the audit row should not surface to the user as a tool error.

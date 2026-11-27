@@ -306,9 +306,6 @@ api_router.include_router(nova_router, prefix="/nova", tags=["Nova"])
 # v1.3 Wave 3.5 — frontend error forwarder (POST /api/errors). Mounts at the
 # api_router (already prefixed with /api), so the final path is /api/errors.
 api_router.include_router(api_errors_router, tags=["Observability - Frontend Errors"])
-# v1.3 Wave 3.5 — frontend error forwarder (POST /api/errors). Mounts at the
-# api_router (already prefixed with /api), so the final path is /api/errors.
-api_router.include_router(api_errors_router, tags=["Observability - Frontend Errors"])
 api_router.include_router(ai_dispatcher_router, prefix="/ai-dispatcher", tags=["AI Dispatcher"])
 
 # ============================================================================
@@ -467,38 +464,43 @@ async def on_startup():
         from seeds.seed_tenants import seed_tenants
         await seed_tenants()
 
+        # Phase 2b — Postgres-backed RBAC / governance seeds ALWAYS run
+        # (roles, permission registry, projects RBAC, system policies). Their
+        # tables and indexes come from Alembic 0005; nothing here touches Mongo.
+        from routes.roles import seed_default_roles
+        await seed_default_roles()
+
+        from services.permission_registry import (
+            seed_system_permissions,
+            deactivate_keys,
+            strip_keys_from_roles,
+        )
+        await seed_system_permissions()
+
+        try:
+            from routes.roles import _DEPRECATED_FINANCE_KEYS
+            await deactivate_keys(_DEPRECATED_FINANCE_KEYS)
+            await strip_keys_from_roles(_DEPRECATED_FINANCE_KEYS)
+        except Exception as e:
+            logger.warning(f"Deprecated key cleanup warning (non-fatal): {e}")
+
+        # Phase 2b orphaned-Nova-permission sweep: delete the rows, preserve any
+        # access they implied, strip them from roles, re-check the DAG — one
+        # transaction. NOT wrapped: a DAG cycle here must fail boot loudly.
+        from routes.roles import _ORPHANED_NOVA_KEYS
+        from services.permission_registry import retire_orphaned_keys
+        await retire_orphaned_keys(_ORPHANED_NOVA_KEYS)
+
+        try:
+            from seeds.seed_projects_rbac import seed_projects_rbac
+            await seed_projects_rbac()
+        except Exception as e:
+            logger.warning(f"Projects RBAC seed warning (non-fatal): {e}")
+
+        from services.policy_seeds import seed_system_policies
+        await seed_system_policies()
+
         if db is not None:
-            from routes.roles import seed_default_roles
-            await seed_default_roles(db)
-
-            try:
-                await db.permissions.create_index("key", unique=True)
-                await db.permissions.create_index("source")
-                await db.permissions.create_index("app_id", sparse=True)
-                await db.permissions.create_index("is_active")
-            except Exception as e:
-                logger.warning(f"Permissions registry index setup hit a non-fatal error: {e}")
-
-            from services.permission_registry import (
-                seed_system_permissions,
-                deactivate_keys,
-                strip_keys_from_roles,
-            )
-            await seed_system_permissions(db)
-
-            try:
-                from routes.roles import _DEPRECATED_FINANCE_KEYS
-                await deactivate_keys(_DEPRECATED_FINANCE_KEYS, db)
-                await strip_keys_from_roles(_DEPRECATED_FINANCE_KEYS, db)
-            except Exception as e:
-                logger.warning(f"Deprecated key cleanup warning (non-fatal): {e}")
-
-            try:
-                from seeds.seed_projects_rbac import seed_projects_rbac
-                await seed_projects_rbac(db)
-            except Exception as e:
-                logger.warning(f"Projects RBAC seed warning (non-fatal): {e}")
-
             try:
                 from seeds.seed_builtin_ingestions import seed_builtin_ingestions
                 await seed_builtin_ingestions(db)
@@ -507,9 +509,6 @@ async def on_startup():
 
             from routes.default_resource_types import seed_default_resource_types
             await seed_default_resource_types(db)
-
-            from services.policy_seeds import seed_system_policies
-            await seed_system_policies(db)
 
             from services.workflow_seeds import seed_system_workflows
             await seed_system_workflows(db)
@@ -567,13 +566,12 @@ async def on_startup():
         else:
             logger.warning("ADMIN_EMAIL and ADMIN_PASSWORD not set - admin auto-initialization skipped")
 
-    if db is not None:
-        try:
-            from services.permission_registry import validate_dag
-            await validate_dag(db)
-        except Exception as e:
-            logger.error("Permission DAG validation failed at startup: %s", e)
-            raise
+    # Permission DAG validation (plan §A7, Phase 2b). Reads Postgres, runs
+    # after seed_system_permissions. Boot-survivable: SKIP_STARTUP_DAG_VALIDATION
+    # short-circuits it, and an unreachable/empty registry logs and continues —
+    # but a REAL cycle on a reachable registry still raises and fails boot.
+    from services.permission_registry import validate_dag_at_startup
+    await validate_dag_at_startup()
 
     import services.ingestion.event_listeners  # noqa: F401
 
@@ -607,7 +605,6 @@ async def on_startup():
                 await db.chat_sessions.create_index("session_id", unique=True)
                 await db.chat_sessions.create_index("user_id")
                 await db.chat_messages.create_index("session_id")
-                await db.roles.create_index("name", unique=True)
 
                 await db.ai_employee_definitions.create_index("definition_id", unique=True)
                 await db.ai_employee_definitions.create_index("type")
@@ -630,19 +627,6 @@ async def on_startup():
                 await db.ai_employees.create_index([("tenant_id", 1), ("status", 1)], sparse=True)
                 await db.ai_employees.create_index("definition_id", sparse=True)
                 await db.ai_employees.create_index("assignment_id", sparse=True)
-
-                await db.audit_logs.create_index([("timestamp", -1)])
-                await db.audit_logs.create_index("action")
-                await db.audit_logs.create_index("actor_id")
-                await db.audit_logs.create_index("event_category")
-                await db.audit_logs.create_index("event_type")
-                await db.audit_logs.create_index("severity")
-                await db.audit_logs.create_index("outcome")
-                await db.audit_logs.create_index([("event_category", 1), ("timestamp", -1)])
-                await db.audit_logs.create_index([("event_type", 1), ("timestamp", -1)])
-                await db.audit_logs.create_index([("actor_id", 1), ("timestamp", -1)])
-                await db.audit_logs.create_index([("actor_email", 1), ("timestamp", -1)])
-                await db.audit_logs.create_index([("resource_type", 1), ("resource_id", 1), ("timestamp", -1)])
 
                 await db.projects.create_index("project_id", unique=True)
                 await db.projects.create_index("contract_id")
@@ -680,10 +664,6 @@ async def on_startup():
                 await db.dashboards.create_index("dashboard_id", unique=True)
                 await db.dashboards.create_index([("user_id", 1), ("order", 1)])
                 await db.capacity_health_rules.create_index("rule_id", unique=True)
-
-                await db.policies.create_index("policy_id", unique=True)
-                await db.policies.create_index([("module", 1), ("entity", 1), ("enabled", 1)])
-                await db.policies.create_index("deleted_at")
 
                 await db.ai_usage.create_index([("created_at", -1)])
                 await db.ai_usage.create_index("user_id")
@@ -763,13 +743,6 @@ async def on_startup():
                     [("tenant_id", 1), ("snapshot_date", -1)],
                     unique=True,
                 )
-
-                await db.policy_targets.create_index(
-                    [("app_id", 1), ("module", 1), ("entity", 1), ("event", 1)],
-                    unique=True,
-                )
-                await db.policy_targets.create_index([("app_id", 1), ("is_active", 1)])
-                await db.policy_targets.create_index([("module", 1), ("entity", 1), ("is_active", 1)])
 
                 logger.info("MongoDB indexes ensured")
             except Exception as e:

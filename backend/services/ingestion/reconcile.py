@@ -16,6 +16,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from database import get_db
+from db.session import get_sessionmaker
+from repositories.permissions import PermissionsRepository
+from repositories.policies import PolicyTargetRepository
 from services import field_registry, permission_registry
 from services.ingestion import rbac_generator
 from services.ingestion import repository as repo
@@ -156,33 +159,29 @@ async def reconcile_app(
     mapping_entities = mapping.get("entities", {}) if isinstance(mapping, dict) else {}
 
     db = get_db()
-    # Pull both active and manual_override permissions. is_active=False alone
-    # would let manual_override re-add itself via the diff; we want to count
-    # any persisted key (regardless of active state) as "already persisted"
-    # so the registry is the source of truth for what exists.
-    permissions_cursor = db.permissions.find(
-        {"app_id": app_id}, {"_id": 0, "key": 1, "source": 1}
-    )
-    persisted_perm_keys = {
-        d["key"] async for d in permissions_cursor if d.get("key")
-    }
+    async with get_sessionmaker()() as pg:
+        # Pull both active and manual_override permissions. is_active=False
+        # alone would let manual_override re-add itself via the diff; we want
+        # to count any persisted key (regardless of active state) as "already
+        # persisted" so the registry is the source of truth for what exists.
+        persisted_perm_keys = await PermissionsRepository(pg).list_keys_for_app(
+            app_id, only_active=False
+        )
 
-    # policy_targets are stored with module = the catalogue's `module_name`
-    # (which equals `entity_name` per the analyzer's convention — see
-    # service.py:472,510). Reading `module` here lets us match what's already
-    # registered without assuming app_slug.
-    # NOTE: the policy_targets collection's `app_id` field actually stores the
-    # app_slug, not the app's `app_id`. This is a pre-existing convention from
-    # the ingestion pipeline (see service.py where targets are written) and is
-    # load-bearing for the reader. If the convention is ever corrected, the
-    # writer in service.py and this reader must change together.
-    targets_cursor = db.policy_targets.find(
-        {"app_id": app_slug, "is_active": True},
-        {"_id": 0, "module": 1, "entity": 1, "event": 1},
-    )
-    persisted_targets = {
-        (d.get("module"), d.get("entity"), d.get("event")) async for d in targets_cursor
-    }
+        # policy_targets are stored with module = the catalogue's
+        # `module_name` (which equals `entity_name` per the analyzer's
+        # convention — see service.py). Reading `module` here lets us match
+        # what's already registered without assuming app_slug.
+        # NOTE: the policy_targets table's `app_id` column actually stores the
+        # app_slug, not the app's `app_id`. This is a pre-existing convention
+        # from the ingestion pipeline (see service.py where targets are
+        # written) and is load-bearing for the reader. If the convention is
+        # ever corrected, the writer in service.py and this reader must change
+        # together.
+        persisted_targets = {
+            (t.module, t.entity, t.event)
+            for t in await PolicyTargetRepository(pg).list_active_targets(app_slug=app_slug)
+        }
 
     # ---- Diff --------------------------------------------------------------------
     changes: dict = {

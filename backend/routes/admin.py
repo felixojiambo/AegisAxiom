@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from db.session import get_session
+from repositories.roles import RolesRepository
 from repositories.users import UserRepository
 from repositories.tenants import TenantRepository
 
@@ -97,7 +98,6 @@ async def list_contract_approval_access(
     if not tenant_id:
         raise HTTPException(status_code=403, detail="User is not assigned to a tenant")
 
-    db = get_db()
     user_dtos = await UserRepository(pg).list_users(tenant_id=tenant_id, limit=5000)
     # resolve_approval_access is a pure helper operating on plain dicts
     # (it does `isinstance(user, dict)` guards), so serialize the DTOs.
@@ -106,7 +106,7 @@ async def list_contract_approval_access(
     # has no tenant_id field — `routes/roles.list_roles` returns the
     # full set. Mirror that here so role permission lookup works
     # for every user regardless of role.
-    roles = await db.roles.find({}, {"_id": 0}).to_list(200)
+    roles = [r.to_api_dict() for r in await RolesRepository(pg).list_roles(limit=200)]
 
     rows = resolve_approval_access(users, roles)
     return filter_and_paginate(
@@ -142,7 +142,7 @@ async def create_user_direct(data: dict, request: Request, current_user=Depends(
     db = get_db()
 
     # Validate role against roles collection (includes custom roles)
-    valid_roles = {r["name"] for r in await db.roles.find({}, {"_id": 0, "name": 1}).to_list(100)}
+    valid_roles = await RolesRepository(pg).list_role_names()
     if role not in valid_roles:
         raise HTTPException(
             status_code=400,
@@ -246,8 +246,7 @@ async def invite_user(data: UserInvite, request: Request, current_user=Depends(g
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
     # SECURITY FIX M-2: Validate role strings against allowed values (now includes custom roles)
-    db = get_db()
-    valid_roles = {r["name"] for r in await db.roles.find({}, {"_id": 0, "name": 1}).to_list(100)}
+    valid_roles = await RolesRepository(pg).list_role_names()
     if data.role not in valid_roles:
         raise HTTPException(
             status_code=400,
@@ -353,7 +352,7 @@ async def update_user(user_id: str, data: UserUpdateRequest, current_user=Depend
 
     # SECURITY FIX M-2: Validate role if being updated (now includes custom roles)
     if data.role is not None:
-        valid_roles = {r["name"] for r in await db.roles.find({}, {"_id": 0, "name": 1}).to_list(100)}
+        valid_roles = await RolesRepository(pg).list_role_names()
         if data.role not in valid_roles:
             raise HTTPException(
                 status_code=400,
@@ -364,7 +363,7 @@ async def update_user(user_id: str, data: UserUpdateRequest, current_user=Depend
     # Validate extra_permissions against the permission registry
     if "extra_permissions" in update_data:
         from services.permission_registry import get_valid_keys
-        valid_keys = await get_valid_keys()
+        valid_keys = await get_valid_keys(session=pg)
         invalid = [p for p in update_data["extra_permissions"] if p not in valid_keys]
         if invalid:
             raise HTTPException(status_code=400, detail=f"Invalid permission keys: {', '.join(invalid)}")

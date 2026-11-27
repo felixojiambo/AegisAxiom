@@ -26,6 +26,45 @@ census_reverify:
     - "audit_logs: audit_id is the TEXT PK (CLAUDE.md §3); DDL widened to the union of all writer shapes."
     - "Scope +3: seeds/seed_projects_rbac.py; services/ingestion/repository.py (audit_logs write ONLY); services/workflow_executor.py (migrated-target guard ONLY)."
     - "CLAUDE.md shim table corrected to true post-2b state (edit lands in step 7)."
+  binding_decisions_2026_11_27:
+    - id: 1
+      decision: "contract endpoint for policies is /api/admin/policies"
+      status: "CONFIRMED in contract_endpoints below (landed in 5f699df)"
+    - id: 2
+      decision: "roles.permissions stays JSONB with the GIN containment index (ix_roles_permissions_gin, jsonb_ops)"
+      status: "IMPLEMENTED in 0005; exception recorded in backend/repositories/CONVENTIONS.md (Phase 2b additions, rule 2)"
+      why: "a role_permissions join table with an FK to permissions.key rejects the wildcard grants (\"*\", \"<module>:*\")"
+    - id: 3
+      decision: "ingestion moves only its 2b writes onto the 2b repositories; all other ingestion collections stay on Mongo until Phase 8"
+      status: "IMPLEMENTED"
+      note: >-
+        As worded ("services/ingestion/repository.py moves only its permission and role
+        writes") the premise does not hold: re-verified 2026-11-27, repository.py has NO
+        role/permission writes (collections: app_registry, app_modules, app_ingestion_log,
+        ingestion_artifacts, ingestion_field_catalogue, ingestion_state). Its only 2b site,
+        the audit_logs insert in log_stage, moved to write_audit_entry. Ingestion's role and
+        permission writes live in rbac_generator.py and service.py, and both moved to the
+        roles/permissions repositories. The in_scope_files limit below stands.
+    - id: 4
+      decision: "workflow_executor rejects writes to any collection migrated through 2b"
+      status: "IMPLEMENTED: _POSTGRES_MIGRATED_COLLECTIONS guard in _get_collection, called only by update_field / create_record / delete_record; tested in test_platform_core_rbac_pg.py"
+      stored_rules_check: "2026-11-27 dev Mongo: 8 workflow_rules, 0 with trigger.module or actions.module in a 2b module/collection; stop_conditions[6] does not fire"
+    - id: 5
+      decision: "find and fix code that compares or sorts timestamp strings drawn from both Postgres and Mongo"
+      status: "SEARCHED, 0 sites found, nothing to fix"
+      evidence: >-
+        Every consumer of the 2b repositories reads only Postgres timestamps:
+        projects_recent_changes.fetch_recent_changes, whose shadow-dedup buckets on
+        datetime.timestamp() rather than strings; pmo.py, which appends rows but never sorts
+        them; routes/audit.py; and contract_approval_access, which sorts by name and email.
+        Python sorted()/.sort() keys and frontend localeCompare / < comparisons on
+        created_at/at/timestamp touch Mongo-only data. Adjacent finding, not fixed (Mongo-only,
+        out of scope): routes/projects_dashboard.py _sort_key sorts changed_at as strings
+        mixing datetime.isoformat() and stored ISO strings. Rule recorded in CONVENTIONS
+        (Phase 2b additions, rule 6).
+    - id: 6
+      decision: "DEFAULT_ROLE_PERMISSIONS is deleted from routes/auth.py"
+      status: "IMPLEMENTED: 0 live hits; _build_user_with_permissions(user, pg) reads RolesRepository.get_role_permissions at all 6 call sites"
   dynamic_path_trace: >-
     field_registry maps module `audit`->audit_logs and `roles`->roles. Neither
     emits events nor registers a date field, so event/date-triggered workflow

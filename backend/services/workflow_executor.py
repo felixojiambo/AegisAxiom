@@ -74,9 +74,27 @@ def _build_context(event: dict, rule: dict) -> dict:
 
 # ==================== COLLECTION HELPERS ====================
 
+# Phase 2b guard. These collections moved to PostgreSQL; their Mongo copies are
+# dead. The write actions below (update_field / create_record / delete_record)
+# address records as db[collection] on Mongo, and field_registry maps the
+# `roles` and `audit` modules onto two of them — so an action targeting either
+# would silently write a dead store. Refuse instead; the executor records the
+# action as failed with this message. (Phase 2b census, dynamic-path trace.)
+_POSTGRES_MIGRATED_COLLECTIONS = frozenset(
+    {"roles", "permissions", "policies", "policy_targets", "audit_logs"}
+)
+
+
 def _get_collection(module: str) -> str:
     config = get_module_config(module)
-    return config.get("collection", module) if config else module
+    collection = config.get("collection", module) if config else module
+    if collection in _POSTGRES_MIGRATED_COLLECTIONS:
+        raise ValueError(
+            f"Workflow actions cannot target module '{module}': its collection "
+            f"'{collection}' is on PostgreSQL (Phase 2b) and is not writable "
+            f"through workflow record actions."
+        )
+    return collection
 
 
 def _get_id_field(module: str) -> str:

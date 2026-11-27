@@ -190,8 +190,16 @@ _VIEWER_EXTENSION: list[str] = [
 ]
 
 
-async def seed_projects_rbac(db) -> None:
-    """Register projects.* permissions and create/extend roles. Idempotent."""
+async def seed_projects_rbac(db=None, *, session=None) -> None:
+    """Register projects.* permissions and create/extend roles. Idempotent.
+
+    Phase 2b: permissions and roles are Postgres. ``db`` (the old Mongo
+    handle server.py used to pass) is accepted and ignored; without
+    ``session`` the role writes run in their own transaction and commit.
+    """
+    from db.session import get_sessionmaker
+    from models import Role
+    from repositories.roles import RolesRepository
     from services.permission_registry import register_permissions, SOURCE_INGESTION
 
     # 1. Register permissions in the registry.
@@ -200,6 +208,7 @@ async def seed_projects_rbac(db) -> None:
             PERMISSIONS,
             source=SOURCE_INGESTION,
             app_id="app_01d360a5c32e",  # projects app_id from mapping file
+            session=session,
         )
         logger.info(f"Projects RBAC: registered {registered} permissions")
     except Exception as e:
@@ -208,72 +217,60 @@ async def seed_projects_rbac(db) -> None:
     now = datetime.now(timezone.utc)
 
     # 2. project_manager role — full projects.* access, plus the access gate.
-    pm_role = {
-        "role_id": "role_project_manager",
-        "name": "project_manager",
-        "display_name": "Project Manager",
-        "description": "Full read/write access across all Projects entities.",
-        "color": "#0EA5E9",
-        "is_system": False,
-        "is_default": False,
-        "permissions": list(_ALL_KEYS),
-        "created_at": now,
-        "updated_at": now,
-    }
-    existing_pm = await db.roles.find_one({"name": "project_manager"}, {"_id": 0, "permissions": 1})
-    if not existing_pm:
-        await db.roles.insert_one(pm_role)
-        logger.info("Projects RBAC: created role 'project_manager'")
-    else:
-        # Add any missing permission keys; preserve admin customizations.
-        await db.roles.update_one(
-            {"name": "project_manager"},
-            {
-                "$addToSet": {"permissions": {"$each": list(_ALL_KEYS)}},
-                "$set": {"updated_at": now},
-            },
-        )
+    pm_role = Role(
+        role_id="role_project_manager",
+        name="project_manager",
+        display_name="Project Manager",
+        description="Full read/write access across all Projects entities.",
+        color="#0EA5E9",
+        is_system=False,
+        is_default=False,
+        permissions=list(_ALL_KEYS),
+        created_at=now,
+        updated_at=now,
+    )
 
     # 3. project_contributor role — view + edit/change_status on tasks/threads.
-    contrib_role = {
-        "role_id": "role_project_contributor",
-        "name": "project_contributor",
-        "display_name": "Project Contributor",
-        "description": (
+    contrib_role = Role(
+        role_id="role_project_contributor",
+        name="project_contributor",
+        display_name="Project Contributor",
+        description=(
             "View all Projects content; edit + change status on assigned tasks "
             "and threads."
         ),
-        "color": "#14B8A6",
-        "is_system": False,
-        "is_default": False,
-        "permissions": list(_CONTRIBUTOR_KEYS),
-        "created_at": now,
-        "updated_at": now,
-    }
-    existing_contrib = await db.roles.find_one({"name": "project_contributor"}, {"_id": 0, "permissions": 1})
-    if not existing_contrib:
-        await db.roles.insert_one(contrib_role)
-        logger.info("Projects RBAC: created role 'project_contributor'")
-    else:
-        await db.roles.update_one(
-            {"name": "project_contributor"},
-            {
-                "$addToSet": {"permissions": {"$each": list(_CONTRIBUTOR_KEYS)}},
-                "$set": {"updated_at": now},
-            },
-        )
+        color="#14B8A6",
+        is_system=False,
+        is_default=False,
+        permissions=list(_CONTRIBUTOR_KEYS),
+        created_at=now,
+        updated_at=now,
+    )
 
-    # 4. Extend the existing 'viewer' role (if it exists) with the projects view set.
-    # Idempotent: $addToSet skips keys already present, and admin-customized
-    # viewer permissions are preserved.
-    viewer = await db.roles.find_one({"name": "viewer"}, {"_id": 0, "permissions": 1})
-    if viewer:
-        await db.roles.update_one(
-            {"name": "viewer"},
-            {
-                "$addToSet": {"permissions": {"$each": list(_VIEWER_EXTENSION)}},
-                "$set": {"updated_at": now},
-            },
-        )
-        logger.info("Projects RBAC: extended 'viewer' role with projects.*.view + dashboard")
-    # Note: 'admin' role uses the '*' wildcard, so no extension needed.
+    async def _roles(s) -> None:
+        repo = RolesRepository(s)
+        for role, keys in ((pm_role, _ALL_KEYS), (contrib_role, _CONTRIBUTOR_KEYS)):
+            # INSERT … ON CONFLICT (name) DO NOTHING; on an existing role add
+            # any missing keys atomically and preserve admin customizations.
+            if await repo.insert_role_if_absent(role):
+                logger.info(f"Projects RBAC: created role '{role.name}'")
+            else:
+                await repo.add_permissions(list(keys), name=role.name)
+
+        # 4. Extend the existing 'viewer' role (if it exists) with the projects
+        # view set. add_permissions skips keys already present (and returns
+        # False when there is no such role), preserving admin customizations.
+        if await repo.add_permissions(list(_VIEWER_EXTENSION), name="viewer"):
+            logger.info("Projects RBAC: extended 'viewer' role with projects.*.view + dashboard")
+        # Note: 'admin' role uses the '*' wildcard, so no extension needed.
+
+    if session is not None:
+        await _roles(session)
+    else:
+        async with get_sessionmaker()() as own:
+            try:
+                await _roles(own)
+                await own.commit()
+            except Exception:
+                await own.rollback()
+                raise

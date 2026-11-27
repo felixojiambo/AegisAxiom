@@ -26,6 +26,11 @@ from db.models.auth import (  # noqa: F401
     OAuthTokenRow,
 )
 from db.models.org_branding import OrgBrandingRow  # noqa: F401
+# Phase 2b — platform-core RBAC / governance / observability.
+from db.models.roles import RoleRow  # noqa: F401
+from db.models.permissions import PermissionRow  # noqa: F401
+from db.models.policies import PolicyRow, PolicyTargetRow  # noqa: F401
+from db.models.audit import AuditLogRow  # noqa: F401
 
 __all__ = [
     "TenantRow",
@@ -36,4 +41,9 @@ __all__ = [
     "OAuthStateRow",
     "OAuthTokenRow",
     "OrgBrandingRow",
+    "RoleRow",
+    "PermissionRow",
+    "PolicyRow",
+    "PolicyTargetRow",
+    "AuditLogRow",
 ]

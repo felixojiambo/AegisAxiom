@@ -67,9 +67,10 @@ scoping so seeded perms don't leak data).
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 from typing import Optional
 
+from db.session import get_sessionmaker
+from repositories.roles import RolesRepository
 from services.audit_service import log_action
 
 logger = logging.getLogger(__name__)
@@ -85,10 +86,42 @@ TENANT_ADMIN_ROLE_ID = "role_tenant_admin"
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+async def _get_tenant_admin(session):
+    """The canonical tenant_admin role (Postgres), or None."""
+    if session is not None:
+        return await RolesRepository(session).get_role(TENANT_ADMIN_ROLE_ID)
+    async with get_sessionmaker()() as pg:
+        return await RolesRepository(pg).get_role(TENANT_ADMIN_ROLE_ID)
+
+
+async def _mutate_tenant_admin(session, *, add=(), remove=()) -> None:
+    """Atomically add/remove keys on tenant_admin. With a caller ``session``
+    the write joins its transaction; otherwise it commits on its own."""
+    async def _apply(s) -> None:
+        repo = RolesRepository(s)
+        if add:
+            await repo.add_permissions(add, role_id=TENANT_ADMIN_ROLE_ID)
+        if remove:
+            await repo.remove_permissions(remove, role_id=TENANT_ADMIN_ROLE_ID)
+
+    if session is not None:
+        await _apply(session)
+        return
+    async with get_sessionmaker()() as own:
+        try:
+            await _apply(own)
+            await own.commit()
+        except Exception:
+            await own.rollback()
+            raise
+
+
 async def _load_app_permission_keys(db, app_id: str) -> list[str]:
     """Return the permission_keys declared by an app. Empty list if the
     app is missing OR has no permission_keys (apps registered before
     1E.3a are in this state until the backfill stamps them)."""
+    # app_registry_legacy_read (Mongo; Phase 8) — app_registry migrates with
+    # ingestion in Phase 8, which deletes this read.
     app = await db.app_registry.find_one(
         {"app_id": app_id}, {"_id": 0, "permission_keys": 1}
     )
@@ -109,6 +142,8 @@ async def _claimed_by_other_active_grants(
     permission_keys. Scans the (status, granted_at) index naturally.
     """
     claimed: set[str] = set()
+    # tenant_app_grants_legacy_read (Mongo; Phase 8) — deleted when
+    # tenant_app_grants migrates in Phase 8.
     cursor = db.tenant_app_grants.find(
         {"status": "active", "grant_id": {"$ne": excluded_grant_id}},
         {"_id": 0, "app_id": 1},
@@ -135,6 +170,7 @@ async def seed_app_permissions(
     triggered_by_grant_id: Optional[str] = None,
     actor_user_id: Optional[str] = None,
     actor_email: Optional[str] = None,
+    session=None,
 ) -> dict:
     """Ensure `role_tenant_admin` carries every permission key declared
     by `app_id`. Idempotent: re-running for the same app is a no-op.
@@ -165,10 +201,7 @@ async def seed_app_permissions(
             "keys_already_present": [],
         }
 
-    role = await db.roles.find_one(
-        {"role_id": TENANT_ADMIN_ROLE_ID},
-        {"_id": 0, "permissions": 1},
-    )
+    role = await _get_tenant_admin(session)
     if not role:
         # If the canonical tenant_admin role doesn't exist, the
         # default-role seeder hasn't run yet — propagating an error
@@ -186,7 +219,7 @@ async def seed_app_permissions(
             "error": "tenant_admin role missing",
         }
 
-    existing = set(role.get("permissions") or [])
+    existing = set(role.permissions or [])
     to_add = [k for k in keys if k not in existing]
     already = [k for k in keys if k in existing]
 
@@ -202,16 +235,10 @@ async def seed_app_permissions(
             "keys_already_present": already,
         }
 
-    # $addToSet with $each gives the desired set-union semantics in
-    # one round-trip. updated_at bumps so any cache invalidation
-    # tracking timestamps sees the change.
-    await db.roles.update_one(
-        {"role_id": TENANT_ADMIN_ROLE_ID},
-        {
-            "$addToSet": {"permissions": {"$each": to_add}},
-            "$set": {"updated_at": datetime.now(timezone.utc)},
-        },
-    )
+    # One atomic UPDATE with set-union semantics (the $addToSet/$each
+    # replacement); updated_at bumps so any cache invalidation tracking
+    # timestamps sees the change.
+    await _mutate_tenant_admin(session, add=to_add)
 
     logger.info(
         "seed_app_permissions(app_id=%s) — added %d keys to tenant_admin: %s",
@@ -257,6 +284,7 @@ async def revoke_app_permissions(
     excluded_grant_id: str,
     actor_user_id: Optional[str] = None,
     actor_email: Optional[str] = None,
+    session=None,
 ) -> dict:
     """Remove perm keys for `app_id` from `role_tenant_admin`, but only
     those NOT claimed by any OTHER currently-active grant.
@@ -278,9 +306,7 @@ async def revoke_app_permissions(
     if not keys:
         return {"app_id": app_id, "keys_removed": [], "keys_preserved": []}
 
-    role = await db.roles.find_one(
-        {"role_id": TENANT_ADMIN_ROLE_ID}, {"_id": 0, "permissions": 1}
-    )
+    role = await _get_tenant_admin(session)
     if not role:
         return {
             "app_id": app_id,
@@ -289,7 +315,7 @@ async def revoke_app_permissions(
             "error": "tenant_admin role missing",
         }
 
-    existing = set(role.get("permissions") or [])
+    existing = set(role.permissions or [])
 
     # Anything claimed by any other active grant is preserved.
     claimed = await _claimed_by_other_active_grants(db, excluded_grant_id)
@@ -308,15 +334,9 @@ async def revoke_app_permissions(
             "keys_preserved": preserved,
         }
 
-    # $pullAll is the inverse of $addToSet with $each — strips each
-    # listed key from the array.
-    await db.roles.update_one(
-        {"role_id": TENANT_ADMIN_ROLE_ID},
-        {
-            "$pullAll": {"permissions": to_remove},
-            "$set": {"updated_at": datetime.now(timezone.utc)},
-        },
-    )
+    # The $pullAll replacement — strips each listed key from the array in
+    # one atomic UPDATE.
+    await _mutate_tenant_admin(session, remove=to_remove)
 
     logger.info(
         "revoke_app_permissions(app_id=%s) — removed %d keys from tenant_admin: %s "

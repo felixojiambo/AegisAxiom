@@ -1,14 +1,15 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone
+from typing import Optional
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import get_db
-from db.session import get_session
+from db.session import get_session, get_sessionmaker
+from repositories.roles import RolesRepository
 from repositories.users import UserRepository
 from auth_helper import get_current_user, has_perm, require_perm
-from models import RoleCreateRequest, RoleUpdateRequest, RoleCloneRequest
+from models import Role, RoleCreateRequest, RoleUpdateRequest, RoleCloneRequest
 from services.audit_service import log_action
 from services.security_logger import log_security_event
 from services.field_registry import register_fields, register_module_events, register_module_config
@@ -31,6 +32,25 @@ register_fields("roles", "role", [
     {"name": "is_default", "type": "boolean", "label": "Is Default", "description": "Whether role is included in default role setup"},
     {"name": "color", "type": "string", "label": "Color", "description": "Hex color code for UI display"},
 ])
+
+# ---- Orphaned Nova permission keys (Phase 2b sweep) ----
+# Left behind when the Nova/FCC engine was parked (plan §A9; nova.py deferred
+# the cleanup to this phase). Each was verified orphaned before removal — no
+# route gate, has_perm, require_perm or require_ai_permission consumer in the
+# backend or frontend. Unlike _DEPRECATED_FINANCE_KEYS these rows are DELETED
+# (permission_registry.retire_orphaned_keys), after the surviving keys they
+# implied are granted to any role that held them, so no role loses access.
+#
+# *** finance.cashflow.view is NOT here and must never be: it gates the live
+# Cashflow Planner (routes/nova.py require_ai_permission). nova.use is NOT
+# here either: services/ai/conductor.py checks it. ***
+_ORPHANED_NOVA_KEYS = {
+    "nova.export.create",
+    "finance.cashflow.export",
+    "finance.nova.run_projection",
+    "finance.cashflow.edit_assumptions",
+}
+
 
 # ---- Deprecated finance permission keys ----
 # Keys that had route handlers before the Wave 3A FCC cutover but no longer do.
@@ -576,16 +596,11 @@ DEFAULT_ROLES = [
             # AI Employees
             "ai_employees.view", "ai_employees.create", "ai_employees.edit", "ai_employees.manage",
             "vega.use", "vega_sessions.view_own", "orion.use", "bpmn.use",
-            # Nova / Cash Flow — run_projection implies view + edit_assumptions
-            # via nova module's permission_registry edges. PR cleanup H1.
-            # nova.export.create is granted alongside nova.use so the
-            # finance export download endpoint is reachable for every role
-            # that already has chat access to Nova.
-            "finance.nova.run_projection", "finance.cashflow.export", "nova.use",
-            # J7. Deliberate broad scope. One permission gates both
-            # create and download by design. See nova_exports.py
-            # _nova_export_permissions for rationale.
-            "nova.export.create",
+            # Nova / Cash Flow. Phase 2b removed the orphaned projection keys
+            # (run_projection, export, edit_assumptions) whose `implies` edges
+            # granted finance.cashflow.view; it is granted explicitly instead so
+            # this role keeps the Cashflow Planner (nova.py require_ai_permission).
+            "finance.cashflow.view", "nova.use",
             # Certifications
             "certifications.view",
         ],
@@ -653,16 +668,11 @@ DEFAULT_ROLES = [
             "finance.referral_mrr.delete_mapping", "finance.referral_mrr.process",
             # finance.revenue.view, finance.meta.view (added Wave 4C N7)
             "finance.revenue.view", "finance.meta.view",
-            # Nova / Cash Flow — run_projection implies view + edit_assumptions
-            # via nova module's permission_registry edges. PR cleanup H1.
-            # nova.export.create is granted alongside nova.use so the
-            # finance export download endpoint is reachable for every role
-            # that already has chat access to Nova.
-            "finance.nova.run_projection", "finance.cashflow.export", "nova.use",
-            # J7. Deliberate broad scope. One permission gates both
-            # create and download by design. See nova_exports.py
-            # _nova_export_permissions for rationale.
-            "nova.export.create",
+            # Nova / Cash Flow. Phase 2b removed the orphaned projection keys
+            # (run_projection, export, edit_assumptions) whose `implies` edges
+            # granted finance.cashflow.view; it is granted explicitly instead so
+            # this role keeps the Cashflow Planner (nova.py require_ai_permission).
+            "finance.cashflow.view", "nova.use",
             # Deals, Accounts, Contacts, Opportunities (View Only)
             "deals.view.all", "accounts.view.all", "accounts.export",
             "contacts.view.all", "opportunities.view.all",
@@ -767,14 +777,7 @@ DEFAULT_ROLES = [
             # Nova — chat-only access. Granted to every authenticated role per
             # the May 2026 product call (Ryan/Aidan); finance.* perms remain
             # restricted to finance/director. PR cleanup H1.
-            # nova.export.create is granted alongside nova.use so the
-            # finance export download endpoint is reachable for every role
-            # that already has chat access to Nova.
             "nova.use",
-            # J7. Deliberate broad scope. One permission gates both
-            # create and download by design. See nova_exports.py
-            # _nova_export_permissions for rationale.
-            "nova.export.create",
             # Certifications
             "certifications.view",
         ],
@@ -830,13 +833,7 @@ DEFAULT_ROLES = [
             # AI Chat
             "chat.access", "vega.use", "vega_sessions.view_own", "orion.use", "bpmn.use",
             # Nova — chat-only access (see sales_rep for rationale).
-            # PR cleanup H1. nova.export.create paired with nova.use so
-            # the finance export download endpoint is reachable.
             "nova.use",
-            # J7. Deliberate broad scope. One permission gates both
-            # create and download by design. See nova_exports.py
-            # _nova_export_permissions for rationale.
-            "nova.export.create",
             # Certifications
             "certifications.view",
         ],
@@ -876,13 +873,7 @@ DEFAULT_ROLES = [
             "chat.access",
             "chat.agent.deals", "chat.agent.commissions",
             # Nova — chat-only access (see sales_rep for rationale).
-            # PR cleanup H1. nova.export.create paired with nova.use so
-            # the finance export download endpoint is reachable.
             "nova.use",
-            # J7. Deliberate broad scope. One permission gates both
-            # create and download by design. See nova_exports.py
-            # _nova_export_permissions for rationale.
-            "nova.export.create",
             # Certifications
             "certifications.view",
         ],
@@ -903,13 +894,7 @@ DEFAULT_ROLES = [
             "time.view.own",
             "chat.access",
             # Nova — chat-only access (see sales_rep for rationale).
-            # PR cleanup H1. nova.export.create paired with nova.use so
-            # the finance export download endpoint is reachable.
             "nova.use",
-            # J7. Deliberate broad scope. One permission gates both
-            # create and download by design. See nova_exports.py
-            # _nova_export_permissions for rationale.
-            "nova.export.create",
             # Certifications
             "certifications.view",
         ],
@@ -928,13 +913,7 @@ DEFAULT_ROLES = [
             "chat.access",
             "chat.agent.deals", "chat.agent.commissions",
             # Nova — chat-only access (see sales_rep for rationale).
-            # PR cleanup H1. nova.export.create paired with nova.use so
-            # the finance export download endpoint is reachable.
             "nova.use",
-            # J7. Deliberate broad scope. One permission gates both
-            # create and download by design. See nova_exports.py
-            # _nova_export_permissions for rationale.
-            "nova.export.create",
             # Certifications
             "certifications.view",
         ],
@@ -1021,7 +1000,7 @@ DEFAULT_ROLES = [
 ]
 
 
-async def seed_default_roles(db):
+async def seed_default_roles(db=None, *, session: Optional[AsyncSession] = None):
     """Seed default roles if they don't exist, and reconcile permission lists.
 
     Reconciliation rule:
@@ -1033,9 +1012,13 @@ async def seed_default_roles(db):
         already-trimmed role is a no-op.
       - Otherwise (admin has customized the role -- added or removed perms
         in a way that changes the effective set), preserve their changes
-        and only $addToSet any new default perms whose implication closure
+        and only add any new default perms whose implication closure
         isn't already covered by the existing set. This avoids silently
         re-introducing perms an admin deliberately removed.
+
+    Phase 2b: Postgres via RolesRepository. ``db`` (the old Mongo handle) is
+    accepted for callers outside this phase (seeds/seed_all.py) and ignored;
+    without ``session`` the seed runs in its own transaction and commits.
     """
     import logging
 
@@ -1055,52 +1038,55 @@ async def seed_default_roles(db):
                     stack.append(impl)
         return out
 
-    for role in DEFAULT_ROLES:
-        existing = await db.roles.find_one({"name": role["name"]}, {"_id": 0})
-        if not existing:
-            await db.roles.insert_one(role)
-            logger.info(f"Created role: {role['name']} ({role['display_name']})")
-            continue
+    async def _run(s: AsyncSession) -> None:
+        repo = RolesRepository(s)
+        for role in DEFAULT_ROLES:
+            # INSERT … ON CONFLICT (name) DO NOTHING — race-free first seed.
+            if await repo.insert_role_if_absent(Role(**role)):
+                logger.info(f"Created role: {role['name']} ({role['display_name']})")
+                continue
 
-        existing_perms = list(existing.get("permissions", []))
-        if "*" in existing_perms:
-            continue  # admin / system role with wildcard
+            existing_perms = await repo.get_role_permissions(role["name"])
+            if "*" in existing_perms:
+                continue  # admin / system role with wildcard
 
-        default_perms = list(role["permissions"])
-        if set(existing_perms) == set(default_perms):
-            continue  # already canonical
+            default_perms = list(role["permissions"])
+            if set(existing_perms) == set(default_perms):
+                continue  # already canonical
 
-        existing_closure = closure(existing_perms)
-        default_closure = closure(default_perms)
+            existing_closure = closure(existing_perms)
+            default_closure = closure(default_perms)
 
-        if existing_closure == default_closure:
-            # Same effective set, but stored differently (e.g., pre-trim fat
-            # list). Replace with canonical trimmed default for readability.
-            await db.roles.update_one(
-                {"name": role["name"]},
-                {"$set": {
-                    "permissions": default_perms,
-                    "updated_at": datetime.now(timezone.utc),
-                }},
-            )
-            logger.info(
-                f"Canonicalized role '{role['name']}': "
-                f"{len(existing_perms)} -> {len(default_perms)} perms "
-                f"(same effective access)"
-            )
-        else:
-            # Admin has customized -- only add new defaults that grant
-            # access not already implied by the existing set.
-            new_perms = [p for p in default_perms if p not in existing_closure]
-            if new_perms:
-                await db.roles.update_one(
-                    {"name": role["name"]},
-                    {"$addToSet": {"permissions": {"$each": new_perms}}},
-                )
+            if existing_closure == default_closure:
+                # Same effective set, but stored differently (e.g., pre-trim fat
+                # list). Replace with canonical trimmed default for readability.
+                await repo.set_role_permissions_by_name(role["name"], default_perms)
                 logger.info(
-                    f"Backfilled {len(new_perms)} permissions for "
-                    f"customized role: {role['name']}"
+                    f"Canonicalized role '{role['name']}': "
+                    f"{len(existing_perms)} -> {len(default_perms)} perms "
+                    f"(same effective access)"
                 )
+            else:
+                # Admin has customized -- only add new defaults that grant
+                # access not already implied by the existing set.
+                new_perms = [p for p in default_perms if p not in existing_closure]
+                if new_perms:
+                    await repo.add_permissions(new_perms, name=role["name"])
+                    logger.info(
+                        f"Backfilled {len(new_perms)} permissions for "
+                        f"customized role: {role['name']}"
+                    )
+
+    if session is not None:
+        await _run(session)
+    else:
+        async with get_sessionmaker()() as own:
+            try:
+                await _run(own)
+                await own.commit()
+            except Exception:
+                await own.rollback()
+                raise
 
     logger.info("Role seeding complete")
 
@@ -1113,87 +1099,95 @@ async def list_permissions(
         source: str = None,
         group: str = None,
         app_id: str = None,
+        pg: AsyncSession = Depends(get_session),
 ):
     if not has_perm(current_user, "roles.manage"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    return await get_all_permissions(source=source, group=group, app_id=app_id)
+    return await get_all_permissions(source=source, group=group, app_id=app_id, session=pg)
 
 
 @router.get("")
-async def list_roles(current_user=Depends(get_current_user)):
+async def list_roles(current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     if not has_perm(current_user, "roles.manage"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
-    db = get_db()
-    roles = await db.roles.find({}, {"_id": 0}).sort("is_default", -1).to_list(100)
-    return roles
+    roles = await RolesRepository(pg).list_roles(order="default", limit=100)
+    return [r.to_api_dict() for r in roles]
 
 
 @router.post("")
-async def create_role(data: RoleCreateRequest, current_user=Depends(get_current_user)):
+async def create_role(
+    data: RoleCreateRequest,
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+):
     await require_perm(current_user, "roles.manage", resource="role", action="create")
 
     # Validate permissions: reject wildcards and unknown keys
     if data.permissions:
         if "*" in data.permissions:
             raise HTTPException(status_code=400, detail="Wildcard '*' permission cannot be assigned to custom roles")
-        valid_keys = await get_valid_keys()
+        valid_keys = await get_valid_keys(session=pg)
         invalid = [p for p in data.permissions if p not in valid_keys]
         if invalid:
             raise HTTPException(status_code=400, detail=f"Invalid permission keys: {', '.join(invalid)}")
 
-    db = get_db()
+    repo = RolesRepository(pg)
     name = data.name.strip().lower().replace(" ", "_")
     if not name:
         raise HTTPException(status_code=400, detail="Role name is required")
-    if await db.roles.find_one({"name": name}, {"_id": 0}):
+    if await repo.role_name_exists(name):
         raise HTTPException(status_code=400, detail=f"Role '{name}' already exists")
-    role = {
-        "role_id": f"role_{uuid.uuid4().hex[:12]}",
-        "name": name,
-        "display_name": data.display_name or name.replace("_", " ").title(),
-        "description": data.description,
-        "color": data.color,
-        "is_system": False,
-        "is_default": False,
-        "permissions": data.permissions,
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
-    }
-    await db.roles.insert_one(role)
-    await log_action("role_create", current_user.user_id, current_user.email, "role", role["role_id"], {"name": name})
+    now = datetime.now(timezone.utc)
+    created = await repo.create_role(Role(
+        role_id=f"role_{uuid.uuid4().hex[:12]}",
+        name=name,
+        display_name=data.display_name or name.replace("_", " ").title(),
+        description=data.description,
+        color=data.color,
+        is_system=False,
+        is_default=False,
+        permissions=data.permissions,
+        created_at=now,
+        updated_at=now,
+    ))
+    await log_action("role_create", current_user.user_id, current_user.email, "role", created.role_id, {"name": name})
     await log_security_event(
         event_type="role_created", severity="info",
         user_id=current_user.user_id, user_email=current_user.email,
-        resource="role", resource_id=role["role_id"],
+        resource="role", resource_id=created.role_id,
         action="create", outcome="success",
         details={"role_name": name},
     )
-    created = await db.roles.find_one({"role_id": role["role_id"]}, {"_id": 0})
-    return created
+    return created.to_api_dict()
 
 
 @router.put("/{role_id}")
-async def update_role(role_id: str, data: RoleUpdateRequest, current_user=Depends(get_current_user)):
+async def update_role(
+    role_id: str,
+    data: RoleUpdateRequest,
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+):
     await require_perm(current_user, "roles.manage", resource="role", resource_id=role_id, action="update")
-    db = get_db()
-    role = await db.roles.find_one({"role_id": role_id}, {"_id": 0})
+    repo = RolesRepository(pg)
+    role = await repo.get_role(role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
-    if role.get("is_system"):
+    if role.is_system:
         raise HTTPException(status_code=400, detail="System roles (admin) cannot be modified")
 
     # Validate permissions if being updated: reject wildcards and unknown keys
     if data.permissions is not None:
         if "*" in data.permissions:
             raise HTTPException(status_code=400, detail="Wildcard '*' permission cannot be assigned to custom roles")
-        valid_keys = await get_valid_keys()
+        valid_keys = await get_valid_keys(session=pg)
         invalid = [p for p in data.permissions if p not in valid_keys]
         if invalid:
             raise HTTPException(status_code=400, detail=f"Invalid permission keys: {', '.join(invalid)}")
 
     updates = {k: v for k, v in data.model_dump().items() if v is not None}
     updates["updated_at"] = datetime.now(timezone.utc)
-    await db.roles.update_one({"role_id": role_id}, {"$set": updates})
+    updated = await repo.update_role(role_id, updates)
     await log_action("role_update", current_user.user_id, current_user.email, "role", role_id, {"changes": list(updates.keys())})
     await log_security_event(
         event_type="role_updated", severity="warning",
@@ -1202,63 +1196,71 @@ async def update_role(role_id: str, data: RoleUpdateRequest, current_user=Depend
         action="update", outcome="success",
         details={"role_id": role_id, "changes": list(updates.keys())},
     )
-    return await db.roles.find_one({"role_id": role_id}, {"_id": 0})
+    return updated.to_api_dict() if updated else None
 
 
 @router.post("/{role_id}/clone")
-async def clone_role(role_id: str, data: RoleCloneRequest, current_user=Depends(get_current_user)):
+async def clone_role(
+    role_id: str,
+    data: RoleCloneRequest,
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+):
     await require_perm(current_user, "roles.manage", resource="role", resource_id=role_id, action="clone")
-    db = get_db()
-    source = await db.roles.find_one({"role_id": role_id}, {"_id": 0})
+    repo = RolesRepository(pg)
+    source = await repo.get_role(role_id)
     if not source:
         raise HTTPException(status_code=404, detail="Role not found")
-    new_name = (data.name or f"{source['name']}_copy").strip().lower().replace(" ", "_")
-    if await db.roles.find_one({"name": new_name}, {"_id": 0}):
+    new_name = (data.name or f"{source.name}_copy").strip().lower().replace(" ", "_")
+    if await repo.role_name_exists(new_name):
         raise HTTPException(status_code=400, detail=f"Role '{new_name}' already exists")
 
     # Strip wildcard from cloned permissions and validate
-    source_perms = [p for p in source.get("permissions", []) if p != "*"]
-    valid_keys = await get_valid_keys()
+    source_perms = [p for p in source.permissions if p != "*"]
+    valid_keys = await get_valid_keys(session=pg)
     cloned_perms = [p for p in source_perms if p in valid_keys]
 
-    cloned = {
-        **source,
-        "role_id": f"role_{uuid.uuid4().hex[:12]}",
-        "name": new_name,
-        "display_name": data.display_name or f"{source['display_name']} (Copy)",
-        "description": data.description or source.get("description", ""),
-        "color": data.color or source.get("color", "#64748B"),
-        "is_system": False,
-        "is_default": False,
-        "permissions": cloned_perms,
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
-    }
-    await db.roles.insert_one(cloned)
-    created = await db.roles.find_one({"role_id": cloned["role_id"]}, {"_id": 0})
-    return created
+    now = datetime.now(timezone.utc)
+    # The Mongo clone copied the whole source document ({**source, …}), so an
+    # ingestion-generated role's app_id carries over to its clone.
+    created = await repo.create_role(
+        Role(
+            role_id=f"role_{uuid.uuid4().hex[:12]}",
+            name=new_name,
+            display_name=data.display_name or f"{source.display_name} (Copy)",
+            description=data.description or source.description or "",
+            color=data.color or source.color or "#64748B",
+            is_system=False,
+            is_default=False,
+            permissions=cloned_perms,
+            created_at=now,
+            updated_at=now,
+        ),
+        app_id=source.app_id,
+    )
+    return created.to_api_dict()
 
 
 @router.delete("/{role_id}")
 async def delete_role(role_id: str, current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     await require_perm(current_user, "roles.manage", resource="role", resource_id=role_id, action="delete")
-    db = get_db()
-    role = await db.roles.find_one({"role_id": role_id}, {"_id": 0})
+    repo = RolesRepository(pg)
+    role = await repo.get_role(role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
-    if role.get("is_default"):
+    if role.is_default:
         raise HTTPException(status_code=400, detail="Default roles cannot be deleted")
     # Check if any users have this role
-    users_count = await UserRepository(pg).count_users(role=role["name"])
+    users_count = await UserRepository(pg).count_users(role=role.name)
     if users_count > 0:
         raise HTTPException(status_code=400, detail=f"Cannot delete: {users_count} user(s) have this role. Reassign them first.")
-    await db.roles.delete_one({"role_id": role_id})
+    await repo.delete_role(role_id)
     await log_security_event(
         event_type="role_deleted", severity="warning",
         user_id=current_user.user_id, user_email=current_user.email,
         resource="role", resource_id=role_id,
         action="delete", outcome="success",
-        details={"role_name": role["name"]},
+        details={"role_name": role.name},
     )
     return {"message": "Role deleted"}
 
@@ -1279,7 +1281,11 @@ def _resource_type_from_key(key: str) -> str | None:
 
 
 @router.get("/{role_id}/preview")
-async def preview_role(role_id: str, current_user=Depends(get_current_user)):
+async def preview_role(
+    role_id: str,
+    current_user=Depends(get_current_user),
+    pg: AsyncSession = Depends(get_session),
+):
     """Return what a role grants in human-readable shape.
 
     Used by the role-management admin UI to show effective access before
@@ -1303,13 +1309,13 @@ async def preview_role(role_id: str, current_user=Depends(get_current_user)):
     ):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
 
-    db = get_db()
-    role = await db.roles.find_one({"role_id": role_id}, {"_id": 0})
+    found = await RolesRepository(pg).get_role(role_id)
+    role = found.to_api_dict() if found else None
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
 
     role_perms = list(role.get("permissions", []))
-    valid_keys = await get_valid_keys()
+    valid_keys = await get_valid_keys(session=pg)
 
     # Wildcard "*" means every registered permission. Expand for the preview
     # so the UI can render the actual access surface, but keep the explicit

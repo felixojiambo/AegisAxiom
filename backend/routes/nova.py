@@ -46,11 +46,16 @@ router = APIRouter()
 # ---------------------------------------------------------------------------
 # Permission registration
 # ---------------------------------------------------------------------------
-# ``finance.cashflow.view`` gates the surviving Cashflow Planner surface. The
-# remaining cash-flow permissions are retained here for RBAC/DAG stability
-# (roles may already reference them); their former projection endpoints were
-# removed with the Nova engine. Permission-surface cleanup is owned by the
-# Platform-core phase (Phase 2), not this deletion pass.
+# ``finance.cashflow.view`` gates the surviving Cashflow Planner surface
+# (require_ai_permission below) and is the only cash-flow key registered here.
+# Phase 2b (orphaned-nova-permissions sweep) removed the three keys whose
+# projection endpoints died with the Nova engine — finance.cashflow.
+# edit_assumptions, finance.cashflow.export, finance.nova.run_projection — after
+# a verify-before-remove grep found no route gate / has_perm / require_perm /
+# require_ai_permission consumer for any of them. Their registry rows are
+# deleted and stripped from roles at startup (routes/roles.py
+# _ORPHANED_NOVA_KEYS). DO NOT remove finance.cashflow.view: it gates a live
+# endpoint.
 
 @register_module_permissions("nova")
 def _nova_permissions():
@@ -59,27 +64,6 @@ def _nova_permissions():
             "key": "finance.cashflow.view",
             "group": "Finance - Cash Flow",
             "label": "View Cash Flow Projections",
-        },
-        {
-            "key": "finance.cashflow.edit_assumptions",
-            "group": "Finance - Cash Flow",
-            "label": "Edit Cash Flow Assumptions",
-            "implies": ["finance.cashflow.view"],
-        },
-        {
-            "key": "finance.cashflow.export",
-            "group": "Finance - Cash Flow",
-            "label": "Export Cash Flow Reports",
-            "implies": ["finance.cashflow.view"],
-        },
-        {
-            "key": "finance.nova.run_projection",
-            "group": "Finance - Cash Flow",
-            "label": "Run Nova Cash Flow Projection",
-            "implies": [
-                "finance.cashflow.view",
-                "finance.cashflow.edit_assumptions",
-            ],
         },
     ]
 
