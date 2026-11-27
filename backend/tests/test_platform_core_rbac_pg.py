@@ -439,9 +439,10 @@ async def test_for_update_serializes_read_modify_write(sessionmaker_pg):
 
 
 # ── workflow_executor guard (dynamic db[collection] path, binding decision 4) ──
-# field_registry maps the `roles` and `audit` modules onto two Postgres-migrated
-# collections; the static zero-grep cannot see workflow record actions resolving
-# them to db[collection]. The guard must refuse every WRITE action BEFORE any
+# field_registry maps modules onto Postgres-migrated collections (roles, audit,
+# admin -> users, tenants). The static zero-grep cannot see workflow record
+# actions resolving them to db[collection]. The guard reads the single registry
+# (db/migrated_collections.json). It must refuse every WRITE action BEFORE any
 # Mongo access, and must leave unmigrated modules alone.
 
 class _ExplodingDb:
@@ -454,12 +455,16 @@ class _ExplodingDb:
         raise AssertionError(f"workflow action touched Mongo attribute {name!r}")
 
 
-@pytest.mark.parametrize("module", ["roles", "audit"])
+@pytest.mark.parametrize("module, phase", [
+    ("roles", "2b"), ("audit", "2b"), ("admin", "2a"), ("tenants", "2a"),
+])
 @pytest.mark.parametrize("action_name", ["update_field", "create_record", "delete_record"])
 @pytest.mark.asyncio
-async def test_workflow_write_actions_refuse_migrated_modules(module, action_name):
-    import routes.audit  # noqa: F401  — registers module "audit" -> audit_logs
-    import routes.roles  # noqa: F401  — registers module "roles" -> roles
+async def test_workflow_write_actions_refuse_migrated_modules(module, phase, action_name):
+    import routes.admin    # noqa: F401  — registers module "admin" -> users
+    import routes.audit    # noqa: F401  — registers module "audit" -> audit_logs
+    import routes.roles    # noqa: F401  — registers module "roles" -> roles
+    import routes.tenants  # noqa: F401  — registers module "tenants" -> tenants
     from services import workflow_executor as wx
 
     action = {
@@ -470,23 +475,49 @@ async def test_workflow_write_actions_refuse_migrated_modules(module, action_nam
         "fields": {"name": "x"},
         "filter": {"name": "x"},
     }
-    context = {"record": {"role_id": "role_x", "audit_id": "audit_x"}}
+    context = {"record": {"role_id": "role_x", "audit_id": "audit_x",
+                          "user_id": "user_x", "tenant_id": "tenant_x"}}
     handler = getattr(wx, f"_action_{action_name}")
-    with pytest.raises(ValueError, match="PostgreSQL"):
+    with pytest.raises(ValueError, match=rf"PostgreSQL \(Phase {phase}\)"):
         await handler(action, context, _ExplodingDb())
 
 
-def test_workflow_guard_covers_every_2b_collection_and_spares_mongo_modules():
+def test_workflow_guard_reads_the_registry_and_spares_mongo_modules():
+    from db.migrated_collections import MIGRATED_COLLECTIONS
+    from services import field_registry
     from services import workflow_executor as wx
-    from services.field_registry import register_module_config
 
-    assert wx._POSTGRES_MIGRATED_COLLECTIONS >= {
+    assert {n for n, p in MIGRATED_COLLECTIONS.items() if p == "2b"} == {
         "roles", "permissions", "policies", "policy_targets", "audit_logs",
     }
-    from services import field_registry
+    # Every registered collection is refused, whatever module name points at it.
+    for name, phase in MIGRATED_COLLECTIONS.items():
+        field_registry.register_module_config("_wx_guard_probe", name, "id", "Test")
+        try:
+            with pytest.raises(ValueError, match=rf"Phase {phase}\)"):
+                wx._get_collection("_wx_guard_probe")
+        finally:
+            field_registry._module_config.pop("_wx_guard_probe", None)
 
-    register_module_config("_wx_guard_probe", "contracts", "contract_id", "Test")
+    field_registry.register_module_config("_wx_guard_probe", "contracts", "contract_id", "Test")
     try:
         assert wx._get_collection("_wx_guard_probe") == "contracts"
     finally:
         field_registry._module_config.pop("_wx_guard_probe", None)
+
+
+@pytest.mark.parametrize("bad, why", [
+    ({"collections": []}, "non-empty"),
+    ({"collections": [{"name": "Roles", "phase": "2b"}]}, "invalid name"),
+    ({"collections": [{"name": "roles", "phase": ""}]}, "invalid phase"),
+    ({"collections": [{"name": "roles", "phase": "2b"}, {"name": "roles", "phase": "3"}]}, "duplicate"),
+])
+def test_registry_loader_rejects_malformed_files(tmp_path, bad, why):
+    import json
+
+    from db.migrated_collections import _load
+
+    p = tmp_path / "migrated_collections.json"
+    p.write_text(json.dumps(bad), encoding="utf-8")
+    with pytest.raises(ValueError, match=why):
+        _load(p)

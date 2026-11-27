@@ -258,8 +258,9 @@ class UserRepository(BaseRepository):
     # Phase 2a's census inventoried only the ATTRIBUTE form ``db.users`` and so
     # missed nine files that reach the collection through the SUBSCRIPT form
     # ``db["users"]`` — 28 live sites, including a write to ``pm_capacity_tier``.
-    # The methods below are those callers' intents; the seam is closed by
-    # ``scripts/greps/phase2a.txt``, which now covers both forms.
+    # The methods below are those callers' intents; the seam is closed by the
+    # zero-grep that verify builds from ``db/migrated_collections.json``, which
+    # covers the dot, subscript and get_collection forms.
 
     @staticmethod
     def _user_card(row: UserRow) -> dict:

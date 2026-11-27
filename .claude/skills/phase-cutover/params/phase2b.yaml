@@ -48,7 +48,13 @@ census_reverify:
     - id: 4
       decision: "workflow_executor rejects writes to any collection migrated through 2b"
       status: "IMPLEMENTED: _POSTGRES_MIGRATED_COLLECTIONS guard in _get_collection, called only by update_field / create_record / delete_record; tested in test_platform_core_rbac_pg.py"
-      stored_rules_check: "2026-11-27 dev Mongo: 8 workflow_rules, 0 with trigger.module or actions.module in a 2b module/collection; stop_conditions[6] does not fire"
+      stored_rules_check: >-
+        CORRECTED 2026-11-27 (harness retro). The first check queried `actions.module`,
+        but stored rules keep actions in `instant_actions` / `scheduled_actions`
+        (workflow_engine.py:183), so its "0 hits" proved nothing. Re-run on the real
+        fields: 8 workflow_rules, 9 actions, 0 targeting a module that maps to a
+        migrated collection (admin, agent_dashboard, audit, roles, tenants,
+        user_resources). stop_conditions[6] does not fire.
     - id: 5
       decision: "find and fix code that compares or sorts timestamp strings drawn from both Postgres and Mongo"
       status: "SEARCHED, 0 sites found, nothing to fix"
@@ -334,7 +340,20 @@ sweeps:
 # --------------------------------------------------------------------------
 # Verification
 # --------------------------------------------------------------------------
-grep_pattern_file: "scripts/greps/phase2b.txt"
+grep_pattern_file: "scripts/greps/phase2b.txt"   # SUPERSEDED 2026-11-27 (harness retro): file retired; 2b's five collections are registered in backend/db/migrated_collections.json and verify -Grep builds the patterns from it
+decisions:
+  - date: "2026-11-27"
+    id: D7
+    decision: "Harness retro: one registry of migrated collections (backend/db/migrated_collections.json) drives the zero-grep (dot, bracket and get_collection forms) and the workflow_executor guard; handwritten scripts/greps/*.txt retired"
+    trigger: "operator harness retro after phase 2b"
+    status: "implemented"
+    evidence: "planted db[\"roles\"] in backend/services/_zero_grep_probe.py -> verify.ps1 -Grep and verify.sh --grep both FAIL with HIT roles(2b)/bracket; reverted -> PASS"
+  - date: "2026-11-27"
+    id: D8
+    decision: "Correction to binding decision 4's stored_rules_check evidence: the original query was vacuous (wrong field); re-run on instant_actions/scheduled_actions found 0 of 9 actions targeting a migrated module"
+    trigger: "harness retro, extending the guard to every registered collection"
+    status: "recorded"
+    evidence: "workflow_engine.py:183 reads instant_actions + scheduled_actions"
 
 contract_endpoints:
   - "/api/auth/login"       # roles feed the permission closure — must not drift
@@ -357,8 +376,9 @@ smoke_legacy: "/api/contracts"    # still Mongo until Phase 4a
 test_paths:
   - "tests/test_platform_core_*_pg.py"
 
+# Updated 2026-11-27 (D7): -Grep takes no pattern file; it builds from the registry.
 gate: |
-  scripts\verify.ps1 -Alembic -Grep scripts\greps\phase2b.txt `
+  scripts\verify.ps1 -Alembic -Grep `
     -Tests tests/test_platform_core_*_pg.py -Boot -Smoke `
     -SmokeMigrated /api/roles -SmokeLegacy /api/contracts `
     -Contracts contracts\captures

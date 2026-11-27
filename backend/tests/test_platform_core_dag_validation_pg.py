@@ -18,19 +18,6 @@ from services.permission_registry import (
 )
 
 
-@pytest.fixture(autouse=True)
-def _logger_enabled():
-    """Re-enable the logger under test.
-
-    The ``pg_migrated_url`` fixture runs Alembic in-process, and
-    ``alembic/env.py`` calls ``logging.config.fileConfig()`` with its default
-    ``disable_existing_loggers=True``. That disables every logger imported
-    before it, including this module's, so ``caplog`` would see nothing.
-    """
-    logging.getLogger("services.permission_registry").disabled = False
-    yield
-
-
 @pytest_asyncio.fixture
 async def unreachable_db(monkeypatch):
     """Point the lazy process-wide engine at a port nothing listens on."""

@@ -3,7 +3,11 @@
 # scripts/verify.ps1). Same profiles, same output grammar, same exit codes.
 #
 #   --alembic              upgrade head -> downgrade base -> upgrade head
-#   --grep <patternfile>   zero-grep over live backend code (repeatable)
+#   --grep                 zero-grep over live backend code. Patterns are BUILT
+#                          from backend/db/migrated_collections.json: for every
+#                          migrated collection, db.<name>, db["<name>"] and
+#                          get_collection("<name>"). No handwritten pattern files.
+#                          (Reads the registry with python3/python, stdlib only.)
 #   --tests <path...>      pytest; SKIPPED PG TESTS ARE A FAILURE
 #   --boot                 force-recreate backend, wait healthy, scan startup log
 #   --smoke                login + health + me + one migrated + one Mongo endpoint
@@ -50,6 +54,14 @@ TEST_DB_URL_NATIVE="${TEST_DATABASE_URL:-postgresql+asyncpg://aegis:aegis@localh
 # Live backend code, per phase2a-census §1.8: these are top-level directories
 # under backend/. __pycache__ is excluded separately, at any depth.
 GREP_EXCLUDE_DIRS=(tests scripts migrations archive)
+# Excluded at ANY depth (pruned, never descended): virtualenvs and vendored JS
+# are third-party code, never a request path. Mirrors $GrepExcludeAnyDepth.
+GREP_EXCLUDE_ANY_DEPTH=(.venv venv node_modules __pycache__)
+
+# The single registry of migrated collections (also read by the runtime guard in
+# backend/services/workflow_executor.py via backend/db/migrated_collections.py).
+REGISTRY_REL="backend/db/migrated_collections.json"
+REGISTRY_PATH="$REPO_ROOT/$REGISTRY_REL"
 
 BASE_URL="${VERIFY_BASE_URL:-http://localhost:8001}"
 SMOKE_MIGRATED="${VERIFY_SMOKE_MIGRATED:-/api/tenants}"
@@ -60,7 +72,7 @@ DEFAULT_CAPTURES="contracts/captures"
 
 RUN_ALEMBIC=0; RUN_GREP=0; RUN_TESTS=0; RUN_BOOT=0; RUN_SMOKE=0; RUN_CONTRACTS=0
 RUN_ALL=0; KEEP=0; NATIVE=0
-GREP_FILES=(); TEST_SPECS=(); CAPTURE_DIR=""
+TEST_SPECS=(); CAPTURE_DIR=""
 STARTED_TEST_DB=0
 declare -A RESULTS
 
@@ -96,7 +108,13 @@ while [ $# -gt 0 ]; do
     --all|-all)             RUN_ALL=1; shift ;;
     --keep|-keep)           KEEP=1; shift ;;
     --native|-native)       NATIVE=1; shift ;;
-    --grep|-grep)           RUN_GREP=1; shift; GREP_FILES+=("$1"); shift ;;
+    --grep|-grep)
+      RUN_GREP=1; shift
+      if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then
+        say "[verify] FAIL reason=unexpected-argument args=$1"
+        say "[verify] note: --grep takes no pattern file any more; patterns are built from $REGISTRY_REL"
+        exit 2
+      fi ;;
     --contracts|-contracts) RUN_CONTRACTS=1; shift; CAPTURE_DIR="$1"; shift ;;
     --tests|-tests)
       RUN_TESTS=1; shift
@@ -111,10 +129,6 @@ done
 if [ "$RUN_ALL" -eq 1 ]; then
   RUN_ALEMBIC=1; RUN_GREP=1; RUN_TESTS=1; RUN_BOOT=1; RUN_SMOKE=1; RUN_CONTRACTS=1
 fi
-if [ "$RUN_GREP" -eq 1 ] && [ ${#GREP_FILES[@]} -eq 0 ]; then
-  while IFS= read -r f; do GREP_FILES+=("${f#"$REPO_ROOT"/}"); done \
-    < <(find "$REPO_ROOT/scripts/greps" -name '*.txt' -type f 2>/dev/null | sort)
-fi
 [ "$RUN_TESTS" -eq 1 ]     && [ ${#TEST_SPECS[@]} -eq 0 ] && TEST_SPECS=("$DEFAULT_TESTS")
 [ "$RUN_CONTRACTS" -eq 1 ] && [ -z "$CAPTURE_DIR" ]       && CAPTURE_DIR="$DEFAULT_CAPTURES"
 
@@ -128,7 +142,7 @@ SELECTED=()
 
 if [ ${#SELECTED[@]} -eq 0 ]; then
   say '[verify] FAIL reason=no-profile-selected'
-  say '[verify] usage: verify.sh [--alembic] [--grep <file>] [--tests <path...>] [--boot] [--smoke] [--contracts <dir>] [--all] [--keep] [--native]'
+  say '[verify] usage: verify.sh [--alembic] [--grep] [--tests <path...>] [--boot] [--smoke] [--contracts <dir>] [--all] [--keep] [--native]'
   exit 2
 fi
 
@@ -241,18 +255,74 @@ profile_alembic() {
 # --------------------------------------------------------------------------
 live_backend_files() {
   local f rel d skip
+  local prune=() first=1
+  for d in "${GREP_EXCLUDE_ANY_DEPTH[@]}"; do
+    [ "$first" -eq 1 ] || prune+=(-o)
+    prune+=(-name "$d"); first=0
+  done
   while IFS= read -r f; do
     rel="${f#"$REPO_ROOT"/}"
-    case "$rel" in *"/__pycache__/"*) continue ;; esac
     skip=0
     for d in "${GREP_EXCLUDE_DIRS[@]}"; do
       case "$rel" in "backend/$d/"*) skip=1; break ;; esac
     done
     [ "$skip" -eq 0 ] && printf '%s\n' "$f"
-  done < <(find "$REPO_ROOT/backend" -type f -name '*.py')
+  done < <(find "$REPO_ROOT/backend" -type d \( "${prune[@]}" \) -prune -o -type f -name '*.py' -print)
+}
+
+# Prints "<name>\t<phase>" per registry entry, or "ERROR <reason>" and exits 1.
+# Same validation as backend/db/migrated_collections.py and verify.ps1.
+read_registry() {
+  local py="" c
+  # Probe by RUNNING it: on Windows `python3` can be a Store stub that exists
+  # on PATH but only prints an install hint.
+  for c in python3 python; do
+    if "$c" -c 'import json, re' >/dev/null 2>&1; then py="$c"; break; fi
+  done
+  [ -z "$py" ] && { printf 'ERROR no-python-to-read-registry\n'; return 1; }
+  "$py" - "$REGISTRY_PATH" 2>/dev/null <<'PY'
+import json, re, sys
+try:
+    entries = json.load(open(sys.argv[1], encoding="utf-8")).get("collections")
+except FileNotFoundError:
+    print("ERROR not-found"); sys.exit(1)
+except Exception:
+    print("ERROR invalid-json"); sys.exit(1)
+if not isinstance(entries, list) or not entries:
+    print("ERROR no-collections"); sys.exit(1)
+seen = set()
+for e in entries:
+    name, phase = (e or {}).get("name"), (e or {}).get("phase")
+    if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_]*", name):
+        print(f"ERROR invalid-name name={name}"); sys.exit(1)
+    if not isinstance(phase, str) or not re.fullmatch(r"[0-9]+[a-z]?", phase):
+        print(f"ERROR invalid-phase name={name}"); sys.exit(1)
+    if name in seen:
+        print(f"ERROR duplicate name={name}"); sys.exit(1)
+    seen.add(name)
+    print(f"{name}\t{phase}")
+PY
+}
+
+# The three access forms, per migrated collection. `(?<!\x60)` = "not preceded
+# by a backtick": prose inside docstrings is the ONLY exemption (CLAUDE.md §2).
+# Byte-identical to Get-ZeroGrepPatterns in verify.ps1. Prints "<form>\t<regex>".
+zero_grep_patterns() { # name
+  local n="$1"
+  printf 'dot\t%s\n'            "(?<!\\x60)\\bdb\\.${n}\\b"
+  printf 'bracket\t%s\n'        "(?<!\\x60)db\\[\\s*[\"']${n}[\"']\\s*\\]"
+  printf 'get_collection\t%s\n' "(?<!\\x60)\\bget_collection\\(\\s*[\"']${n}[\"']"
 }
 
 profile_grep() {
+  local registry
+  registry="$(read_registry | tr -d '\r')"   # pipefail keeps read_registry's status; tr drops Windows CRs
+  if [ $? -ne 0 ] || [ -z "$registry" ]; then
+    registry="${registry:-ERROR registry-read-failed}"
+    say "[grep] FAIL registry=$REGISTRY_REL reason=${registry#ERROR }"
+    set_result grep 1 'reason=registry-invalid'; return 1
+  fi
+
   local file_list total_hits=0 total_patterns=0 rc=0
   file_list="$(mktemp)"; live_backend_files | sort > "$file_list"
   local file_count; file_count="$(wc -l < "$file_list" | tr -d ' ')"
@@ -260,32 +330,29 @@ profile_grep() {
     rm -f "$file_list"; set_result grep 1 'reason=no-live-backend-files-found (wrong repo root?)'; return 1
   fi
 
-  local pf path patterns pattern hits n
-  for pf in "${GREP_FILES[@]}"; do
-    path="$pf"; is_abs "$path" || path="$REPO_ROOT/$pf"
-    if [ ! -f "$path" ]; then say "[grep] FAIL patternfile=$pf reason=not-found"; rc=1; continue; fi
-    patterns="$(grep -v -e '^[[:space:]]*#' -e '^[[:space:]]*$' "$path")"
-    n="$(printf '%s\n' "$patterns" | grep -c . )"
-    total_patterns=$((total_patterns + n))
-    say "[grep] START patternfile=$pf patterns=$n files=$file_count"
-    if [ "$n" -eq 0 ]; then say "[grep] FAIL patternfile=$pf reason=no-patterns"; rc=1; continue; fi
+  local n_coll phases
+  n_coll="$(printf '%s\n' "$registry" | grep -c .)"
+  phases="$(printf '%s\n' "$registry" | cut -f2 | sort -u | paste -sd, -)"
+  say "[grep] START registry=$REGISTRY_REL collections=$n_coll phases=$phases patterns=$((n_coll * 3)) files=$file_count"
 
-    # One grep per pattern: GNU grep -P does not accept a multi-pattern -f.
-    while IFS= read -r pattern; do
-      [ -z "$pattern" ] && continue
+  # One grep per pattern: GNU grep -P does not accept a multi-pattern -f.
+  local name phase form pattern hits line
+  while IFS=$'\t' read -r name phase; do
+    while IFS=$'\t' read -r form pattern; do
+      total_patterns=$((total_patterns + 1))
       hits="$(xargs -a "$file_list" -d '\n' grep -nHP -- "$pattern" 2>/dev/null)"
       if [ -n "$hits" ]; then
         while IFS= read -r line; do
-          say "[grep] HIT ${line#"$REPO_ROOT"/}"
+          say "[grep] HIT ${name}(${phase})/${form} ${line#"$REPO_ROOT"/}"
           total_hits=$((total_hits + 1))
         done <<< "$hits"
         rc=1
       fi
-    done <<< "$patterns"
-  done
+    done < <(zero_grep_patterns "$name")
+  done <<< "$registry"
 
   rm -f "$file_list"
-  set_result grep "$rc" "hits=$total_hits patterns=$total_patterns files=$file_count"
+  set_result grep "$rc" "hits=$total_hits collections=$n_coll patterns=$total_patterns files=$file_count"
 }
 
 # --------------------------------------------------------------------------

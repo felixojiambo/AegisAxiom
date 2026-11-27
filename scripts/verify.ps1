@@ -7,7 +7,10 @@
   flags; `-All` runs them in order and stops at the first failure.
 
     -Alembic              upgrade head -> downgrade base -> upgrade head
-    -Grep <patternfile>   zero-grep over live backend code (repeatable)
+    -Grep                 zero-grep over live backend code. Patterns are BUILT
+                          from backend/db/migrated_collections.json: for every
+                          migrated collection, db.<name>, db["<name>"] and
+                          get_collection("<name>"). No handwritten pattern files.
     -Tests <path...>      in-container pytest; SKIPPED PG TESTS ARE A FAILURE
     -Boot                 force-recreate backend, wait healthy, scan startup log
     -Smoke                login + health + me + one migrated + one Mongo endpoint
@@ -23,18 +26,18 @@
   elided to `a***@d***` in output.
 
 .EXAMPLE
-  scripts\verify.ps1 -Alembic -Grep scripts\greps\phase2a.txt `
+  scripts\verify.ps1 -Alembic -Grep `
       -Tests tests/test_platform_core_*_pg.py -Boot -Smoke -Contracts contracts/captures
 
 .EXAMPLE
   scripts\verify.ps1 -All            # uses the defaults documented on each param
 #>
 #Requires -Version 5.1
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding = $false)]
 param(
     # --- profiles -----------------------------------------------------------
     [switch]$Alembic,
-    [string[]]$Grep,
+    [switch]$Grep,
     [string[]]$Tests,
     [switch]$Boot,
     [switch]$Smoke,
@@ -59,7 +62,12 @@ param(
 
     # Defaults used when -All is given without the corresponding flag.
     [string]$DefaultTests = 'tests/test_platform_core_*_pg.py',
-    [string]$DefaultCaptures = 'contracts/captures'
+    [string]$DefaultCaptures = 'contracts/captures',
+
+    # Catches stray positional tokens, e.g. a retired `-Grep <patternfile>`
+    # argument, so they fail with a clear message instead of a binder error.
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$Unexpected
 )
 
 Set-StrictMode -Version 2.0
@@ -97,6 +105,15 @@ if ($env:VERIFY_TEST_DATABASE_URL) { $TestDbUrlContainer = $env:VERIFY_TEST_DATA
 # Live backend code, per phase2a-census §1.8. Everything else under backend/ is
 # the test suite or a one-off Mongo data-fix script — dead, not a request path.
 $GrepExcludeDirs = @('tests', 'scripts', 'migrations', 'archive')
+# Excluded at ANY depth: virtualenvs and vendored JS are third-party code, never
+# a request path. A stray host backend/.venv put 395 site-packages files (of
+# 677 scanned) into the scan before this exclusion. Mirrors verify.sh.
+$GrepExcludeAnyDepth = @('.venv', 'venv', 'node_modules', '__pycache__')
+
+# The single registry of migrated collections (also read by the runtime guard in
+# backend/services/workflow_executor.py via backend/db/migrated_collections.py).
+$RegistryRel  = 'backend/db/migrated_collections.json'
+$RegistryPath = Join-Path $RepoRoot $RegistryRel
 
 $script:StartedTestDb = $false
 $script:Results = [ordered]@{}
@@ -265,51 +282,77 @@ function Get-LiveBackendFiles {
             $rel = $_.FullName.Substring($RepoRoot.Length + 1).Replace('\', '/')
             $skip = $false
             foreach ($p in $prefixes) { if ($rel.StartsWith($p)) { $skip = $true; break } }
-            if ($rel -like '*/__pycache__/*') { $skip = $true }
+            if (-not $skip) {
+                $segs = $rel.Split('/')
+                foreach ($d in $GrepExcludeAnyDepth) { if ($segs -ccontains $d) { $skip = $true; break } }
+            }
             if (-not $skip) { $_ }
         }
 }
 
+# The three access forms, per migrated collection. `(?<!\x60)` = "not preceded
+# by a backtick": prose inside docstrings (``db.roles.find(...)``) is the ONLY
+# exemption (CLAUDE.md §2). .NET- and PCRE-compatible; verify.sh builds the
+# byte-identical list. A name is [a-z][a-z0-9_]*, so no regex escaping is needed.
+function Get-ZeroGrepPatterns {
+    param([string]$Name)
+    return @(
+        [pscustomobject]@{ Form = 'dot';            Regex = "(?<!\x60)\bdb\.$Name\b" },
+        [pscustomobject]@{ Form = 'bracket';        Regex = "(?<!\x60)db\[\s*[`"']$Name[`"']\s*\]" },
+        [pscustomobject]@{ Form = 'get_collection'; Regex = "(?<!\x60)\bget_collection\(\s*[`"']$Name[`"']" }
+    )
+}
+
+# Returns the registry entries, or $null after printing the reason.
+function Read-MigratedRegistry {
+    if (-not (Test-Path -LiteralPath $RegistryPath)) {
+        Say "[grep] FAIL registry=$RegistryRel reason=not-found"; return $null
+    }
+    try {
+        $doc = Get-Content -LiteralPath $RegistryPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    } catch {
+        Say "[grep] FAIL registry=$RegistryRel reason=invalid-json"; return $null
+    }
+    $entries = @($doc.collections)
+    if ($entries.Count -eq 0) { Say "[grep] FAIL registry=$RegistryRel reason=no-collections"; return $null }
+    $seen = @{}
+    foreach ($e in $entries) {
+        if (-not ($e.name -cmatch '^[a-z][a-z0-9_]*$')) { Say "[grep] FAIL registry=$RegistryRel reason=invalid-name name=$($e.name)"; return $null }
+        if (-not ($e.phase -cmatch '^[0-9]+[a-z]?$'))  { Say "[grep] FAIL registry=$RegistryRel reason=invalid-phase name=$($e.name)"; return $null }
+        if ($seen.ContainsKey($e.name))                { Say "[grep] FAIL registry=$RegistryRel reason=duplicate name=$($e.name)"; return $null }
+        $seen[$e.name] = $true
+    }
+    return ,$entries
+}
+
 function Invoke-GrepProfile {
-    param([string[]]$PatternFiles)
+    $entries = Read-MigratedRegistry
+    if ($null -eq $entries) { return (Set-Result 'grep' $false 'reason=registry-invalid') }
 
     $files = @(Get-LiveBackendFiles)
     if ($files.Count -eq 0) {
         return (Set-Result 'grep' $false 'reason=no-live-backend-files-found (wrong repo root?)')
     }
-    $totalHits = 0
-    $totalPatterns = 0
-    $ok = $true
 
-    foreach ($pf in $PatternFiles) {
-        $path = $pf
-        if (-not [System.IO.Path]::IsPathRooted($path)) { $path = Join-Path $RepoRoot $pf }
-        if (-not (Test-Path -LiteralPath $path)) {
-            Say "[grep] FAIL patternfile=$pf reason=not-found"
-            $ok = $false
-            continue
+    # regex -> "<collection>(<phase>)/<form>", so every HIT names what it broke.
+    $label = @{}
+    foreach ($e in $entries) {
+        foreach ($p in (Get-ZeroGrepPatterns -Name $e.name)) {
+            $label[$p.Regex] = '{0}({1})/{2}' -f $e.name, $e.phase, $p.Form
         }
-        $patterns = @(Get-Content -LiteralPath $path |
-            Where-Object { $_.Trim() -ne '' -and -not $_.TrimStart().StartsWith('#') })
-        $totalPatterns += $patterns.Count
-        Say ("[grep] START patternfile={0} patterns={1} files={2}" -f $pf, $patterns.Count, $files.Count)
-
-        if ($patterns.Count -eq 0) {
-            Say "[grep] FAIL patternfile=$pf reason=no-patterns"
-            $ok = $false
-            continue
-        }
-
-        $hits = @(Select-String -LiteralPath $files.FullName -Pattern $patterns -CaseSensitive -ErrorAction SilentlyContinue)
-        foreach ($h in $hits) {
-            $rel = $h.Path.Substring($RepoRoot.Length + 1).Replace('\', '/')
-            Say ("[grep] HIT {0}:{1}: {2}" -f $rel, $h.LineNumber, $h.Line.Trim())
-        }
-        $totalHits += $hits.Count
-        if ($hits.Count -gt 0) { $ok = $false }
     }
+    $patterns = @($label.Keys)
+    $phases = (@($entries | ForEach-Object { $_.phase }) | Sort-Object -Unique) -join ','
+    Say ("[grep] START registry={0} collections={1} phases={2} patterns={3} files={4}" -f `
+        $RegistryRel, $entries.Count, $phases, $patterns.Count, $files.Count)
 
-    return (Set-Result 'grep' $ok ("hits=$totalHits patterns=$totalPatterns files=$($files.Count)"))
+    $hits = @(Select-String -LiteralPath $files.FullName -Pattern $patterns -CaseSensitive -ErrorAction SilentlyContinue)
+    foreach ($h in $hits) {
+        $rel = $h.Path.Substring($RepoRoot.Length + 1).Replace('\', '/')
+        Say ("[grep] HIT {0} {1}:{2}: {3}" -f $label[$h.Pattern], $rel, $h.LineNumber, $h.Line.Trim())
+    }
+    $ok = ($hits.Count -eq 0)
+    return (Set-Result 'grep' $ok ("hits=$($hits.Count) collections=$($entries.Count) patterns=$($patterns.Count) files=$($files.Count)"))
 }
 
 # ===========================================================================
@@ -492,7 +535,15 @@ function Invoke-ContractsProfile {
 # Main
 # ===========================================================================
 $runAlembic   = $Alembic.IsPresent   -or $All.IsPresent
-$runGrep      = ($null -ne $Grep)    -or $All.IsPresent
+if ($Unexpected) {
+    Say ("[verify] FAIL reason=unexpected-argument args={0}" -f ($Unexpected -join ' '))
+    if ($Unexpected | Where-Object { $_ -like '*greps*' -or $_ -like '*.txt' }) {
+        Say "[verify] note: -Grep takes no pattern file any more; patterns are built from $RegistryRel"
+    }
+    exit 2
+}
+
+$runGrep      = $Grep.IsPresent      -or $All.IsPresent
 $runTests     = ($null -ne $Tests)   -or $All.IsPresent
 $runBoot      = $Boot.IsPresent      -or $All.IsPresent
 $runSmoke     = $Smoke.IsPresent     -or $All.IsPresent
@@ -500,11 +551,10 @@ $runContracts = ($null -ne $Contracts -and $Contracts -ne '') -or $All.IsPresent
 
 if (-not ($runAlembic -or $runGrep -or $runTests -or $runBoot -or $runSmoke -or $runContracts)) {
     Say '[verify] FAIL reason=no-profile-selected'
-    Say '[verify] usage: verify.ps1 [-Alembic] [-Grep <file>] [-Tests <path...>] [-Boot] [-Smoke] [-Contracts <dir>] [-All] [-Keep]'
+    Say '[verify] usage: verify.ps1 [-Alembic] [-Grep] [-Tests <path...>] [-Boot] [-Smoke] [-Contracts <dir>] [-All] [-Keep]'
     exit 2
 }
 
-if ($runGrep      -and $null -eq $Grep)       { $Grep = @(Get-ChildItem (Join-Path $RepoRoot 'scripts\greps') -Filter '*.txt' -File | ForEach-Object { 'scripts/greps/' + $_.Name }) }
 if ($runTests     -and $null -eq $Tests)      { $Tests = @($DefaultTests) }
 if ($runContracts -and (-not $Contracts))     { $Contracts = $DefaultCaptures }
 
@@ -527,7 +577,7 @@ if ($needsDocker -and -not (Test-DockerUp)) {
 $failed = $false
 try {
     if ($runAlembic   -and -not $failed) { if (-not (Invoke-AlembicProfile))                    { $failed = $true } }
-    if ($runGrep      -and -not $failed) { if (-not (Invoke-GrepProfile -PatternFiles $Grep))   { $failed = $true } }
+    if ($runGrep      -and -not $failed) { if (-not (Invoke-GrepProfile))                       { $failed = $true } }
     if ($runTests     -and -not $failed) { if (-not (Invoke-TestsProfile -Specs $Tests))        { $failed = $true } }
     if ($runBoot      -and -not $failed) { if (-not (Invoke-BootProfile))                       { $failed = $true } }
     if ($runSmoke     -and -not $failed) { if (-not (Invoke-SmokeProfile))                      { $failed = $true } }

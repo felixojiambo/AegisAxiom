@@ -89,14 +89,19 @@ Resolved while landing `roles`, `permissions`, `policies`, `policy_targets`, `au
    (c) still **raise** on a real integrity failure (a cycle) against a reachable, populated DB.
    Never call a validator un-wrapped from the lifespan hook.
 
-5. **Zero-grep pattern files cover BOTH access forms** for every migrated collection:
-   `(?<!\x60)\bdb\.<name>\b` **and** `(?<!\x60)db\[\s*["']<name>["']\s*\]`. Phase 2a shipped
-   28 live `db["users"]` sites because only the attribute form was checked.
-   **The grep cannot see dynamic access.** `db[collection]`, with `collection` resolved from
-   `field_registry`, needs an explicit runtime guard. Reference:
-   `services/workflow_executor._POSTGRES_MIGRATED_COLLECTIONS` refuses workflow write actions
-   whose module resolves to a migrated collection. **Every later phase adds its collections
-   to that set.**
+5. **One registry drives both gates: `backend/db/migrated_collections.json`** (loader:
+   `db/migrated_collections.py`). It records each migrated collection and the phase that
+   migrated it. **A phase adds its collections there in `/phase-cutover` step 4. Nothing
+   else needs editing.**
+   * *Static gate.* `scripts/verify -Grep` builds the zero-grep from it in three access forms
+     per collection: `(?<!\x60)\bdb\.<name>\b`, `(?<!\x60)db\[\s*["']<name>["']\s*\]` and
+     `(?<!\x60)\bget_collection\(\s*["']<name>["']`. Phase 2a shipped 28 live `db["users"]`
+     sites because only the attribute form was checked. Handwritten per-phase pattern files
+     are retired (harness retro, 2026-11-27).
+   * *Runtime gate.* The grep cannot see dynamic access: `db[collection]`, with `collection`
+     resolved from `field_registry`. `services/workflow_executor._get_collection` calls
+     `migrated_in()` and refuses workflow write actions whose module resolves to any
+     registered collection.
 
 6. **Timestamps across the seam.** Postgres columns are `timestamptz` and come back
    tz-aware (`isoformat()` → `…+00:00`). Motor returns naive datetimes, and many Mongo

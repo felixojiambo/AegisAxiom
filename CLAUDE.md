@@ -29,8 +29,9 @@ still on Mongo. Three rules keep that honest (plan §A2, CONVENTIONS.md).
 
 1. **Migrated collections have ZERO `db.<name>` references anywhere in live
    backend code.** Live = every `.py` under `backend/` except `tests/`,
-   `scripts/`, `migrations/`, `archive/`, and `__pycache__/` (one-off Mongo
-   data-fix scripts and the test suite are out of scope by census §1.8).
+   `scripts/`, `migrations/`, `archive/` (one-off Mongo data-fix scripts and
+   the test suite are out of scope by census §1.8), and, at any depth,
+   `__pycache__/`, `.venv/`, `venv/` and `node_modules/` (third-party code).
    Prose mentions inside backticks (`` `db.users` ``) in docstrings are exempt
    and are the *only* exemption.
 2. **Cross-domain reads of migrated data go through that domain's repository** —
@@ -109,11 +110,14 @@ when the diff looks right, and not when tests were "probably" fine.**
 
 ```powershell
 # the standing phase-cutover gate
-scripts\verify.ps1 -All -Grep scripts\greps\phase2a.txt -Tests tests/test_platform_core_*_pg.py
+scripts\verify.ps1 -All -Tests tests/test_platform_core_*_pg.py
 ```
 
-Profiles: `-Alembic` `-Grep <patternfile>` `-Tests <path…>` `-Boot` `-Smoke`
-`-Contracts <capture-dir>` `-All`. Exit code 0 means everything requested
+Profiles: `-Alembic` `-Grep` `-Tests <path…>` `-Boot` `-Smoke`
+`-Contracts <capture-dir>` `-All`. `-Grep` takes no argument. It builds the
+zero-grep from `backend/db/migrated_collections.json`, the one registry of
+migrated collections, in the dot, subscript and `get_collection` forms. The
+runtime workflow guard reads the same file. Exit code 0 means everything requested
 passed; anything else is a failure. **A skipped Postgres test counts as a
 failure** — skipped-as-green is the exact failure mode the harness exists to
 kill. Paste the raw verify output in the report; do not paraphrase it.
