@@ -26,14 +26,6 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-@pytest.fixture(autouse=True)
-def _logger_enabled():
-    """Re-enable the logger under test. The in-process Alembic run behind
-    ``pg_migrated_url`` calls ``fileConfig()`` with ``disable_existing_loggers=True``."""
-    logging.getLogger("repositories.audit").disabled = False
-    yield
-
-
 @pytest_asyncio.fixture
 async def sessionmaker_pg(pg_migrated_url):
     from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine

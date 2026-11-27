@@ -41,7 +41,10 @@ import db.models  # noqa: E402,F401
 config = context.config
 
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    # disable_existing_loggers=False: fileConfig's default (True) disables every
+    # logger already imported. The test fixtures run Alembic in-process, so the
+    # default silenced the application loggers under test (caplog saw nothing).
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 target_metadata = Base.metadata
 

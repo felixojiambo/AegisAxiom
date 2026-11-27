@@ -1,0 +1,17 @@
+{
+  "_about": "The ONE registry of Mongo collections that have moved to PostgreSQL. Read by backend/db/migrated_collections.py (the workflow_executor guard) and by scripts/verify.ps1 / verify.sh, which build the zero-grep patterns from it (db.<name>, db[\"<name>\"], get_collection(\"<name>\")). A phase adds its collections here in /phase-cutover step 4. Entries are never removed.",
+  "collections": [
+    {"name": "users",                 "phase": "2a", "repository": "repositories/users.py"},
+    {"name": "user_sessions",         "phase": "2a", "repository": "repositories/auth.py"},
+    {"name": "password_reset_tokens", "phase": "2a", "repository": "repositories/auth.py"},
+    {"name": "oauth_states",          "phase": "2a", "repository": "repositories/auth.py"},
+    {"name": "oauth_tokens",          "phase": "2a", "repository": "repositories/auth.py"},
+    {"name": "tenants",               "phase": "2a", "repository": "repositories/tenants.py"},
+    {"name": "org_branding",          "phase": "2a", "repository": "repositories/org_branding.py"},
+    {"name": "roles",                 "phase": "2b", "repository": "repositories/roles.py"},
+    {"name": "permissions",           "phase": "2b", "repository": "repositories/permissions.py"},
+    {"name": "policies",              "phase": "2b", "repository": "repositories/policies.py"},
+    {"name": "policy_targets",        "phase": "2b", "repository": "repositories/policies.py"},
+    {"name": "audit_logs",            "phase": "2b", "repository": "repositories/audit.py"}
+  ]
+}

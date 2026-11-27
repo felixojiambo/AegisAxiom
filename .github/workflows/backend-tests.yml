@@ -7,9 +7,10 @@ name: backend-tests
 #               suite SKIPS fails the job. Skipped-as-green is the failure mode
 #               this job exists to kill, so it is asserted on pytest OUTPUT, not
 #               just on the exit code (pytest exits 0 when everything skips).
-#   zero-grep   scripts/verify.sh --grep over every completed-phase pattern file,
-#               so a merged regression that reintroduces `db.users` (either the
-#               attribute or the subscript form) can never land silently.
+#   zero-grep   scripts/verify.sh --grep over every collection registered in
+#               backend/db/migrated_collections.json, so a merged regression that
+#               reintroduces `db.users` (attribute, subscript or get_collection
+#               form) can never land silently.
 #   full-suite  the existing mongomock-motor suites, running as-is until their
 #               domains migrate. Kept intentionally separate: those tests have
 #               legitimate skips, and folding them in would blunt the PG
@@ -117,22 +118,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Every scripts/greps/*.txt is enforced, so a future phase's pattern file
-      # takes effect the moment it is added. Needs no Python, no Docker, no
-      # database — pure source inspection, so it is the fastest signal in CI.
-      - name: Verify — zero-grep over all completed-phase pattern files
-        run: |
-          set -o pipefail
-          shopt -s nullglob
-          files=(scripts/greps/*.txt)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "::error::no pattern files under scripts/greps/ — the zero-grep gate is empty"
-            exit 1
-          fi
-          args=()
-          for f in "${files[@]}"; do args+=(--grep "$f"); done
-          echo "enforcing: ${files[*]}"
-          bash scripts/verify.sh "${args[@]}"
+      # Patterns are built from backend/db/migrated_collections.json (dot,
+      # subscript and get_collection forms per migrated collection), so a phase's
+      # collections are enforced the moment it registers them. Needs the
+      # runner's stock python3 (stdlib json only) to read the registry; no
+      # Docker, no database, so it is the fastest signal in CI.
+      - name: Verify — zero-grep over every registered migrated collection
+        run: bash scripts/verify.sh --grep
 
   # ------------------------------------------------------------------
   # 3. Existing mongomock-motor suites — unchanged until their domains migrate

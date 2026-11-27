@@ -5,9 +5,16 @@ stack is **local-first**: everything runs in Docker Compose against local Mongo,
 Postgres, and Chroma. Follow these steps in order.
 
 > **The classic failure:** copying an `.env` from another machine. A stale
-> `backend/.env` often carries a dead cloud `MONGO_URL` (an old Atlas cluster).
-> The app then crashes at the `validate_dag` startup check. **Always start from
-> the `.env.example` files below** — their values are local-first and correct.
+> `backend/.env` often carries a dead cloud `MONGO_URL` (an old Atlas cluster)
+> or a `DATABASE_URL` for a database that isn't there. Before Phase 2b this
+> crashed boot at the `validate_dag` startup check. Since 2b, `validate_dag`
+> reads the Postgres permission registry, and when that database is unreachable
+> or empty it **logs an error or warning and boot continues**
+> (`SKIP_STARTUP_DAG_VALIDATION=true` skips it entirely). The app comes up, but
+> every domain behind the dead database fails at request time. Look for
+> `Permission registry:` lines in `docker compose logs backend`.
+> **Always start from the `.env.example` files below.** Their values are
+> local-first and correct.
 
 ---
 
@@ -64,25 +71,78 @@ docker compose build backend
 `docker compose run` / `up` will **not** rebuild on their own. The tell-tale
 symptom of a missed rebuild is `command not found` for a newly added tool.
 
-## 5. First boot: seed once, then turn seeding off
+## 5. Seeding: on first boot AND after every new migration
 
-On a **fresh** machine the local Mongo is empty (no tenants, roles, permissions,
-or admin user). Seed once:
+The migration is a fresh start (plan OQ-1). No rows are copied from Mongo, and
+every Postgres table a migration creates is **empty** until the startup seeders
+run. Tenants, users, roles, permissions and policies live in Postgres. The
+backend does **not** run Alembic on boot, and with `SKIP_STARTUP_SEEDS=true` it
+does not seed either.
 
-1. Set `SKIP_STARTUP_SEEDS=false` in `backend/.env`.
-2. Boot clean:
+**Seed on a fresh machine, and again after any new Alembic migration** (for
+example after pulling a phase that adds `0006_…`):
+
+1. Bring the schema to head:
    ```bash
-   docker compose down
-   docker compose build backend
-   docker compose up -d
+   docker compose exec backend sh -c "cd /app/backend && alembic upgrade head"
    ```
-   Watch `docker compose logs -f backend` for: `validate_dag` passing, the seed
-   lines (tenants / roles / permissions), `Auto-initialized admin account`, and
+2. Set `SKIP_STARTUP_SEEDS=false` in `backend/.env`.
+3. Recreate the backend so it picks up the edit (see §5a, not `restart`):
+   ```bash
+   docker compose up -d --force-recreate backend
+   ```
+   Watch `docker compose logs -f backend` for the seed lines (tenants / roles /
+   permissions / policies), `Permission registry: implication DAG validated (… nodes)`,
+   `Auto-initialized admin account` (fresh machine only) and
    `Application startup complete.`
-3. Set `SKIP_STARTUP_SEEDS=true` again and `docker compose restart backend`.
-   Daily boots stay fast because the seed block is skipped.
+4. Set `SKIP_STARTUP_SEEDS=true` again and recreate once more:
+   `docker compose up -d --force-recreate backend`. Daily boots stay fast
+   because the seed block is skipped.
+
+**The symptom of a skipped step:** startup logs `DAG validation found an empty
+registry`, and every non-wildcard user, admin included, gets **403** on
+permission-gated routes such as `/api/roles`. The roles table is empty, so
+nobody has permissions. Phase 2b hit exactly this. Seeding is idempotent, so
+re-running it is safe.
 
 Admin credentials come from `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `backend/.env`.
+
+## 5a. After ANY `.env` edit: recreate, never restart
+
+```bash
+docker compose up -d --force-recreate <service>     # e.g. backend
+```
+
+`docker compose restart` reuses the container's **old** environment block, so
+an `.env` change silently does not land. This applies to every key, including
+`SKIP_STARTUP_SEEDS`. Never add `--remove-orphans`: the test stack
+(`docker-compose.test.yml`) would be treated as an orphan and deleted.
+
+## 5b. Tests: `TEST_DATABASE_URL` is the only working path
+
+Postgres tests run against the `docker-compose.test.yml` database, and
+**`TEST_DATABASE_URL` must point at it**. Let the harness set it:
+
+```powershell
+scripts\verify.ps1 -Tests tests/test_platform_core_*_pg.py    # Windows
+```
+```bash
+scripts/verify.sh --tests 'tests/test_platform_core_*_pg.py'  # Linux / CI
+```
+
+The harness brings up `postgres-test`, bridges it onto the main network, and
+runs pytest in the backend container with
+`TEST_DATABASE_URL=postgresql+asyncpg://aegis:aegis@postgres-test:5432/aegis_test`.
+From the Windows host the same database is `localhost:5544`.
+
+- **testcontainers does not work here.** It cannot reach Docker from inside the
+  backend container. It remains in `conftest.py` only as a host-side fallback,
+  so never rely on it.
+- A Postgres test that **skips** (no `TEST_DATABASE_URL`) counts as a
+  **failure**. The harness reports it as `SKIP-AS-FAIL`.
+- A bare `docker compose run backend pytest …` without `-e TEST_DATABASE_URL=…`
+  skips every PG test. Without the harness's network bridge, `postgres-test`
+  does not resolve.
 
 ## 6. Ingestion stack (optional)
 
