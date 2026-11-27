@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from db.session import get_session, get_sessionmaker
+from repositories.roles import RolesRepository
 from repositories.users import UserRepository
 from models import (
     AIEmployeeCreate, AIEmployeeUpdate, AIEmployeeStatusUpdate,
@@ -893,7 +894,7 @@ def _derived_use_perms(employee_id: str, employee_doc: dict) -> list[str]:
 
 
 @router.get("/ai-employees/{employee_id}/access")
-async def get_ai_employee_access(employee_id: str, current_user=Depends(get_current_user)):
+async def get_ai_employee_access(employee_id: str, current_user=Depends(get_current_user), pg: AsyncSession = Depends(get_session)):
     """Get access configuration for an AI employee.
 
     Returns explicit ``allowed_roles`` AND ``roles_with_permission`` — the set
@@ -922,11 +923,11 @@ async def get_ai_employee_access(employee_id: str, current_user=Depends(get_curr
 
     roles_with_permission: list[str] = []
     if required_perms:
-        cursor = db.roles.find(
-            {"permissions": {"$in": required_perms}},
-            {"_id": 0, "name": 1},
+        # Roles whose permission array contains any required key
+        # (JSONB ?| — GIN-served), sorted by name.
+        roles_with_permission = await RolesRepository(pg).list_role_names_with_any_permission(
+            required_perms
         )
-        roles_with_permission = sorted({r["name"] async for r in cursor if r.get("name")})
 
     return {
         "employee_id": employee_id,
@@ -957,7 +958,7 @@ async def update_ai_employee_access(employee_id: str, data: dict, current_user=D
     update = {}
     if "allowed_roles" in data:
         # Validate roles exist
-        valid_roles = {r["name"] for r in await db.roles.find({}, {"_id": 0, "name": 1}).to_list(100)}
+        valid_roles = await RolesRepository(pg).list_role_names()
         invalid = [r for r in data["allowed_roles"] if r not in valid_roles]
         if invalid:
             raise HTTPException(status_code=400, detail=f"Invalid roles: {', '.join(invalid)}")

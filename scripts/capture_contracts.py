@@ -6,8 +6,30 @@ mounts this file at /harness/scripts and the capture directory at
 /harness/captures, then invokes it on the compose network where the backend
 answers at http://backend:8001.
 
-    record   log in, hit the endpoint list, write sanitized JSON to <dir>/<name>.json
-    compare  re-hit the same list and structurally diff against what is stored
+    record   log in, hit ONLY the endpoints named on the command line, write
+             sanitized JSON to <dir>/<name>.json. Nothing else in <dir> is touched.
+    compare  for EVERY <dir>/*.json, re-issue the request that file stores and
+             structurally diff the response against it
+
+THE CAPTURE DIRECTORY IS THE ENDPOINT LIST
+    Each capture file carries its own request (`request.method/path/auth`, plus
+    a non-secret `request.body` template when the endpoint takes one). Adding an
+    endpoint to the contract check = recording a capture for it; there is no
+    hardcoded list to edit. The one built-in spec is the login request, because
+    every run must authenticate (LOGIN_SPEC below).
+
+    record names resolve, in order:
+      1. --path given (exactly one name): an ad-hoc spec from --method/--path/
+         --no-auth/--domain;
+      2. a spec with that name in the --endpoints JSON file;
+      3. an existing <dir>/<name>.json — re-record it from its stored request
+         (its `domain` label is kept unless --domain is given);
+      4. `auth_login` — LOGIN_SPEC.
+    An unresolvable name is an error (exit 2); nothing is written.
+
+    Examples (in-container, capture dir mounted at /harness/captures):
+      record audit_list --path /api/audit --domain "postgres (2b)"
+      record roles_list policies_list            # re-record two existing files
 
 WHY SHAPE, NOT BYTES
     Plan §A2/§A3 move a domain's storage, not its API. A cutover is correct when
@@ -51,32 +73,36 @@ except ImportError:  # pragma: no cover - httpx is pinned in requirements.txt
 
 
 # --------------------------------------------------------------------------
-# The endpoint list. Seeded per the harness spec: login response, /api/auth/me,
-# tenants list, roles list, contracts list. Override wholesale with
-# `--endpoints <file.json>` (same schema) when a phase needs its own set.
+# Endpoint spec schema (capture `request` block / --endpoints file entries):
 #
 #   name    capture filename stem
 #   method  GET/POST/...
 #   path    appended to --base-url
 #   auth    send the bearer token from the login step
-#   body    JSON body; the literal "$ADMIN_EMAIL"/"$ADMIN_PASSWORD" are
-#           substituted from the environment at request time and never stored
+#   body    JSON body TEMPLATE; the literals "$ADMIN_EMAIL"/"$ADMIN_PASSWORD"
+#           are substituted from the environment at request time. Only the
+#           template is ever stored — never the substituted values.
 #   domain  informational: which datastore backs it today (parallel-run seam)
+#
+# LOGIN_SPEC is the one built-in spec: every record/compare run logs in first.
+# A capture whose request matches it is answered from that login response
+# instead of logging in twice.
 # --------------------------------------------------------------------------
-DEFAULT_ENDPOINTS: List[Dict[str, Any]] = [
-    {
-        "name": "auth_login",
-        "method": "POST",
-        "path": "/api/auth/login",
-        "auth": False,
-        "body": {"email": "$ADMIN_EMAIL", "password": "$ADMIN_PASSWORD"},
-        "domain": "postgres (2a)",
-    },
-    {"name": "auth_me", "method": "GET", "path": "/api/auth/me", "auth": True, "domain": "postgres (2a)"},
-    {"name": "tenants_list", "method": "GET", "path": "/api/tenants", "auth": True, "domain": "postgres (2a)"},
-    {"name": "roles_list", "method": "GET", "path": "/api/roles", "auth": True, "domain": "mongo (2b)"},
-    {"name": "contracts_list", "method": "GET", "path": "/api/contracts", "auth": True, "domain": "mongo (4a)"},
-]
+LOGIN_SPEC: Dict[str, Any] = {
+    "name": "auth_login",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "auth": False,
+    "body": {"email": "$ADMIN_EMAIL", "password": "$ADMIN_PASSWORD"},
+    "domain": "postgres (2a)",
+}
+
+
+def is_login(spec: Dict[str, Any]) -> bool:
+    return (
+        spec.get("path") == LOGIN_SPEC["path"]
+        and spec.get("method", "GET").upper() == LOGIN_SPEC["method"]
+    )
 
 SECRET_KEY_RE = re.compile(
     r"(token|password|passwd|secret|api[_-]?key|client[_-]?secret|private[_-]?key"
@@ -236,7 +262,7 @@ def substitute(body: Any) -> Any:
 
 
 def login(client: httpx.Client, base_url: str) -> Tuple[str, Dict[str, Any], int]:
-    spec = next(e for e in DEFAULT_ENDPOINTS if e["name"] == "auth_login")
+    spec = LOGIN_SPEC
     resp = client.post(base_url + spec["path"], json=substitute(spec["body"]))
     if resp.status_code != 200:
         raise SystemExit(
@@ -263,13 +289,19 @@ def fetch(client: httpx.Client, base_url: str, spec: Dict[str, Any], token: str)
 
 
 def capture_one(spec: Dict[str, Any], status: int, payload: Any) -> Dict[str, Any]:
+    request = {
+        "method": spec.get("method", "GET"),
+        "path": spec["path"],
+        "auth": bool(spec.get("auth")),
+    }
+    # The login body is LOGIN_SPEC's, rebuilt at run time — never stored.
+    # Any other body is stored as its (non-secret) template so compare can
+    # replay it.
+    if spec.get("body") and not is_login(spec):
+        request["body"] = spec["body"]
     return {
         "name": spec["name"],
-        "request": {
-            "method": spec.get("method", "GET"),
-            "path": spec["path"],
-            "auth": bool(spec.get("auth")),
-        },
+        "request": request,
         "domain": spec.get("domain", "unknown"),
         "status": status,
         "shape": shape_of(payload),
@@ -297,22 +329,76 @@ def scan_dirty(value: Any, path: str = "") -> List[str]:
 # --------------------------------------------------------------------------
 # Commands
 # --------------------------------------------------------------------------
-def load_endpoints(path: Optional[str]) -> List[Dict[str, Any]]:
+def load_endpoints(path: Optional[str]) -> Dict[str, Dict[str, Any]]:
     if not path:
-        return DEFAULT_ENDPOINTS
+        return {}
     with open(path, "r", encoding="utf-8") as fh:
-        return json.load(fh)
+        return {e["name"]: e for e in json.load(fh)}
+
+
+def spec_from_capture(name: str, stored: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Rebuild a request spec from a stored capture; None if it has no request."""
+    req = stored.get("request")
+    if not isinstance(req, dict) or not req.get("path"):
+        return None
+    spec = {
+        "name": name,
+        "method": req.get("method", "GET"),
+        "path": req["path"],
+        "auth": bool(req.get("auth")),
+        "domain": stored.get("domain", "unknown"),
+    }
+    if req.get("body"):
+        spec["body"] = req["body"]
+    return spec
+
+
+def usage_error(msg: str) -> None:
+    print("[contract] ERROR " + msg)
+    raise SystemExit(2)
+
+
+def resolve_record_specs(args: argparse.Namespace) -> List[Dict[str, Any]]:
+    """Turn the names on the command line into specs (see module docstring)."""
+    if not args.names:
+        usage_error("record needs at least one endpoint name")
+    if args.path and len(args.names) != 1:
+        usage_error("--path defines exactly one endpoint; name one")
+    from_file = load_endpoints(args.endpoints)
+    specs: List[Dict[str, Any]] = []
+    for name in args.names:
+        if args.path:
+            spec = {"name": name, "method": args.method.upper(), "path": args.path,
+                    "auth": not args.no_auth, "domain": args.domain or "unknown"}
+        elif name in from_file:
+            spec = dict(from_file[name])
+        else:
+            existing = os.path.join(args.dir, name + ".json")
+            spec = None
+            if os.path.exists(existing):
+                with open(existing, "r", encoding="utf-8") as fh:
+                    spec = spec_from_capture(name, json.load(fh))
+            if spec is None and name == LOGIN_SPEC["name"]:
+                spec = dict(LOGIN_SPEC)
+            if spec is None:
+                usage_error(
+                    "cannot resolve endpoint '{}': no --path, not in "
+                    "--endpoints, no stored capture with a request".format(name))
+        if args.domain:
+            spec["domain"] = args.domain
+        specs.append(spec)
+    return specs
 
 
 def cmd_record(args: argparse.Namespace) -> int:
-    endpoints = load_endpoints(args.endpoints)
+    endpoints = resolve_record_specs(args)
     os.makedirs(args.dir, exist_ok=True)
     written, dirty = [], []
 
     with httpx.Client(timeout=30.0) as client:
         token, login_body, login_status = login(client, args.base_url)
         for spec in endpoints:
-            if spec["name"] == "auth_login":
+            if is_login(spec):
                 status, payload = login_status, login_body
             else:
                 status, payload = fetch(client, args.base_url, spec, token)
@@ -342,27 +428,33 @@ def cmd_record(args: argparse.Namespace) -> int:
 
 
 def cmd_compare(args: argparse.Namespace) -> int:
-    endpoints = load_endpoints(args.endpoints)
     if not os.path.isdir(args.dir):
         print("[contract] FAIL capture dir not found: {}".format(args.dir))
         return 2
+    files = sorted(f for f in os.listdir(args.dir) if f.endswith(".json"))
+    if not files:
+        print("[contract] FAIL capture dir holds no *.json captures: {}".format(args.dir))
+        return 1
 
     compared, missing, failures = 0, 0, 0
     strict = args.strict_values and not args.ignore_values
 
     with httpx.Client(timeout=30.0) as client:
         token, login_body, login_status = login(client, args.base_url)
-        for spec in endpoints:
-            path = os.path.join(args.dir, spec["name"] + ".json")
-            if not os.path.exists(path):
-                print("[contract] MISSING {} (no stored capture; run `record`)".format(spec["name"]))
+        for fname in files:
+            name = fname[: -len(".json")]
+            with open(os.path.join(args.dir, fname), "r", encoding="utf-8") as fh:
+                stored = json.load(fh)
+            spec = spec_from_capture(name, stored)
+            if spec is None:
+                # A capture that cannot say what it captured is a broken
+                # contract, not a skip.
+                print("[contract] MISSING {} (capture has no request block; re-record it)".format(name))
                 missing += 1
                 failures += 1
                 continue
-            with open(path, "r", encoding="utf-8") as fh:
-                stored = json.load(fh)
 
-            if spec["name"] == "auth_login":
+            if is_login(spec):
                 status, payload = login_status, login_body
             else:
                 status, payload = fetch(client, args.base_url, spec, token)
@@ -396,9 +488,15 @@ def cmd_compare(args: argparse.Namespace) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("mode", choices=["record", "compare"])
+    ap.add_argument("names", nargs="*",
+                    help="record: the endpoint names to (re)record; compare: ignored (every capture is checked)")
     ap.add_argument("--dir", default="/harness/captures", help="capture directory")
     ap.add_argument("--base-url", default=os.environ.get("CONTRACT_BASE_URL", "http://backend:8001"))
-    ap.add_argument("--endpoints", help="JSON file overriding the built-in endpoint list")
+    ap.add_argument("--endpoints", help="record: JSON file of named specs to resolve names against")
+    ap.add_argument("--path", help="record: ad-hoc spec path for the single name given")
+    ap.add_argument("--method", default="GET", help="record: method for --path (default GET)")
+    ap.add_argument("--no-auth", action="store_true", help="record: --path request is unauthenticated")
+    ap.add_argument("--domain", help="record: datastore label to store (overrides a re-recorded file's)")
     # Value comparison is OFF by default: ids and timestamps are volatile, so a
     # value-strict default would cry wolf on every run and get switched off.
     ap.add_argument("--ignore-values", action="store_true", default=True,
@@ -411,6 +509,9 @@ def main() -> int:
 
     if args.strict_values:
         args.ignore_values = False
+    if args.mode == "compare" and args.names:
+        print("[contract] ERROR compare takes no endpoint names; it checks every capture in --dir")
+        return 2
 
     try:
         return cmd_record(args) if args.mode == "record" else cmd_compare(args)

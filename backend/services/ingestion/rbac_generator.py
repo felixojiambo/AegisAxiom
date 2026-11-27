@@ -13,7 +13,10 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from database import get_db
-from models import gen_id
+from db.session import get_sessionmaker
+from models import Role, gen_id
+from repositories.permissions import PermissionsRepository
+from repositories.roles import RolesRepository
 from services.ingestion import repository as repo
 from services.ingestion.models import PipelineStage, slug_to_app_slug
 from services.permission_registry import (
@@ -239,24 +242,27 @@ async def apply_rbac(
 
         if action == "create_new":
             role_id = gen_id("role_")
-            role_doc = {
-                "role_id": role_id,
-                "name": decision["name"],
-                "display_name": decision["display_name"],
-                "description": decision.get("description", ""),
-                "color": decision.get("color", "#6366F1"),
-                "is_system": False,
-                "is_default": False,
-                "permissions": decision["permissions"],
-                "app_id": app_id,  # Track which app generated this role
-                "created_at": datetime.now(timezone.utc),
-                "updated_at": datetime.now(timezone.utc),
-            }
-            existing = await db.roles.find_one({"name": decision["name"]})
-            if existing:
+            now = datetime.now(timezone.utc)
+            role = Role(
+                role_id=role_id,
+                name=decision["name"],
+                display_name=decision["display_name"],
+                description=decision.get("description", ""),
+                color=decision.get("color", "#6366F1"),
+                is_system=False,
+                is_default=False,
+                permissions=decision["permissions"],
+                created_at=now,
+                updated_at=now,
+            )
+            # INSERT … ON CONFLICT (name) DO NOTHING; app_id tracks which app
+            # generated this role.
+            async with get_sessionmaker()() as pg:
+                inserted = await RolesRepository(pg).insert_role_if_absent(role, app_id=app_id)
+                await pg.commit()
+            if not inserted:
                 logger.warning(f"Role '{decision['name']}' already exists, skipping creation")
                 continue
-            await db.roles.insert_one(role_doc)
             results["roles_created"].append(decision["name"])
             logger.info(f"Created role: {decision['name']} with {len(decision['permissions'])} permissions")
 
@@ -265,10 +271,9 @@ async def apply_rbac(
             if not existing_role:
                 continue
             new_perms = decision.get("permissions", [])
-            await db.roles.update_one(
-                {"name": existing_role},
-                {"$addToSet": {"permissions": {"$each": new_perms}}}
-            )
+            async with get_sessionmaker()() as pg:
+                await RolesRepository(pg).add_permissions(new_perms, name=existing_role)
+                await pg.commit()
             results["roles_extended"].append({
                 "role": existing_role,
                 "permissions_added": len(new_perms),
@@ -376,13 +381,8 @@ async def _app_permission_keys(app_id: str, only_active: bool = True) -> set:
     Reads from the permission registry rather than the app_registry doc so
     manually-added (source='manual_override') keys are included.
     """
-    db = get_db()
-    query = {"app_id": app_id}
-    if only_active:
-        query["is_active"] = True
-    cursor = db.permissions.find(query, {"_id": 0, "key": 1})
-    docs = await cursor.to_list(length=None)
-    return {d["key"] for d in docs if d.get("key")}
+    async with get_sessionmaker()() as pg:
+        return await PermissionsRepository(pg).list_keys_for_app(app_id, only_active=only_active)
 
 
 async def add_app_permission(app_id: str, perm: dict, performed_by: str) -> dict:
@@ -454,28 +454,13 @@ async def remove_app_permission(app_id: str, key: str, performed_by: str) -> dic
     if not app:
         raise ValueError(f"App {app_id} not found")
 
-    db = get_db()
-    now = datetime.now(timezone.utc)
-
-    perm_result = await db.permissions.update_one(
-        {"key": key, "app_id": app_id, "is_active": True},
-        {"$set": {"is_active": False, "updated_at": now}},
-    )
-    deactivated = perm_result.modified_count > 0
-
-    affected_roles = await db.roles.find(
-        {"permissions": key}, {"_id": 0, "name": 1}
-    ).to_list(length=None)
-    removed_from_roles = [r["name"] for r in affected_roles if r.get("name")]
-
-    if removed_from_roles:
-        await db.roles.update_many(
-            {"permissions": key},
-            {
-                "$pull": {"permissions": key},
-                "$set": {"updated_at": now},
-            },
-        )
+    # Deactivate the registry row and strip the key from every role in ONE
+    # transaction (Postgres) — no window where a role holds a key the
+    # registry has already retired.
+    async with get_sessionmaker()() as pg:
+        deactivated = await PermissionsRepository(pg).deactivate_app_key(key, app_id)
+        removed_from_roles = await RolesRepository(pg).strip_permissions_from_all_roles([key])
+        await pg.commit()
 
     await log_security_event(
         event_type="app_permission_edited",
@@ -530,42 +515,38 @@ async def reassign_app_role_perms(
     if not app:
         raise ValueError(f"App {app_id} not found")
 
-    db = get_db()
-
-    role = await db.roles.find_one({"name": role_name}, {"_id": 0})
-    if not role:
-        raise ValueError(f"Role '{role_name}' not found")
-
     app_keys = await _app_permission_keys(app_id, only_active=True)
-    submitted = list(perm_keys or [])
-    invalid = set(submitted) - app_keys
-    if invalid:
-        raise ValueError(
-            f"Permission key(s) not registered for app {app_id}: {sorted(invalid)}"
-        )
 
-    # Preserve everything the role has that does NOT belong to this app,
-    # then add the new set for this app.
-    existing_perms = role.get("permissions", []) or []
-    preserved = [p for p in existing_perms if p not in app_keys]
-    # Dedupe submitted while preserving caller-provided order
-    seen = set()
-    new_for_app = []
-    for k in submitted:
-        if k not in seen:
-            seen.add(k)
-            new_for_app.append(k)
-    new_perms = preserved + new_for_app
+    # Read-modify-write under a row lock in one transaction (Postgres), so a
+    # concurrent edit to the same role cannot be lost between read and write.
+    async with get_sessionmaker()() as pg:
+        roles_repo = RolesRepository(pg)
+        role = await roles_repo.get_role_by_name(role_name, for_update=True)
+        if not role:
+            raise ValueError(f"Role '{role_name}' not found")
 
-    await db.roles.update_one(
-        {"name": role_name},
-        {
-            "$set": {
-                "permissions": new_perms,
-                "updated_at": datetime.now(timezone.utc),
-            }
-        },
-    )
+        submitted = list(perm_keys or [])
+        invalid = set(submitted) - app_keys
+        if invalid:
+            raise ValueError(
+                f"Permission key(s) not registered for app {app_id}: {sorted(invalid)}"
+            )
+
+        # Preserve everything the role has that does NOT belong to this app,
+        # then add the new set for this app.
+        existing_perms = list(role.permissions or [])
+        preserved = [p for p in existing_perms if p not in app_keys]
+        # Dedupe submitted while preserving caller-provided order
+        seen = set()
+        new_for_app = []
+        for k in submitted:
+            if k not in seen:
+                seen.add(k)
+                new_for_app.append(k)
+        new_perms = preserved + new_for_app
+
+        await roles_repo.set_role_permissions_by_name(role_name, new_perms)
+        await pg.commit()
 
     previous_for_app = [p for p in existing_perms if p in app_keys]
     await log_security_event(

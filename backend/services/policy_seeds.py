@@ -8,7 +8,6 @@ Idempotent: uses policy_id as the key. On re-seed, updates the definition
 but preserves the user's `enabled` setting.
 """
 import logging
-from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -310,49 +309,43 @@ SYSTEM_POLICIES = [
 ]
 
 
-async def seed_system_policies(db):
+async def seed_system_policies(db=None, *, session=None):
     """
     Seed all system policies. Idempotent — upserts by policy_id.
     Preserves the user's `enabled` setting on existing policies.
+
+    Phase 2b: one ``INSERT … ON CONFLICT (policy_id) DO UPDATE`` per policy
+    (PolicyRepository.upsert_system_policy): a conflict rewrites the
+    definition, forces is_system / un-deletes, and keeps the operator's
+    ``enabled`` plus the original ``created_by`` / ``created_at``. ``db`` (the
+    old Mongo handle) is accepted and ignored; without ``session`` the seed
+    runs in its own transaction and commits.
     """
+    from db.session import get_sessionmaker
+    from repositories.policies import PolicyRepository
+
     seeded = 0
     updated = 0
 
-    for policy_def in SYSTEM_POLICIES:
-        policy_id = policy_def["policy_id"]
-        existing = await db.policies.find_one({"policy_id": policy_id})
+    async def _run(s) -> None:
+        nonlocal seeded, updated
+        repo = PolicyRepository(s)
+        for policy_def in SYSTEM_POLICIES:
+            if await repo.upsert_system_policy(policy_def):
+                seeded += 1
+            else:
+                updated += 1
 
-        if existing:
-            # Update definition but preserve user's enabled setting
-            user_enabled = existing.get("enabled", True)
-            update_doc = {**policy_def}
-            update_doc["enabled"] = user_enabled
-            update_doc["is_system"] = True
-            update_doc["updated_at"] = datetime.now(timezone.utc)
-            # Preserve original creation metadata
-            update_doc["created_by"] = existing.get("created_by", "system")
-            update_doc["created_at"] = existing.get("created_at", datetime.now(timezone.utc))
-            update_doc["deleted_at"] = None  # ensure not soft-deleted
-
-            await db.policies.update_one(
-                {"policy_id": policy_id},
-                {"$set": update_doc},
-            )
-            updated += 1
-        else:
-            # Create new
-            now = datetime.now(timezone.utc)
-            doc = {
-                **policy_def,
-                "is_system": True,
-                "enabled": True,
-                "created_by": "system",
-                "created_at": now,
-                "updated_at": now,
-                "deleted_at": None,
-            }
-            await db.policies.insert_one(doc)
-            seeded += 1
+    if session is not None:
+        await _run(session)
+    else:
+        async with get_sessionmaker()() as own:
+            try:
+                await _run(own)
+                await own.commit()
+            except Exception:
+                await own.rollback()
+                raise
 
     logger.info(f"Policy Engine: {seeded} new system policies seeded, {updated} existing updated")
     return {"seeded": seeded, "updated": updated}

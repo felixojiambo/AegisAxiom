@@ -52,6 +52,7 @@ from auth_helper import get_current_user, has_perm
 from database import get_db
 from db.session import get_sessionmaker
 from repositories.auth import AuthRepository
+from repositories.roles import RolesRepository
 from repositories.users import UserRepository
 from middleware.tenant_scoping import get_current_tenant_id
 from services.projects_realtime_bus import (
@@ -193,10 +194,13 @@ async def _hydrate_user(user_id: str):
     from auth_helper import get_cached_implication_graph
     from services.permission_implications import resolve_implications
 
-    db = get_db()
     sm = get_sessionmaker()
     async with sm() as pg:
         user_dto = await UserRepository(pg).get_user_by_id(user_id)
+        role_permissions = (
+            await RolesRepository(pg).get_role_permissions(user_dto.role or "customer")
+            if user_dto else []
+        )
     if not user_dto:
         raise HTTPException(status_code=401, detail="User not found")
     user_doc = user_dto.model_dump()
@@ -204,9 +208,6 @@ async def _hydrate_user(user_id: str):
     if not user_doc.get("is_active", True):
         raise HTTPException(status_code=403, detail="Account is deactivated")
 
-    role_name = user_doc.get("role", "customer")
-    role_doc = await db.roles.find_one({"name": role_name}, {"_id": 0, "permissions": 1})
-    role_permissions = role_doc.get("permissions", []) if role_doc else []
     user_extras = user_doc.get("extra_permissions", [])
     permissions = list(set(role_permissions + user_extras))
 

@@ -1,7 +1,7 @@
 """
 Security audit logging for RBAC events.
 
-Writes into the unified audit_logs MongoDB collection (the same store
+Writes into the unified audit_logs table (Phase 2b: PostgreSQL, the same store
 used by services.audit_service.log_action) so security events show up
 side-by-side with activity events in the admin Audit Log UI. The
 event_category field distinguishes the two streams: "security" for
@@ -17,7 +17,7 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
-from database import get_db
+from services.audit_service import write_audit_entry
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,6 @@ async def log_security_event(
     The original argument names are preserved on this function so call
     sites don't have to change.
     """
-    db = get_db()
     entry = {
         "audit_id": f"audit_{uuid.uuid4().hex[:16]}",
         "event_category": "security",
@@ -72,6 +71,6 @@ async def log_security_event(
         "timestamp": datetime.now(timezone.utc),
     }
     try:
-        await db.audit_logs.insert_one(entry)
+        await write_audit_entry(entry)
     except Exception as e:
         logger.error(f"Failed to write security audit log: {e}")

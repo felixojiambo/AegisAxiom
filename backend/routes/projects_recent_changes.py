@@ -62,6 +62,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from auth_helper import get_current_user, has_perm
 from database import get_db
 from db.session import get_sessionmaker
+from repositories.audit import AuditRepository
 from repositories.users import UserRepository
 from middleware.tenant_scoping import get_current_tenant_id
 
@@ -499,78 +500,32 @@ async def fetch_recent_changes(
 
     since = now - timedelta(hours=hours)
 
-    # Build Mongo filter. Use $in on resource_type so the
-    # (resource_type, resource_id, timestamp) compound index can serve
-    # combined resource_type + project_id lookups. For unbounded queries
-    # the (timestamp -1) index carries the load.
-    clauses: List[Dict[str, Any]] = [
-        {"resource_type": {"$in": allowed_resource_types}},
-        {"timestamp": {"$gte": since, "$lte": now}},
-        # Phase 1E.3c — tenant_id filter. Three places to look:
-        #   1. Top-level `tenant_id` — written by audit_service.log_ingested_crud
-        #      from 1E.3c onward. Most efficient (indexable).
-        #   2. `details.after.tenant_id` — present on every create/update row
-        #      where the audited entity is tenant-bearing.
-        #   3. `details.before.tenant_id` — present on every delete row.
-        # A row that matches NONE of these is pre-multitenant history and
-        # we exclude it from tenant-scoped views (treating absent tenant_id
-        # as a separate scope rather than blanket-visible).
-        {
-            "$or": [
-                {"tenant_id": effective_tenant_id},
-                {"details.after.tenant_id": effective_tenant_id},
-                {"details.before.tenant_id": effective_tenant_id},
-            ]
-        },
-        # Include both human writes (event_category=="activity" or absent)
-        # AND AI writes (event_category=="ai_action"). The two are
-        # de-duplicated post-fetch by (resource_type, resource_id, action,
-        # rounded-timestamp, actor) with the ai_action row preferred when
-        # both are present (it carries actor_type + tool_name).
-        {
-            "$or": [
-                {"event_category": "activity"},
-                {"event_category": "ai_action"},
-                {"event_category": {"$exists": False}},
-            ]
-        },
-    ]
-    if actor_user_id:
-        # Either canonical `actor_id` (crud_envelope) or `actor_user_id`
-        # (legacy / explicit) matches — the AI helper writes both for compat.
-        clauses.append({
-            "$or": [
-                {"actor_id": actor_user_id},
-                {"actor_user_id": actor_user_id},
-            ]
-        })
-
-    # project_id filter: two paths
-    #   - changes ON the project itself → resource_id == project_id
-    #     AND resource_type == projects.project
-    #   - changes on tasks/etc IN the project → details.after.project_id
-    #     or details.before.project_id == project_id
-    # We do this server-side with a single $or so we still hit the
-    # timestamp index.
-    if project_id:
-        clauses.append({
-            "$or": [
-                {"resource_type": "projects.project", "resource_id": project_id},
-                {"details.after.project_id": project_id},
-                {"details.before.project_id": project_id},
-            ]
-        })
-
-    filt = {"$and": clauses} if len(clauses) > 1 else clauses[0]
-
-    # Pull the audit rows. We over-fetch slightly because some rows may be
-    # noise (no usable diff field) and we want to honor `limit` post-filter.
-    audit_rows = (
-        await db.audit_logs.find(filt, {"_id": 0})
-        .sort("timestamp", -1)
-        .limit(limit * 2)
-        .to_list(limit * 2)
-    )
+    # Phase 2b: audit_logs is Postgres (AuditRepository.list_recent_activity).
+    # Same predicate the Mongo filter expressed:
+    #   * resource_type IN the allowed set (served by
+    #     (resource_type, timestamp DESC));
+    #   * since <= timestamp <= now;
+    #   * tenant: top-level tenant_id (1E.3c+) OR details.after.tenant_id OR
+    #     details.before.tenant_id — rows matching none are pre-multitenant
+    #     history and stay excluded from tenant-scoped views;
+    #   * human writes (event_category "activity" or NULL) AND AI writes
+    #     ("ai_action");
+    #   * optional actor: actor_id OR actor_user_id (the AI helper writes both);
+    #   * optional project: the project row itself, or
+    #     details.after/before.project_id.
+    # Over-fetch slightly because some rows may be noise (no usable diff field)
+    # and we want to honor `limit` post-filter.
+    async with get_sessionmaker()() as audit_pg:
+        records = await AuditRepository(audit_pg).list_recent_activity(
+            resource_types=allowed_resource_types,
+            since=since,
+            until=now,
+            tenant_id=effective_tenant_id,
+            actor_user_id=actor_user_id or None,
+            project_id=project_id or None,
+            limit=limit * 2,
+        )
+    audit_rows = [r.to_api_dict() for r in records]
 
     # Normalize → public shape.
     rows = [_normalize_audit_row(r) for r in audit_rows]
@@ -737,7 +692,6 @@ async def get_recent_changes(
         )
 
     db = get_db()
-    await _ensure_indexes(db)
 
     rows = await fetch_recent_changes(
         db,
@@ -757,27 +711,3 @@ async def get_recent_changes(
         "limit": limit,
         "counts": aggregate_change_counts(rows),
     }
-
-
-# ---------------------------------------------------------------------------
-# Index management — keep the (timestamp, resource_type) hot path indexed.
-# audit_logs already has (timestamp -1) and (resource_type, resource_id,
-# timestamp) from server.py. We add a (resource_type, timestamp) compound
-# specifically for this endpoint's $in lookup pattern.
-# ---------------------------------------------------------------------------
-_INDEXES_ENSURED = False
-
-
-async def _ensure_indexes(db) -> None:
-    global _INDEXES_ENSURED
-    if _INDEXES_ENSURED:
-        return
-    try:
-        await db.audit_logs.create_index(
-            [("resource_type", 1), ("timestamp", -1)],
-            name="audit_logs_resource_type_ts",
-            background=True,
-        )
-        _INDEXES_ENSURED = True
-    except Exception as e:
-        logger.warning(f"audit_logs index ensure failed (non-fatal): {e}")

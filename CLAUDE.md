@@ -47,7 +47,7 @@ phase that adds or removes one):**
 | `ai_employees_legacy_read` | `db.ai_employees` (`auth_helper.py`) | Phase 8 |
 | `tenant_app_grants_legacy_read` | `db.tenant_app_grants` (`middleware/tenant_scoping.py`) | Phase 8 |
 | `app_registry_legacy_read` | `db.app_registry` (`middleware/tenant_scoping.py`) | Phase 8 |
-| `roles_legacy_read` | `db.roles` (`auth_helper.py`, `routes/auth.py`) | **Phase 2b** |
+| ~~`roles_legacy_read`~~ | ~~`db.roles` (`auth_helper.py`; unannotated copy in `routes/projects_events.py`)~~ | **Deleted in Phase 2b** → `RolesRepository.get_role_permissions` |
 
 Phase 11's gate requires zero shims.
 

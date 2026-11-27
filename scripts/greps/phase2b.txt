@@ -1,0 +1,49 @@
+# Phase 2b — platform-core RBAC / governance / observability: zero-grep pattern list.
+#
+# Consumed by `scripts/verify.ps1 -Grep scripts/greps/phase2b.txt` (and the .sh
+# twin). Any hit in live backend code is a FAILURE: these five collections are
+# on Postgres and are reached only through repositories/{roles,permissions,
+# policies,audit}.py. This file is permanent — it makes a 2b regression
+# detectable forever, long after the phase prompt is gone.
+#
+# FORMAT
+#   * one regex per line; blank lines and `#` lines are ignored
+#   * .NET-compatible (PowerShell Select-String) AND PCRE-compatible (grep -P)
+#   * `(?<!\x60)` = "not preceded by a backtick". Prose references inside
+#     docstrings (``db.roles.find(...)``) are documentation, not call sites,
+#     and are the ONLY exemption.
+#
+# SEARCH SCOPE (fixed by the harness, per phase2a-census §1.8 — "live backend
+# code"): every *.py under backend/ EXCEPT tests/, scripts/, migrations/,
+# archive/, __pycache__/. Those are the test suite and one-off Mongo data-fix
+# scripts; they are dead code paths, not live request paths.
+#
+# COLLECTIONS COVERED (5 — plan Phase 2 (2b block); `api_errors` is not a
+# collection, census §0.1):
+#   roles · permissions · policies · policy_targets · audit_logs
+#
+# Both access forms are covered per collection: attribute (`db.roles`) and
+# subscript (`db["roles"]`). Phase 2a shipped with 28 live subscript-form sites
+# because only the attribute form was checked; this file exists so that
+# cannot recur.
+#
+# NOT COVERED BY A STATIC GREP — the dynamic path. field_registry maps the
+# `roles` and `audit` modules onto `roles` / `audit_logs`, and workflow record
+# actions resolve module -> db[collection] at runtime. That path is closed by
+# the guard in services/workflow_executor.py (_POSTGRES_MIGRATED_COLLECTIONS),
+# not by this file.
+
+(?<!\x60)\bdb\.roles\b
+(?<!\x60)db\[\s*["']roles["']\s*\]
+
+(?<!\x60)\bdb\.permissions\b
+(?<!\x60)db\[\s*["']permissions["']\s*\]
+
+(?<!\x60)\bdb\.policies\b
+(?<!\x60)db\[\s*["']policies["']\s*\]
+
+(?<!\x60)\bdb\.policy_targets\b
+(?<!\x60)db\[\s*["']policy_targets["']\s*\]
+
+(?<!\x60)\bdb\.audit_logs\b
+(?<!\x60)db\[\s*["']audit_logs["']\s*\]

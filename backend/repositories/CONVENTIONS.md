@@ -53,6 +53,64 @@ These were resolved while landing the first real domain (platform-core identity)
 
 8. **`*_legacy_read` shims** (plan §A2) read UNMIGRATED domains only, are narrow + read-only, and **must** carry an inline annotation naming the phase that deletes them. A repository never reads another **migrated** domain's tables directly — it calls that domain's repository.
 
+## Phase 2b additions — platform-core RBAC, governance, observability
+
+Resolved while landing `roles`, `permissions`, `policies`, `policy_targets`, `audit_logs`
+(revision `0005_platform_core_rbac`). Derivation: `.claude/plans/phase2b-census.md` +
+`.claude/plans/phase2b-census-reverify.md`; params: `.claude/skills/phase-cutover/params/phase2b.yaml`.
+
+1. **JSONB for opaque governance sub-arrays.** `roles.permissions`, `permissions.implies`,
+   and `policies.trigger` / `conditions` / `actions` are JSONB columns, never child tables.
+   They are read and written whole by their owning domain.
+
+2. **Recorded exception — `roles.permissions` is filtered by interior and is STILL JSONB.**
+   Rule 2a.4 says a list filtered by its contents wants relational storage. `roles.permissions`
+   is filtered (`?|` "roles holding any of these keys", which also guards the
+   strip-permission CAS `UPDATE`) and stays JSONB by operator ruling (2026-11-25), because:
+   * a `role_permissions(role_id, key → permissions.key)` join table with a foreign key would
+     reject the wildcard grant `"*"` (and `<module>:*` grants), which are not registry rows;
+   * dropping the FK to admit them removes the only thing the join table would buy (orphan-key
+     prevention), leaving a strictly more expensive shape.
+   It is served by **`ix_roles_permissions_gin` (GIN, default `jsonb_ops`)**, which supports
+   `?`, `?|`, `?&` and `@>` containment. Keep `jsonb_ops`. `jsonb_path_ops` would drop the
+   `?|` support. **Orphan keys are therefore possible at the storage layer.** They are
+   handled in code: `permission_registry.retire_orphaned_keys` deletes registry rows and
+   strips them from every role in ONE transaction, then re-runs DAG validation. Do not copy
+   this exception to a list that has no wildcard members. Use the join table there.
+
+3. **`distinct()` → `SELECT DISTINCT`** (ordered, `NULL` excluded where Mongo's `distinct`
+   would have skipped missing fields). Mongo `{"$exists": false}` → `IS NULL`; an anchored
+   `$regex` prefix → `ILIKE 'prefix%'` with escaped `%`/`_`, served by a trigram GIN.
+
+4. **Non-fatal startup validation.** A startup validator that reads the database
+   (template: `permission_registry.validate_dag_at_startup`) must:
+   (a) honor a `SKIP_STARTUP_<NAME>` env flag (default off) that returns early and logs;
+   (b) **log and continue** when the database is unreachable or empty, so boot survives;
+   (c) still **raise** on a real integrity failure (a cycle) against a reachable, populated DB.
+   Never call a validator un-wrapped from the lifespan hook.
+
+5. **Zero-grep pattern files cover BOTH access forms** for every migrated collection:
+   `(?<!\x60)\bdb\.<name>\b` **and** `(?<!\x60)db\[\s*["']<name>["']\s*\]`. Phase 2a shipped
+   28 live `db["users"]` sites because only the attribute form was checked.
+   **The grep cannot see dynamic access.** `db[collection]`, with `collection` resolved from
+   `field_registry`, needs an explicit runtime guard. Reference:
+   `services/workflow_executor._POSTGRES_MIGRATED_COLLECTIONS` refuses workflow write actions
+   whose module resolves to a migrated collection. **Every later phase adds its collections
+   to that set.**
+
+6. **Timestamps across the seam.** Postgres columns are `timestamptz` and come back
+   tz-aware (`isoformat()` → `…+00:00`). Motor returns naive datetimes, and many Mongo
+   documents store ISO strings with or without an offset. **Never compare or sort timestamps
+   as strings when the inputs can come from both stores.** Parse each value to an aware UTC
+   `datetime` first: a naive value is assumed UTC, and a string goes through
+   `datetime.fromisoformat(s.replace("Z", "+00:00"))`.
+
+7. **Append-only hot writes go through one helper.** Every `audit_logs` writer calls
+   `services.audit_service.write_audit_entry`. It joins the caller's session if one is
+   given, and otherwise opens and commits its own. The insert is
+   `INSERT … ON CONFLICT (audit_id) DO NOTHING` (idempotent on the app-generated TEXT id),
+   so no writer needs a read-then-write existence check.
+
 ## Scaffolding (removed in Phase 2a)
 
 The Phase-0 throwaway hello-world (`repositories/_scaffolding/`, migration `0002`, the scaffolding test, and the `alembic/env.py` import) proved the rails end to end and was **deleted in Phase 2a** once the first real domain landed. Migration `0004_drop_scaffolding_hello` drops its table (downgrade recreates it by hand for a clean round-trip).

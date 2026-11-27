@@ -1,0 +1,131 @@
+{
+  "domain": "mongo (2b)",
+  "name": "policies_list",
+  "request": {
+    "auth": true,
+    "method": "GET",
+    "path": "/api/admin/policies"
+  },
+  "sample": {
+    "items": [
+      {
+        "actions": [
+          {
+            "field": null,
+            "message": "This week's time entries are locked. Contact an admin if you need to make changes.",
+            "type": "block"
+          }
+        ],
+        "condition_logic": "AND",
+        "conditions": [
+          {
+            "field": "is_locked",
+            "operator": "is_true",
+            "value": null,
+            "value_type": "boolean"
+          },
+          {
+            "field": "user_has_admin_perm",
+            "operator": "is_false",
+            "value": null,
+            "value_type": "boolean"
+          }
+        ],
+        "created_at": "2026-07-19T12:38:11.852000",
+        "created_by": "system",
+        "deleted_at": null,
+        "description": "Prevents time entry creation/edits on locked weeks. Weeks lock 8 days after the week starts at 10 PM UTC. Admin-permissioned users are exempt.",
+        "enabled": true,
+        "entity": "time_entry",
+        "is_system": true,
+        "module": "time_tracking",
+        "name": "Time Entry Week Locking",
+        "policy_id": "sys_time_locking",
+        "priority": 10,
+        "trigger": {
+          "event": "on_create"
+        },
+        "updated_at": "2026-07-21T11:41:07.734000"
+      },
+      {
+        "actions": [
+          {
+            "field": null,
+            "message": "This week's time entries are locked. Contact an admin if you need to make changes.",
+            "type": "block"
+          }
+        ],
+        "condition_logic": "AND",
+        "conditions": [
+          {
+            "field": "is_locked",
+            "operator": "is_true",
+            "value": null,
+            "value_type": "boolean"
+          },
+          {
+            "field": "user_has_admin_perm",
+            "operator": "is_false",
+            "value": null,
+            "value_type": "boolean"
+          }
+        ],
+        "created_at": "2026-07-19T12:38:11.896000",
+        "created_by": "system",
+        "deleted_at": null,
+        "description": "Prevents editing time entries on locked weeks. Same rules as creation locking.",
+        "enabled": true,
+        "entity": "time_entry",
+        "is_system": true,
+        "module": "time_tracking",
+        "name": "Time Entry Week Locking (Updates)",
+        "policy_id": "sys_time_locking_update",
+        "priority": 10,
+        "trigger": {
+          "event": "on_update"
+        },
+        "updated_at": "2026-07-21T11:41:07.737000"
+      }
+    ],
+    "total": 17
+  },
+  "shape": {
+    "items": [
+      {
+        "actions": [
+          {
+            "field": "null",
+            "message": "str",
+            "type": "str"
+          }
+        ],
+        "condition_logic": "str",
+        "conditions": [
+          {
+            "field": "str",
+            "operator": "str",
+            "value": "['str']|['str']|int|float|float|int|str|float|int|int|float|int",
+            "value_type": "str"
+          }
+        ],
+        "created_at": "str",
+        "created_by": "str",
+        "deleted_at": "null",
+        "description": "str",
+        "enabled": "bool",
+        "entity": "str",
+        "is_system": "bool",
+        "module": "str",
+        "name": "str",
+        "policy_id": "str",
+        "priority": "int",
+        "trigger": {
+          "event": "str"
+        },
+        "updated_at": "str"
+      }
+    ],
+    "total": "int"
+  },
+  "status": 200
+}

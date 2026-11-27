@@ -24,16 +24,25 @@ _policy_cache = {"data": None, "timestamp": 0}
 CACHE_TTL = 60  # seconds
 
 
-async def _get_policies(db) -> list:
-    """Load enabled, non-deleted policies from cache or DB."""
+async def _get_policies(db=None) -> list:
+    """Load enabled, non-deleted policies from cache or DB.
+
+    Phase 2b: read from Postgres (PolicyRepository) in a short session of its
+    own — the result is process-cached for CACHE_TTL, so it must not borrow a
+    request's transaction. ``db`` (the Mongo handle evaluate_policies callers
+    still pass) is ignored. Returned as plain dicts, the shape the evaluator
+    has always consumed.
+    """
     now = time.time()
     if _policy_cache["data"] is not None and (now - _policy_cache["timestamp"]) < CACHE_TTL:
         return _policy_cache["data"]
 
-    policies = await db.policies.find(
-        {"enabled": True, "deleted_at": None},
-        {"_id": 0}
-    ).sort("priority", -1).to_list(1000)
+    from db.session import get_sessionmaker
+    from repositories.policies import PolicyRepository
+
+    async with get_sessionmaker()() as pg:
+        rows = await PolicyRepository(pg).list_active_for_engine(limit=1000)
+    policies = [p.model_dump() for p in rows]
 
     _policy_cache["data"] = policies
     _policy_cache["timestamp"] = now
@@ -472,13 +481,17 @@ async def evaluate_for_event(event: dict, db) -> dict:
     }
 
 
-async def list_targets_for_admin_ui(db) -> list:
+async def list_targets_for_admin_ui(db=None, *, session=None) -> list:
     """Enumerate every (module, entity, event) tuple available for policy creation.
 
     Sources:
       1. Native modules registered via field_registry at import time
-      2. Ingested apps from the `policy_targets` collection (populated by
-         Wave 2 — tolerant of missing/empty collection on fresh deploys)
+      2. Ingested apps from the `policy_targets` table (populated by the
+         ingestion pipeline — tolerant of an empty/unreadable table)
+
+    Phase 2b: ``session`` is the caller's AsyncSession (the admin route passes
+    its request session); without one a short session is opened. ``db`` is
+    accepted for compatibility and ignored.
 
     Returns:
         list of dicts shaped:
@@ -507,17 +520,12 @@ async def list_targets_for_admin_ui(db) -> list:
             "label": _format_target_label(module, entity, events),
         })
 
-    # 2. Ingested apps from policy_targets collection (Wave 2 schema:
-    #    {app_id, module, entity, event, is_active}). Tolerant of
-    #    missing collection — collections in Mongo are auto-created on
-    #    first write, so a fresh deploy may not have it.
+    # 2. Ingested apps from the policy_targets table ({app_id, module,
+    #    entity, event, is_active}). Tolerant of an empty or unreadable
+    #    table — the admin UI still gets native targets.
     try:
-        collections = await db.list_collection_names()
-        if "policy_targets" in collections:
-            ingested_docs = await db.policy_targets.find(
-                {"is_active": True},
-                {"_id": 0, "module": 1, "entity": 1, "event": 1},
-            ).to_list(5000)
+        ingested_docs = await _load_active_policy_targets(session)
+        if ingested_docs:
 
             # Group by (module, entity) so multiple events on the same
             # entity collapse into one target row.
@@ -548,6 +556,25 @@ async def list_targets_for_admin_ui(db) -> list:
         logger.warning(f"list_targets_for_admin_ui: ingestion lookup failed: {e}")
 
     return targets
+
+
+async def _load_active_policy_targets(session=None) -> list:
+    """Active policy_targets as ``{module, entity, event}`` dicts (Postgres).
+
+    With a caller session the read runs inside a SAVEPOINT so a failure
+    cannot poison the caller's transaction; otherwise in a short session.
+    """
+    from db.session import get_sessionmaker
+    from repositories.policies import PolicyTargetRepository
+
+    def _shape(records) -> list:
+        return [{"module": t.module, "entity": t.entity, "event": t.event} for t in records]
+
+    if session is not None:
+        async with session.begin_nested():
+            return _shape(await PolicyTargetRepository(session).list_active_targets())
+    async with get_sessionmaker()() as pg:
+        return _shape(await PolicyTargetRepository(pg).list_active_targets())
 
 
 def _format_target_label(module: str, entity: str, events: list) -> str:

@@ -15,6 +15,9 @@ from pathlib import Path
 from typing import Optional
 
 from database import get_db
+from db.session import get_sessionmaker
+from repositories.permissions import PermissionsRepository
+from repositories.policies import PolicyTargetRepository
 from services.ingestion.models import (
     AppRegistry, AppModule, IngestionArtifact, IngestionState,
     IngestionStatus, ModuleStatus, PipelineStage, ArtifactType,
@@ -389,17 +392,11 @@ async def extract_field_catalogue(app_id: str, clone_dir: str, selected_entities
 
 # ==================== STAGE 14-15: REGISTER FIELDS & POLICIES ====================
 
-# TODO(server.py startup): Create indexes on the `policy_targets` collection so
-# the deactivation sweep and admin UI lookup don't full-scan. Recommended:
-#   await db.policy_targets.create_index([("app_id", 1), ("is_active", 1)])
-#   await db.policy_targets.create_index(
-#       [("module", 1), ("entity", 1), ("is_active", 1)]
-#   )
-#   await db.policy_targets.create_index(
-#       [("app_id", 1), ("module", 1), ("entity", 1), ("event", 1)],
-#       unique=True,
-#   )
-# These should be created once at startup, not lazily inside the ingestion path.
+# policy_targets (Phase 2b) is a Postgres table keyed on
+# (app_id, module, entity, event) with (app_id, is_active) and
+# (module, entity, is_active) indexes — all created by Alembic
+# 0005_platform_core_rbac, not lazily here. NOTE: `app_id` here is the app
+# SLUG the caller passes (load-bearing; ingestion/reconcile.py reads it so).
 
 
 async def _register_policy_targets(
@@ -407,24 +404,11 @@ async def _register_policy_targets(
 ) -> None:
     """Upsert one policy_targets row per (app_id, module, entity, event).
     Idempotent. Marks active=True. Caller is responsible for calling
-    _deactivate_policy_targets first on re-ingestion."""
-    now = datetime.now(timezone.utc)
-    for event in events:
-        await db.policy_targets.update_one(
-            {"app_id": app_id, "module": module, "entity": entity, "event": event},
-            {
-                "$set": {
-                    "app_id": app_id,
-                    "module": module,
-                    "entity": entity,
-                    "event": event,
-                    "is_active": True,
-                    "updated_at": now,
-                },
-                "$setOnInsert": {"created_at": now},
-            },
-            upsert=True,
-        )
+    _deactivate_policy_targets first on re-ingestion. ``db`` is accepted
+    for caller compatibility and ignored (the table is Postgres)."""
+    async with get_sessionmaker()() as pg:
+        await PolicyTargetRepository(pg).upsert_targets(app_id, module, entity, events)
+        await pg.commit()
 
 
 async def _deactivate_policy_targets(db, app_id: str) -> int:
@@ -432,12 +416,11 @@ async def _deactivate_policy_targets(db, app_id: str) -> int:
     re-registering. Re-registering then flips them back to True for any
     (module, entity, event) still in the current catalogue. Stale ones
     remain is_active=False.
-    Returns count of deactivated rows."""
-    result = await db.policy_targets.update_many(
-        {"app_id": app_id, "is_active": True},
-        {"$set": {"is_active": False, "updated_at": datetime.now(timezone.utc)}},
-    )
-    return result.modified_count
+    Returns count of deactivated rows. ``db`` is accepted and ignored."""
+    async with get_sessionmaker()() as pg:
+        n = await PolicyTargetRepository(pg).deactivate_for_app(app_id)
+        await pg.commit()
+    return n
 
 
 async def register_fields_from_catalogue(app_id: str) -> dict:
@@ -760,9 +743,10 @@ async def _compute_actual_counts(app_id: str, app_slug: str, catalogues: list) -
     # Routes come from catalogues (most reliable; field_registry doesn't store routes).
     total_routes = sum(len(c.get("api_routes", [])) for c in catalogues)
 
-    # Permission count: query the permissions collection by app_id (ingested perms carry app_id).
+    # Permission count: the Postgres permissions registry by app_id (ingested perms carry app_id).
+    async with get_sessionmaker()() as pg:
+        perm_count = await PermissionsRepository(pg).count_active_for_app(app_id)
     db = get_db()
-    perm_count = await db.permissions.count_documents({"app_id": app_id, "is_active": True})
 
     # Module count from app_modules collection.
     module_count = await db.app_modules.count_documents({"app_id": app_id})
@@ -853,14 +837,13 @@ async def get_ingestion_status(app_id: str) -> dict:
                 break
 
         # Permission count for this module's prefix: query permissions where key starts with prefix.
-        db = get_db()
         perm_prefix = mod.get("permission_prefix", "")
         if perm_prefix:
-            module_perm_count = await db.permissions.count_documents({
-                "app_id": app_id,
-                "is_active": True,
-                "key": {"$regex": f"^{re.escape(perm_prefix)}"},
-            })
+            # Former anchored $regex -> LIKE prefix (trigram-indexed key).
+            async with get_sessionmaker()() as pg:
+                module_perm_count = await PermissionsRepository(pg).count_active_for_app(
+                    app_id, key_prefix=perm_prefix
+                )
         else:
             module_perm_count = 0
 

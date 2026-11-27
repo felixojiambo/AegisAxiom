@@ -5,10 +5,40 @@ from contextvars import ContextVar
 from datetime import datetime, timezone
 from typing import Literal, Optional
 
-from database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from db.session import get_sessionmaker
 from models import User
+from repositories.audit import AuditRepository
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# The one audit_logs write path (Phase 2b)
+# ---------------------------------------------------------------------------
+async def write_audit_entry(entry: dict, *, session: Optional[AsyncSession] = None) -> bool:
+    """Persist one audit row. True iff inserted (False = ``audit_id`` existed).
+
+    Every audit writer (log_action, log_ingested_crud, security_logger,
+    conversational-tools AI actions, ingestion stage events) funnels here.
+
+    Without ``session`` the row is written in its OWN short transaction and
+    committed immediately (plan §A6.2 "must commit independently"): an audit
+    row — especially a security denial logged just before an HTTPException —
+    must survive the caller's request rolling back. ``session`` is for tests
+    and for callers that deliberately want the row inside their transaction.
+    """
+    if session is not None:
+        return await AuditRepository(session).record(entry)
+    async with get_sessionmaker()() as own:
+        try:
+            inserted = await AuditRepository(own).record(entry)
+            await own.commit()
+            return inserted
+        except Exception:
+            await own.rollback()
+            raise
 
 
 # ---------------------------------------------------------------------------
@@ -50,12 +80,11 @@ async def log_action(
     a missing database init in a test path, or an upstream Mongo
     transient error all degrade to a logged warning instead of
     propagating into the caller's response. The earlier shape only
-    wrapped the insert_one call, which left get_db() unwrapped — a
-    real production hazard the cutover surfaced through the proposal
+    wrapped the insert call, which left the datastore handle unwrapped —
+    a real production hazard the cutover surfaced through the proposal
     send path.
     """
     try:
-        db = get_db()
         entry = {
             "audit_id": f"audit_{uuid.uuid4().hex[:16]}",
             "event_category": "activity",
@@ -67,7 +96,7 @@ async def log_action(
             "details": details or {},
             "timestamp": datetime.now(timezone.utc),
         }
-        await db.audit_logs.insert_one(entry)
+        await write_audit_entry(entry)
     except Exception as e:  # noqa: BLE001 — audit must never raise
         logger.error(f"Failed to write audit log: {e}")
 
@@ -101,13 +130,13 @@ async def log_ingested_crud(
 ) -> str:
     """Write a single audit_logs row for an ingested-app CRUD operation.
 
-    Idempotent: a duplicate (request_id, resource_id, action) tuple is a no-op
-    (find-before-insert). Race-safe enough for retry scenarios because a real
-    concurrent retry would race on the same request_id and the second writer
-    would see the first's row. We deliberately do NOT add a unique index on
-    audit_id to avoid coupling this idempotency contract to the global audit
-    schema — other writers (log_action, log_security_event) generate random
-    audit_ids and don't need the constraint.
+    Idempotent: a duplicate (request_id, resource_id, action) tuple is a no-op.
+    Phase 2b: ``audit_id`` is the table's primary key, so the deterministic id
+    makes the insert ``ON CONFLICT DO NOTHING`` — race-free in one statement,
+    replacing the Mongo find-before-insert.
+
+    ``db`` is accepted for caller compatibility (services/ingestion/
+    route_helpers.py still passes its Mongo handle) and ignored.
 
     Diff strategy:
       - created:                details.after  = full doc
@@ -118,19 +147,11 @@ async def log_ingested_crud(
 
     Returns the audit_id (existing one if a duplicate was found).
     """
-    if db is None:
-        db = get_db()
-
-    # Deterministic audit_id so retries collapse to the same row.
+    # Deterministic audit_id so retries collapse to the same row (the PK
+    # conflict in write_audit_entry makes a retry a no-op).
     audit_id = hashlib.sha256(
         f"{request_id}|{resource_id}|{action}".encode("utf-8")
     ).hexdigest()[:32]
-
-    # Idempotency check — no unique index, so this is best-effort but
-    # sufficient for the retry pattern in route_helpers (Thread 1D).
-    existing = await db.audit_logs.find_one({"audit_id": audit_id}, {"_id": 1})
-    if existing:
-        return audit_id
 
     details: dict = {
         "module": module,
@@ -202,13 +223,11 @@ async def log_ingested_crud(
     if tool_name:
         entry["tool_name"] = tool_name
     try:
-        await db.audit_logs.insert_one(entry)
+        await write_audit_entry(entry)
     except Exception as e:
         logger.error(f"Failed to write ingested CRUD audit log: {e}")
 
-    # TODO: add (resource_type, resource_id, timestamp) compound index in
-    # server.py alongside the other db.audit_logs.create_index(...) calls
-    # (around line 357). Deferred to Wave 1 postmortem to avoid file conflict
-    # with Thread 1A's listener-import edit to server.py.
+    # The (resource_type, resource_id, timestamp DESC) index this used to ask
+    # for now ships in migration 0005_platform_core_rbac.
 
     return audit_id

@@ -188,7 +188,7 @@ async def log_stage(
     try:
         import uuid as _uuid
 
-        db = get_db()
+        from services.audit_service import write_audit_entry  # Phase 2b: audit_logs is Postgres
         stage_value = stage.value if hasattr(stage, "value") else stage
         actor_id = performed_by or "system"
         actor_email = "system@aegisaxiom.internal"
@@ -211,7 +211,7 @@ async def log_stage(
         if duration_ms is not None:
             summary += f" in {duration_ms}ms"
 
-        await db.audit_logs.insert_one({
+        await write_audit_entry({
             "audit_id": f"audit_{_uuid.uuid4().hex[:16]}",
             "event_category": "security",
             "event_type": "ingestion_stage",

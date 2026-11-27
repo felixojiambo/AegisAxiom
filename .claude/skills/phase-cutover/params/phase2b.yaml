@@ -16,6 +16,66 @@ plan_ref:
 
 census: ".claude/plans/phase2b-census.md"   # COMPLETE — re-verify counts, do not rewrite
 census_verdict: "PROCEED (one scope trim: api_errors is not a collection — see sweeps)"
+census_reverify:
+  date: "2026-11-25"
+  tree: "16381be"
+  verdict: "PROCEED after operator rulings below; no open traces"
+  counts: "119 live attr-form lines / 21 files (roles 48, permissions 18, policies 17, policy_targets 11, audit_logs 25); subscript form 0 for all five"
+  rulings:
+    - "policy_targets: census sketch was wrong (no policy_id). Transcribe the real target-registry shape; no FK to policies. STOP resolved by operator."
+    - "audit_logs: audit_id is the TEXT PK (CLAUDE.md §3); DDL widened to the union of all writer shapes."
+    - "Scope +3: seeds/seed_projects_rbac.py; services/ingestion/repository.py (audit_logs write ONLY); services/workflow_executor.py (migrated-target guard ONLY)."
+    - "CLAUDE.md shim table corrected to true post-2b state (edit lands in step 7)."
+  binding_decisions_2026_11_27:
+    - id: 1
+      decision: "contract endpoint for policies is /api/admin/policies"
+      status: "CONFIRMED in contract_endpoints below (landed in 5f699df)"
+    - id: 2
+      decision: "roles.permissions stays JSONB with the GIN containment index (ix_roles_permissions_gin, jsonb_ops)"
+      status: "IMPLEMENTED in 0005; exception recorded in backend/repositories/CONVENTIONS.md (Phase 2b additions, rule 2)"
+      why: "a role_permissions join table with an FK to permissions.key rejects the wildcard grants (\"*\", \"<module>:*\")"
+    - id: 3
+      decision: "ingestion moves only its 2b writes onto the 2b repositories; all other ingestion collections stay on Mongo until Phase 8"
+      status: "IMPLEMENTED"
+      note: >-
+        As worded ("services/ingestion/repository.py moves only its permission and role
+        writes") the premise does not hold: re-verified 2026-11-27, repository.py has NO
+        role/permission writes (collections: app_registry, app_modules, app_ingestion_log,
+        ingestion_artifacts, ingestion_field_catalogue, ingestion_state). Its only 2b site,
+        the audit_logs insert in log_stage, moved to write_audit_entry. Ingestion's role and
+        permission writes live in rbac_generator.py and service.py, and both moved to the
+        roles/permissions repositories. The in_scope_files limit below stands.
+    - id: 4
+      decision: "workflow_executor rejects writes to any collection migrated through 2b"
+      status: "IMPLEMENTED: _POSTGRES_MIGRATED_COLLECTIONS guard in _get_collection, called only by update_field / create_record / delete_record; tested in test_platform_core_rbac_pg.py"
+      stored_rules_check: "2026-11-27 dev Mongo: 8 workflow_rules, 0 with trigger.module or actions.module in a 2b module/collection; stop_conditions[6] does not fire"
+    - id: 5
+      decision: "find and fix code that compares or sorts timestamp strings drawn from both Postgres and Mongo"
+      status: "SEARCHED, 0 sites found, nothing to fix"
+      evidence: >-
+        Every consumer of the 2b repositories reads only Postgres timestamps:
+        projects_recent_changes.fetch_recent_changes, whose shadow-dedup buckets on
+        datetime.timestamp() rather than strings; pmo.py, which appends rows but never sorts
+        them; routes/audit.py; and contract_approval_access, which sorts by name and email.
+        Python sorted()/.sort() keys and frontend localeCompare / < comparisons on
+        created_at/at/timestamp touch Mongo-only data. Adjacent finding, not fixed (Mongo-only,
+        out of scope): routes/projects_dashboard.py _sort_key sorts changed_at as strings
+        mixing datetime.isoformat() and stored ISO strings. Rule recorded in CONVENTIONS
+        (Phase 2b additions, rule 6).
+    - id: 6
+      decision: "DEFAULT_ROLE_PERMISSIONS is deleted from routes/auth.py"
+      status: "IMPLEMENTED: 0 live hits; _build_user_with_permissions(user, pg) reads RolesRepository.get_role_permissions at all 6 call sites"
+  dynamic_path_trace: >-
+    field_registry maps module `audit`->audit_logs and `roles`->roles. Neither
+    emits events nor registers a date field, so event/date-triggered workflow
+    rules cannot fire on them. Workflow ACTIONS (update_field, create_record,
+    delete_record) resolve action.module -> db[collection] with no server-side
+    target validation: a live Mongo write path to two migrated collections,
+    invisible to the zero-grep. Closed by the workflow_executor guard.
+    ai/schema.discover samples every Mongo collection at startup but nothing
+    consumes the 2b entries (inert). data_fetcher / pmo use fixed collection
+    lists. Not verified: stored workflow_rules targeting roles/audit (Docker
+    was down at census time).
 
 # --------------------------------------------------------------------------
 # Collections. ~122 refs / ~22 files per census §1.
@@ -26,7 +86,7 @@ census_verdict: "PROCEED (one scope trim: api_errors is not a collection — see
 # --------------------------------------------------------------------------
 collections:
   - name: roles
-    refs: 50
+    refs: 48
     ddl: "roles(role_id text PK, name text UNIQUE, display_name, description, color, is_system, is_default, permissions jsonb, created_at, updated_at)"
     notes: "permissions is an opaque key list — JSONB, never a child table"
   - name: permissions
@@ -39,17 +99,39 @@ collections:
     notes: "index (module, entity) for engine lookup; (enabled) WHERE deleted_at IS NULL"
   - name: policy_targets
     refs: 11
-    ddl: "policy_targets(id bigserial PK, policy_id text FK->policies ON DELETE CASCADE, target_type, target_id, tenant_id, created_at)"
-    notes: "schemaless today — PIN the final columns by reading all 11 sites during implementation, not from this sketch"
-  - name: audit_logs
-    refs: 26
-    ddl: "audit_logs(id bigserial PK, event_category, event_type, severity, actor_id, actor_email, resource_type, resource_id, action, outcome, details jsonb, timestamp timestamptz)"
+    ddl: "policy_targets(app_id text, module text, entity text, event text, is_active boolean NOT NULL DEFAULT true, created_at timestamptz, updated_at timestamptz, PRIMARY KEY (app_id, module, entity, event))"
     notes: >-
-      Hot WRITE path (fires on ~every mutating request) — index for writes, not
-      just reads. Mirror the retired Mongo index set: (timestamp DESC),
-      (event_category,timestamp DESC), (event_type,timestamp DESC),
-      (actor_id,timestamp DESC), (resource_type,resource_id,timestamp DESC).
-      §A4 trigram GIN on the text columns the list endpoint searches.
+      PINNED from all 11 sites (writer ingestion/service.py:413; readers
+      policy_engine.py:517, routes/audit.py:166, ingestion/reconcile.py:179;
+      Mongo indexes server.py:767-772). A target registry keyed on
+      (app_id, module, entity, event) — NOT a policy->target join. NO policy_id,
+      NO FK to policies (operator ruling 2026-11-25). app_id actually stores the
+      app SLUG (reconcile.py:174, load-bearing) — column comment, do not rename.
+      Indexes: (app_id, is_active), (module, entity, is_active). The
+      `"policy_targets" in list_collection_names()` existence guards at the
+      readers are Mongo-only and die with the port.
+  - name: audit_logs
+    refs: 25
+    ddl: >-
+      audit_logs(audit_id text PK, event_category text NULL, event_type, severity,
+      actor_id, actor_user_id, actor_email, actor_type, tool_name, tenant_id,
+      resource_type, resource_id, action, outcome, result_status, error_detail,
+      session_id, tier, params jsonb, details jsonb NOT NULL DEFAULT '{}',
+      timestamp timestamptz NOT NULL DEFAULT now())
+    notes: >-
+      audit_id is the TEXT PK (operator ruling; every writer generates it;
+      audit_service.py:131 looks it up for idempotency -> becomes
+      INSERT ... ON CONFLICT (audit_id) DO NOTHING). DDL is the union of all
+      writer shapes (security_logger, audit_service x2, conversational_tools,
+      ingestion/repository). event_category NULLABLE: legacy rows lack it and
+      routes/audit.py maps $exists:false -> IS NULL. Hot WRITE path. Carry over
+      the retired Mongo index set: (timestamp DESC), (event_category,timestamp
+      DESC), (event_type,timestamp DESC), (actor_id,timestamp DESC),
+      (actor_email,timestamp DESC), (resource_type,resource_id,timestamp DESC).
+      §A4 trigram GIN on resource_type — the only $regex-searched column
+      (anchored prefix, routes/audit.py). Filtered columns needing support:
+      tenant_id, actor_user_id, details->'after'->>'project_id',
+      details->'before'->>'project_id' (projects_recent_changes).
 
 # --------------------------------------------------------------------------
 # Alembic lane claim. CLAIMED — a second lane must pick a different number.
@@ -91,21 +173,26 @@ in_scope_files:
     - backend/routes/roles.py                     # CRUD, clone, seed_default_roles
     - backend/routes/policies.py
     - backend/routes/audit.py                     # distinct @149/@204 -> SELECT DISTINCT
+    - backend/seeds/seed_projects_rbac.py         # RBAC seed, 8 db.roles sites (added 2026-11-25)
     - backend/db/models/__init__.py               # register the new modules
     - backend/server.py                           # startup wiring + OQ-10 dedup
   cross_domain_callers:
-    - backend/auth_helper.py                      # :290 roles_legacy_read -> roles repo
-    - backend/routes/auth.py                      # :45/:50 _build_user_with_permissions
+    - backend/auth_helper.py                      # :293 roles_legacy_read -> roles repo
+    - backend/routes/auth.py                      # _build_user_with_permissions: DEFAULT_ROLE_PERMISSIONS sweep (no db.roles left here)
     - backend/routes/admin.py
     - backend/routes/ai_employees.py
-    - backend/routes/projects_events.py
+    - backend/routes/projects_events.py           # :208 duplicate permission closure (unannotated db.roles read)
     - backend/routes/projects_recent_changes.py
     - backend/services/ingestion/rbac_generator.py
     - backend/services/ingestion/reconcile.py
     - backend/services/ingestion/service.py
-    - backend/services/ai/agents/tools/conversational_tools.py
+    - backend/services/ai/agents/tools/conversational_tools.py   # :2070 audit_logs write
+    - path: backend/services/ingestion/repository.py
+      limit: "ONLY the audit_logs insert at :214. Every other collection in this file (app_registry, app_modules, app_ingestion_log, ingestion_*) stays on Mongo until Phase 8."
+    - path: backend/services/workflow_executor.py
+      limit: "ONLY a guard in the action path refusing update_field/create_record/delete_record targets whose module resolves to a Postgres-migrated collection (roles, audit_logs). No other change."
   docs:
-    - CLAUDE.md                                   # shim table: drop roles_legacy_read
+    - CLAUDE.md                                   # shim table -> true post-2b state: drop roles_legacy_read; its row's routes/auth.py citation was already stale
     - backend/repositories/CONVENTIONS.md         # add the 2b rules (see below)
 
 protected:
@@ -129,9 +216,11 @@ shims_deleted:
   - name: roles_legacy_read
     sites:
       - backend/auth_helper.py:222   # docstring
-      - backend/auth_helper.py:290   # db.roles.find_one({name}, {permissions})
-      - backend/routes/auth.py:45    # docstring
-      - backend/routes/auth.py:50    # db = get_db()
+      - backend/auth_helper.py:290   # shim banner comment
+      - backend/auth_helper.py:293   # db.roles.find_one({name}, {permissions})
+      - backend/routes/projects_events.py:208   # unannotated duplicate of the same read
+      # routes/auth.py:45/:50 (cited at claim time) no longer exist — that file
+      # now reads DEFAULT_ROLE_PERMISSIONS, handled by sweep 3.
     replacement: "RolesRepository(pg).get_role_permissions(role_name); get_implication_graph() reads Postgres permissions"
     note: >-
       get_current_user already receives `pg = Depends(get_session)` from 2a — reuse
@@ -171,7 +260,7 @@ new_env_flags:
 sweeps:
   - id: api-errors-dedup
     what: "Remove the duplicate api_router.include_router(api_errors_router, ...) registration."
-    where: "backend/server.py:303 AND :306 — byte-identical (the plan's OQ-10 cites the stale :327/:331)."
+    where: "backend/server.py:308 AND :311 at 16381be — byte-identical (the plan's OQ-10 cites the stale :327/:331; claim time said :303/:306)."
     action: "Delete ONE of the two lines. Verify the remaining one still registers with tags=[\"Observability - Frontend Errors\"]."
     verify: "POST /api/errors still routes; the route appears exactly once in the OpenAPI paths."
     log: "Record which line number was deleted and the resulting single line number."
@@ -253,11 +342,14 @@ contract_endpoints:
   - "/api/tenants"          # 2a regression guard
   - "/api/roles"            # THIS phase's domain — shape must be byte-compatible
   - "/api/contracts"        # still-Mongo parallel-run guard
+  - "/api/audit"            # audit_list.json — pinned Mongo-backed 2026-11-25
+  - "/api/admin/policies"   # policies_list.json — pinned Mongo-backed 2026-11-25 (router mounts under /admin; /api/policies is a 404)
 contracts_note: >-
   /api/roles is already in contracts/captures/roles_list.json, recorded while it
   was Mongo-backed. That capture is the 2b acceptance test: after cutover the
-  shape must compare clean WITHOUT re-recording. Add /api/audit and /api/policies
-  captures before starting so their shapes are pinned too.
+  shape must compare clean WITHOUT re-recording. /api/audit and
+  /api/admin/policies were captured Mongo-backed before step 3 (audit_list.json,
+  policies_list.json). compare checks every file in contracts/captures.
 
 smoke_migrated: "/api/roles"      # Postgres after 2b
 smoke_legacy: "/api/contracts"    # still Mongo until Phase 4a
@@ -279,7 +371,9 @@ stop_conditions:
   - "A nova permission key marked REMOVE turns out to have a live consumer — stop the sweep and report, do not remove it anyway."
   - "roles_legacy_read cannot be deleted because a caller has no AsyncSession in scope — report the caller; do not thread a new global session in."
   - "Revision 0005 is already present in backend/alembic/versions/ — another lane claimed it. STOP."
-  - "The 2a grep (scripts/greps/phase2a.txt) is still red. 2b builds on 2a's seam; fix or formally accept 2a's 28 open db[\"users\"] sites first."
+  - "The 2a grep (scripts/greps/phase2a.txt) is still red. 2b builds on 2a's seam; fix or formally accept 2a's 28 open db[\"users\"] sites first. (Re-verified GREEN, 0 hits, 2026-11-25.)"
+  - "The workflow_executor guard cannot be written without touching anything beyond the action-target resolution — report; do not widen the edit."
+  - "A stored workflow_rules row already targets module roles or audit in an action — report it with the rule id before the guard lands."
 
 # --------------------------------------------------------------------------
 # CONVENTIONS.md additions this phase must write
@@ -292,6 +386,5 @@ conventions_additions:
 
 handoff: >-
   Operator's next action: run /phase-cutover with this file. Step 1 re-verifies
-  the existing census against the current tree; step 6 is the harness gate. Note
-  the 2a grep is currently RED (28 db["users"] sites) — decide that before or
-  during 2b, since 2b's gate re-runs every scripts/greps/*.txt.
+  the existing census against the current tree; step 6 is the harness gate.
+  (2026-11-25: census re-verified, 2a grep GREEN, all traces closed — proceed to step 2.)
